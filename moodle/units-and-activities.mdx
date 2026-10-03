@@ -1,0 +1,79 @@
+---
+title: Units and activities
+description: List your enrolled units, drill into sections and activities, and check your dashboard, notifications and account info.
+sidebarTitle: Units and activities
+icon: layers
+---
+
+This page covers the commands that inspect structure rather than a single item: `units`, `activities`, `todo`, `alerts`, `overview` and `user`. For the bare-target shortcuts (`moodle UNIT`, `moodle UNIT SECTION`), see [Daily use](/moodle/daily-use). For deadlines and grades in depth, see [Grades and deadlines](/moodle/grades-and-deadlines).
+
+## Units
+
+```bash
+moodle units list
+moodle units show UNIT
+```
+
+`units` also answers to `courses` — both are registered names for the same command, so `moodle courses list` and `moodle units list` behave identically.
+
+`units list` shows every unit you're enrolled in — its code, name, dates and whether it's hidden. `units show UNIT` resolves `UNIT` (code, name, id or URL) to one unit and shows its section index: each section's name, how many activities it has, and which one is current. It does not include each section's activities; for that, use `moodle UNIT SECTION` or `activities list --section`.
+
+See [`moodle units`](/moodle/reference/units) for the full flag list. Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#units) for the exact field names.
+
+## Sections and activities
+
+A unit's content is organized into sections, and each section holds activities — assignments, quizzes, resources, pages, folders, forums, and labels. `activities list` walks that structure directly instead of going through a unit reference:
+
+```bash
+moodle activities list UNIT --section SECTION --limit 50
+```
+
+- `--section` narrows to one section (number or name, resolved the same way as [`moodle UNIT SECTION`](/moodle/daily-use#a-section)); omitted, it lists every section's activities.
+- `--limit` caps how many activity rows come back (default 200); the response's `total` still counts every matching activity, so a `total` larger than the returned array means more exist beyond the limit.
+- `--include-labels` includes label activities, which are excluded by default since they're inline text rather than something to open.
+
+`activities show ID` takes a course-module ID directly — no phrase resolution — and returns that one activity's full detail: for an assignment or quiz, its due date and submission or grading status; for a resource or folder, its files; for a forum activity, its latest threads.
+
+```bash
+moodle activities show 91234
+```
+
+<Note>
+  Resource and folder activities return file entries you can pass straight to [`moodle get` or `moodle download`](/moodle/downloads).
+</Note>
+
+### The current section
+
+Moodle marks one section as "current" on sites that use that feature. Where a site doesn't mark one, moodle-cli estimates it: the first section (in order) containing an activity the site reports as not yet complete. An estimated current section is never confused with the site's own marker — the output flags it `estimated` so you know it's a guess based on unfinished work, not something the site itself decided.
+
+## Todo
+
+```bash
+moodle todo --limit 20 --days 14
+```
+
+`todo` runs the same underlying deadline lookup as [`moodle due`](/moodle/grades-and-deadlines#due-items) with no unit scoping and its own `--days`/`--limit` flags (`--limit` defaults to 20, matching `due`'s own default). This section exists mainly so `moodle todo --help` isn't a dead end. Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#due-and-todo) for the field-by-field shape.
+
+## Alerts
+
+```bash
+moodle alerts --limit 20
+```
+
+Shows your notification and message counts, plus up to `--limit` individual notifications, each with its own time, phrased the way Moodle itself would show it. Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#alerts) for the exact field names.
+
+## Overview
+
+```bash
+moodle overview --todo-days 7
+```
+
+A compact combination of the dashboard's due items, unread counts, and unit list — the same `home` data as bare `moodle`, scoped by `--todo-days`. `--todo-limit` and `--alerts-limit` are accepted on the command line but don't change the result in 0.9.2: the dashboard always returns up to 5 due items and a single "has any unread" pass over your alert counts; only `--todo-days` changes what's included.
+
+## User
+
+```bash
+moodle user
+```
+
+Prints the authenticated account: id, name, `siteurl`, and the site's raw `timezone` value from your Moodle profile. That value is the input to the timezone resolution described in [Grades and deadlines](/moodle/grades-and-deadlines#timezones) — `moodle user`'s output is the unprocessed site setting, not the resolved zone other commands display alongside dates.

@@ -1,0 +1,90 @@
+---
+title: "OnTrack CLI for scripts and agents"
+sidebarTitle: "OnTrack"
+icon: "code"
+description: "Exit codes, environment variables, non-interactive flags, and token-based sign-in for scripting ontrack or building an agent integration."
+---
+
+This page covers what a script author, agent builder, or contributor needs from `ontrack` beyond the human-facing walkthroughs: exact exit codes, config keys and environment variables, non-interactive flags, and signing in without a browser.
+
+<Note>
+  There is no MCP (Model Context Protocol) server for OnTrack in this release. Every integration goes through the `ontrack` binary and its `--json` output.
+</Note>
+
+## Error codes and exit codes
+
+`--json` prints an error in the shape described in [Errors and exit codes](/concepts/errors-and-exit-codes); this table maps each exit code to what actually produced it in `ontrack`.
+
+| Exit | `error.code` | Typical cause | Fix |
+| --- | --- | --- | --- |
+| `1` | `config` / `network` | No `base_url` configured, an invalid config file, or OnTrack unreachable | Set `ONTRACK_BASE_URL` or fix `config.yaml`; check connectivity |
+| `2` | `usage` | Bad flag or argument, an ambiguous `UNIT`, a mutation run without `--yes` | Fix the command; for ambiguity, rerun with the project ID it lists |
+| `3` | `auth` | No valid session; browser-cookie exchange and the session cache both failed | Run `ontrack auth login` |
+| `4` | `not_found` | `UNIT` or `TASK` doesn't resolve to anything you have access to | Check `ontrack units` / `ontrack tasks UNIT` for the exact reference |
+| `5` | `upstream` | OnTrack returned something unexpected, or rejected the request outright (no task sheet, no resources) | Usually transient; rerun. A persistent one is a real OnTrack-side rejection |
+| `130` | `cancelled` | `Ctrl-C`, or a mutation declined at the confirmation prompt | Not a failure — rerun if you want to continue |
+
+`error.code` here is the same shared vocabulary every CLI in the family uses — see [Errors and exit codes](/concepts/errors-and-exit-codes) for the full table.
+
+## Environment variables and config keys
+
+See [Configuration](/ontrack/configuration) for where the config file lives. The keys below are for automation specifically.
+
+```yaml
+username: your-username
+auth_token: <your-token>
+```
+
+`username` / `auth_token` — an access token and the username it belongs to, for automation. Both must be present together; see [Automating sign-in without a browser](#automating-sign-in-without-a-browser) below.
+
+### Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `ONTRACK_BASE_URL` | Overrides `base_url`. |
+| `ONTRACK_USERNAME` | Username for token-based automation. |
+| `ONTRACK_TOKEN` | Access token for token-based automation. |
+| `ONTRACK_AUTH_TOKEN` | Legacy alias for `ONTRACK_TOKEN`, kept for older setups. |
+| `ONTRACK_CONFIG` | Overrides the config file path. |
+
+### Resolution order
+
+`ontrack` resolves a session in this order, stopping at the first that succeeds:
+
+1. **Explicit credentials.** `ONTRACK_USERNAME` + `ONTRACK_TOKEN` (or `ONTRACK_AUTH_TOKEN`) from the environment; failing that, `username` + `auth_token` from the config file. Either wins over everything below and is used directly on every run — no session file is read or written.
+2. **Cached session.** `session.json`, if it matches the current `base_url` and hasn't expired.
+3. **Browser-cookie exchange.** Tried automatically, using whichever supported browser has a usable session for the site.
+4. Nothing found: `ontrack` errors and tells you to run `ontrack auth login`.
+
+See [Configuration](/concepts/configuration) for how this fits the model every tool here shares.
+
+## Non-interactive use
+
+A script or agent shell has no prompt to answer, so it must pass `--yes` to proceed or `--dry-run` to see the plan without sending it:
+
+```bash
+ontrack tasks set UNIT TASK working_on_it --dry-run
+ontrack tasks submit UNIT TASK --file report.pdf --yes
+```
+
+`--dry-run` prints the plan to stderr and exits `0` without contacting OnTrack — it works the same whether or not you're at a terminal.
+
+## Automating sign-in without a browser
+
+For scripts and CI, skip the browser paths entirely by supplying a username and access token:
+
+<CodeGroup>
+
+```bash Environment
+export ONTRACK_USERNAME="your-username"
+export ONTRACK_TOKEN="<your-token>"
+```
+
+```yaml config.yaml
+username: your-username
+auth_token: <your-token>
+```
+
+</CodeGroup>
+
+`ONTRACK_AUTH_TOKEN` is also accepted in place of `ONTRACK_TOKEN`, for setups carried over from an older release. See [Environment variables and config keys](#environment-variables-and-config-keys) above for the full precedence order between these, the config file, and a cached session.

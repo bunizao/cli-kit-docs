@@ -1,0 +1,72 @@
+---
+title: "Connect Claude Desktop"
+description: "Add the Moodle and Ed Discussion MCP servers to Claude Desktop."
+---
+
+Claude Desktop connects to the Moodle and Ed Discussion Model Context Protocol (MCP) servers as local processes; see [MCP servers](/mcp/index) for what each surface offers.
+
+Official reference: [Connect to local MCP servers](https://modelcontextprotocol.io/quickstart/user), fetched 2026-09-21.
+
+## Prerequisites
+
+- moodle-cli and edstem-cli installed and signed in. See [Install](/moodle/install) and [Install](/edstem/install).
+- Claude Desktop installed. It's available for macOS and Windows.
+
+## Config file location
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+Open it from Claude Desktop itself: Claude menu → Settings → Developer → Edit Config.
+
+<Tabs>
+  <Tab title="Moodle">
+    ### Preferred: `moodle mcp connect`
+
+    ```bash
+    moodle mcp connect claude-desktop
+    ```
+
+    This writes a bridge entry directly to the config file above:
+
+    ```json
+    {
+      "mcpServers": {
+        "moodle-<profile>": {
+          "command": "moodle",
+          "args": ["mcp", "bridge", "--profile", "<profile>"]
+        }
+      }
+    }
+    ```
+
+    Restart Claude Desktop after connecting — it only reads this file at launch.
+
+    Claude Desktop's remote-connector support is limited to what claude.ai itself exposes; for OAuth or header-based remote access from the desktop app, use claude.ai's connector settings, covered on [Connect claude.ai](/mcp/clients/claude-ai).
+  </Tab>
+  <Tab title="Ed Discussion">
+    Add the stdio server by hand, merging it into the same file's `mcpServers` object:
+
+    ```json
+    {
+      "mcpServers": {
+        "edstem": {
+          "command": "edstem-mcp",
+          "env": { "EDSTEM_TOKEN": "<your-token>" }
+        }
+      }
+    }
+    ```
+
+    Restart Claude Desktop to pick it up.
+  </Tab>
+</Tabs>
+
+## Verify the connection
+
+Restart Claude Desktop, then click the "Add files, connectors, and more" control in the bottom-left of the message box, open **Connectors** → **Manage connectors**, and select the server to see its available tools. If it doesn't appear, check the logs:
+
+- **macOS**: `~/Library/Logs/Claude/mcp*.log`
+- **Windows**: `%APPDATA%\Claude\logs\mcp*.log`
+
+`mcp.log` covers connection failures; `mcp-server-<name>.log` carries that server's own stderr output.

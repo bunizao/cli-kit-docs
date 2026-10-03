@@ -1,0 +1,80 @@
+---
+title: "ontrack chats"
+description: "Read and send task chat messages"
+sidebarTitle: "chats"
+---
+
+```bash
+ontrack chats [options] [command]
+```
+
+## ontrack chats list
+
+```bash
+ontrack chats list [options] <unit>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit code, name or project id |
+
+## ontrack chats read
+
+```bash
+ontrack chats read [options] <unit> <task>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit code, name or project id |
+| `task` | Yes | Task abbreviation, such as 1.1 |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## ontrack chats mark-read
+
+```bash
+ontrack chats mark-read [options] <unit> <task>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit code, name or project id |
+| `task` | Yes | Task abbreviation, such as 1.1 |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## ontrack chats send
+
+```bash
+ontrack chats send [options] <unit> <task>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit code, name or project id |
+| `task` | Yes | Task abbreviation, such as 1.1 |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--message <text>` | Exact message to send |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+Global options apply to every command. See [Global options](/ontrack/reference/index#global-options).

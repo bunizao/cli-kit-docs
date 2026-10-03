@@ -1,0 +1,39 @@
+---
+title: cli-kit
+description: Terminal and MCP access to Moodle, Ed Discussion and OnTrack for students, teaching staff, and the AI apps you connect.
+icon: terminal
+---
+
+cli-kit is three command-line tools — `moodle`, `edstem`, and `ontrack` — that give students, teaching staff, and the AI apps you connect terminal and MCP (Model Context Protocol) access to the learning platforms a university runs: Moodle, Ed Discussion and OnTrack. All three tools work the same way: the same commands, the same way of showing an error, the same confirmation before anything changes. What you learn running one applies to the others.
+
+| Tool | npm package | Binary | Reaches | Auth model | MCP |
+| --- | --- | --- | --- | --- | --- |
+| [Moodle CLI](/moodle/index) | `moodle-cli` | `moodle` | Moodle | Browser session | Yes: local + remote |
+| [Ed Discussion CLI](/edstem/index) | `edstem-cli` | `edstem`, `edstem-mcp` | Ed Discussion | API token | Yes: local + hosted |
+| [OnTrack CLI](/ontrack/index) | `ontrack` | `ontrack` | OnTrack | Browser session or SAML snippet | No |
+
+Each tool only reaches what your own account can already see: `moodle` borrows the browser session you signed in with, `edstem` uses a personal API token you create yourself, and `ontrack` reuses a browser session or falls back to a SAML (Security Assertion Markup Language) sign-in. None of them create a service account or a new set of upstream permissions.
+
+<Columns cols={2}>
+  <Card title="Moodle CLI" icon="graduation-cap" href="/moodle/index">
+    Deadlines, grades, announcements, forum threads and files, borrowed from your browser session.
+  </Card>
+  <Card title="Ed Discussion CLI" icon="message-square" href="/edstem/index">
+    Threads, lesson content and quiz slides, read and posted with a personal Ed API token.
+  </Card>
+  <Card title="OnTrack CLI" icon="list-checks" href="/ontrack/index">
+    Tasks, task chats and teaching roles, CLI-only in this release.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Install, sign in, and run your first command in each tool.
+  </Card>
+  <Card title="MCP servers" icon="plug" href="/mcp/index">
+    Connect an AI client to Moodle or Ed Discussion without running the CLI yourself.
+  </Card>
+  <Card title="Compare the CLIs" icon="scale" href="/compare/features">
+    A feature matrix across all three, and what each one's web UI still covers that the CLI doesn't.
+  </Card>
+  <Card title="Developers" icon="code" href="/developers/index">
+    Building on this? JSON output, exit codes, MCP internals and agent skills.
+  </Card>
+</Columns>

@@ -1,0 +1,139 @@
+---
+title: Sign in
+description: How moodle-cli finds, caches and renews the browser session it borrows from you.
+sidebarTitle: Sign in
+icon: key
+---
+
+`moodle-cli` has no Moodle account of its own. It borrows the login session your browser already holds, the same way the Moodle web UI does. There is nothing to request from your university and nothing to configure on the Moodle side.
+
+## How the CLI finds a session
+
+Most commands look for a usable session in this order:
+
+1. **`MOODLE_TOKEN` or `MOODLE_SESSION`** — if either environment variable is set, its value is used directly and validated against the site. `MOODLE_TOKEN` wins if both are set.
+2. **A saved session** — one left over from a previous run, if it hasn't expired. Skipped entirely when you pass `--no-cache`.
+3. **A stored mobile sign-in**, if the site has previously supported it and the CLI captured one — this signs you back in with no browser and no disk access at all. See [Keepalive](#keepalive) below; it's what makes unattended renewal possible.
+4. **Your browser's own cookie store** — Chrome, Edge, Brave, Firefox and Safari are all checked, matching cookies to your site and trying each one until it validates.
+
+If none of those produce a session, the command fails with an `auth` error and a hint that points at `moodle auth login`.
+
+`moodle auth login` itself resolves differently, because it has to produce a session rather than just find one: it tries your browser's cookie store first, and if that finds nothing, falls back to driving a browser itself. `--paste` skips both and takes the cookie by hand.
+
+```bash
+moodle auth login
+moodle auth login --paste
+```
+
+## First run
+
+The first command that needs a session and finds none runs an interactive sign-in instead of failing outright. It shows the wordmark, a short note about what's about to happen, then a menu:
+
+<Steps>
+  <Step title="Sign in in my own browser">
+    Opens the Moodle login page in your default browser and waits for you to press Enter. On Enter, the CLI picks up the session from your browser. Only offered when at least one cookie store on the machine is readable — see [Full Disk Access](#macos-full-disk-access-and-cookie-stores) below.
+  </Step>
+  <Step title="Open a browser window from here">
+    Opens a browser window the CLI controls, in its own private profile, points it at the login page, and waits until you're signed in. Nothing from your real browser profile is read or written.
+  </Step>
+  <Step title="Paste the MoodleSession cookie">
+    Prompts for the cookie value with no echo. Accepts a bare cookie value, a `MoodleSession=...` pair, or a whole "Copy as cURL" command pasted in.
+  </Step>
+</Steps>
+
+A failed attempt reopens the menu instead of exiting, and the CLI narrows the choices — e.g. it stops offering "my own browser" once every cookie store on the machine has proven unreadable.
+
+Once signed in, on macOS only, it offers to install the [keepalive](#keepalive) background job, unless one is already installed.
+
+## macOS Full Disk Access and cookie stores
+
+Chromium and Firefox cookie databases live behind ordinary file permissions, but Safari's cookie file, and often the Chromium ones too, sit behind macOS's Full Disk Access privacy control. Full Disk Access is granted to the application that owns the process — your terminal app (Terminal, iTerm, Ghostty, VS Code, Warp, and so on) — never to the CLI itself, since it doesn't have its own app to grant it to.
+
+`moodle doctor` and every auth failure report this as a `browser` check or an `auth` error whose hint names the exact application to grant access to, read from your terminal:
+
+```text
+System Settings > Privacy & Security > Full Disk Access: enable Terminal, then restart it.
+```
+
+Granting access and restarting the terminal app is the fix, if you're willing to grant it. The workaround if you'd rather not is `moodle auth login --paste`: it never touches the cookie store, so it works no matter what Full Disk Access allows.
+
+```bash
+moodle auth login --paste
+```
+
+## moodle doctor
+
+`moodle doctor` runs a fixed set of checks and reports each as `pass`, `warn` or `fail`:
+
+- **sqlite** — whether the current runtime can read Chromium cookie databases at all (Node 22.13+ or Bun; older Node can't).
+- **config** — whether a Moodle site URL is configured.
+- **session** — whether a saved session exists and is still alive against the site.
+- **browser** — whether at least one browser cookie store could be read; reports `fail` with a Full Disk Access hint when every store is blocked.
+- **job**, once per background job you have running — whether the keepalive job (and any managed MCP (Model Context Protocol) renewal job) can still read cookies.
+- **mcp** — whether a local managed MCP deployment exists; a `warn` here is informational, not a problem, for CLI-only use.
+
+The command exits non-zero if any check fails.
+
+```bash
+moodle doctor
+moodle doctor --json
+```
+
+## moodle auth status
+
+`moodle auth status` reports the saved session's freshness without making you re-authenticate:
+
+- `base_url` — the configured Moodle site.
+- `session_cached` and `cache_age_minutes` — whether a session is saved and how old it is.
+- `session_alive` — the result of checking the session against Moodle right now (`null` when there's no saved session to check, or the site couldn't be reached).
+- `session_time_remaining_seconds` — how long Moodle says the session has left, when the site reports it.
+- `keepalive_installed` and `keepalive_plist_path` — whether the keepalive job is registered.
+
+```bash
+moodle auth status
+```
+
+## Keepalive
+
+A session left untouched expires; `moodle auth keepalive` touches it (and re-authenticates if it has already expired) in one call. Run alone, it renews once and exits — that's what a scheduler calls on an interval:
+
+```bash
+moodle auth keepalive
+moodle auth keepalive --no-renew   # only check; never re-authenticate
+```
+
+Installing it as a recurring job is a separate step, and the mechanism is platform-specific:
+
+<Tabs>
+  <Tab title="macOS">
+    `moodle auth keepalive install` sets up a background job at `~/Library/LaunchAgents/com.moodle-cli.keepalive.plist`, on a 30-minute interval by default. It refuses to install when the runtime that would run it can't read browser cookies, since a job pinned to that runtime would only ever succeed until the session it started with expires.
+
+    ```bash
+    moodle auth keepalive install
+    moodle auth keepalive install --interval 15
+    moodle auth keepalive status
+    moodle auth keepalive uninstall
+    ```
+  </Tab>
+  <Tab title="Linux">
+    There's no automatic installer; `moodle auth keepalive install` is macOS-only and errors on Linux with the cron line to add yourself:
+
+    ```bash
+    */30 * * * * moodle auth keepalive --json
+    ```
+  </Tab>
+</Tabs>
+
+Renewal prefers a stored mobile sign-in over the browser cookie store, because a background job has no browser to poll: getting a fresh session that way needs no user interaction, while re-reading the cookie store only works on a machine where the store stays readable unattended. When there's no stored mobile sign-in, the keepalive tick falls back to the same order ordinary commands use, running non-interactively — it never opens a browser or prompts.
+
+## The session cache and `--no-cache`
+
+A validated session is saved at `~/.cache/moodle-cli/session.json`, encrypted at rest. It holds what's needed to sign you back in without asking again, plus a few details worth keeping across a re-login (which site features are disabled, the durable mobile sign-in when one exists).
+
+`--no-cache` bypasses both reads and writes for that invocation: the command re-resolves a session from scratch and never saves whatever it finds.
+
+```bash
+moodle todo --no-cache
+```
+
+See [Configuration](/moodle/configuration) for where `base_url` itself is stored, and [`moodle/reference/auth`](/moodle/reference/auth) and [`moodle/reference/doctor`](/moodle/reference/doctor) for the full flag reference. [Connect an agent](/moodle/mcp-server) covers how a deployed MCP server's own session differs from the one this page describes.

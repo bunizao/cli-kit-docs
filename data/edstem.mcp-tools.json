@@ -1,0 +1,927 @@
+[
+  {
+    "name": "get_user",
+    "title": "Get current user",
+    "description": "Get the current Ed identity and enrolled courses.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "list_courses",
+    "title": "List courses",
+    "description": "List enrolled courses; archived courses are omitted by default.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "includeArchived": {
+          "default": false,
+          "description": "Also return courses Ed marks as archived; defaults to false.",
+          "type": "boolean"
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "list_lessons",
+    "title": "List lessons",
+    "description": "List compact lesson summaries for one course. courseId accepts a numeric ID or course code. Call without filters first: an empty list means the course has no Ed Lessons. Filters are case-insensitive; use all or omit a filter to include every value.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "courseId": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ],
+          "description": "Ed course ID or exact course code, for example 12345 or \"UNIT\"."
+        },
+        "lessonType": {
+          "description": "Exact lesson type, for example \"general\". Use \"all\" or omit to include every type.",
+          "type": "string",
+          "minLength": 1
+        },
+        "module": {
+          "description": "Module ID or case-insensitive text from the module name, for example \"Week 5\". Use \"all\" or omit to include every module.",
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "description": "Exact availability state, for example \"active\" or \"scheduled\". Use \"all\" or omit to include every state.",
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "description": "Exact progress status: \"unattempted\", \"attempted\", or \"completed\". Use \"all\" or omit to include every status.",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "courseId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "get_lesson",
+    "title": "Get lesson",
+    "description": "Get one lesson with slide content.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "lessonId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Ed lesson ID as returned by list_lessons."
+        }
+      },
+      "required": [
+        "lessonId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "list_lesson_files",
+    "title": "List lesson files",
+    "description": "List Ed-hosted downloadable files and direct resource links for one lesson.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "lessonId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Ed lesson ID as returned by list_lessons."
+        }
+      },
+      "required": [
+        "lessonId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "list_thread_files",
+    "title": "List thread files",
+    "description": "List Ed-hosted downloadable files and direct resource links attached to one thread, including its answers and comments.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "threadId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Global thread ID as returned by list_threads."
+        }
+      },
+      "required": [
+        "threadId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "list_slide_questions",
+    "title": "List slide questions",
+    "description": "List quiz questions for one lesson slide.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "slideId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Ed slide ID as returned by get_lesson."
+        }
+      },
+      "required": [
+        "slideId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "list_slide_responses",
+    "title": "List slide responses",
+    "description": "List saved quiz responses for one lesson slide.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "slideId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Ed slide ID as returned by get_lesson."
+        }
+      },
+      "required": [
+        "slideId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "get_slide",
+    "title": "Get slide",
+    "description": "Get one lesson slide with its content.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "slideId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Ed slide ID as returned by get_lesson."
+        }
+      },
+      "required": [
+        "slideId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "list_threads",
+    "title": "List threads",
+    "description": "List compact thread summaries for one course. courseId accepts a numeric ID or course code. Categories are hierarchical: category is top-level and subcategory is second-level. Sort defaults to new; Ed may keep pinned threads first.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "answered": {
+          "description": "Keep answered threads when true, unanswered when false; omit for both.",
+          "type": "boolean"
+        },
+        "category": {
+          "description": "Exact top-level category, for example \"Applied\".",
+          "type": "string",
+          "minLength": 1
+        },
+        "courseId": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ],
+          "description": "Ed course ID or exact course code, for example 12345 or \"UNIT\"."
+        },
+        "limit": {
+          "default": 30,
+          "description": "Maximum threads to return, capped at 100; defaults to 30.",
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 100
+        },
+        "offset": {
+          "default": 0,
+          "description": "Threads to skip in the unfiltered Ed stream before filtering.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "since": {
+          "description": "Only threads created at or after this time: an ISO date such as \"2026-09-01\", an ISO datetime such as \"2026-09-01T10:00:00Z\", or a relative offset such as \"7d\", \"12h\", or \"2w\".",
+          "type": "string",
+          "minLength": 1
+        },
+        "sort": {
+          "default": "new",
+          "description": "Ed sort order. Defaults to \"new\"; Ed may keep pinned threads ahead of that order.",
+          "type": "string",
+          "enum": [
+            "new",
+            "old",
+            "top",
+            "hot"
+          ]
+        },
+        "subcategory": {
+          "description": "Exact second-level subcategory, for example \"MiniTests\".",
+          "type": "string",
+          "minLength": 1
+        },
+        "threadType": {
+          "description": "Exact thread type, for example \"question\" or \"post\".",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "courseId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "search_threads",
+    "title": "Search threads",
+    "description": "Search threads in one course. Every query word must appear, case-insensitively, in the thread title or body; Ed is paged client-side until limit threads match. Accepts the same filters as list_threads.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "answered": {
+          "description": "Keep answered threads when true, unanswered when false; omit for both.",
+          "type": "boolean"
+        },
+        "category": {
+          "description": "Exact top-level category, for example \"Applied\".",
+          "type": "string",
+          "minLength": 1
+        },
+        "courseId": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ],
+          "description": "Ed course ID or exact course code, for example 12345 or \"UNIT\"."
+        },
+        "limit": {
+          "default": 30,
+          "description": "Maximum threads to return, capped at 100; defaults to 30.",
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 100
+        },
+        "offset": {
+          "default": 0,
+          "description": "Threads to skip in the unfiltered Ed stream before filtering.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "since": {
+          "description": "Only threads created at or after this time: an ISO date such as \"2026-09-01\", an ISO datetime such as \"2026-09-01T10:00:00Z\", or a relative offset such as \"7d\", \"12h\", or \"2w\".",
+          "type": "string",
+          "minLength": 1
+        },
+        "sort": {
+          "default": "new",
+          "description": "Ed sort order. Defaults to \"new\"; Ed may keep pinned threads ahead of that order.",
+          "type": "string",
+          "enum": [
+            "new",
+            "old",
+            "top",
+            "hot"
+          ]
+        },
+        "subcategory": {
+          "description": "Exact second-level subcategory, for example \"MiniTests\".",
+          "type": "string",
+          "minLength": 1
+        },
+        "threadType": {
+          "description": "Exact thread type, for example \"question\" or \"post\".",
+          "type": "string",
+          "minLength": 1
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Words that must all appear, case-insensitively, in the thread title or body."
+        }
+      },
+      "required": [
+        "courseId",
+        "query"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "get_thread",
+    "title": "Get thread",
+    "description": "Get a compact thread detail by global thread ID.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "includeHtml": {
+          "default": false,
+          "description": "Also return Ed's XML content; the plain-text document is always returned.",
+          "type": "boolean"
+        },
+        "threadId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Global Ed thread ID as returned by list_threads; for the number shown inside a course use get_course_thread."
+        }
+      },
+      "required": [
+        "threadId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "get_course_thread",
+    "title": "Get thread by course number",
+    "description": "Get a compact thread detail by course ID or code and course-local number.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "courseId": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ],
+          "description": "Ed course ID or exact course code, for example 12345 or \"UNIT\"."
+        },
+        "includeHtml": {
+          "default": false,
+          "description": "Also return Ed's XML content; the plain-text document is always returned.",
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "description": "One-based thread number as shown inside the course, the #N in the Ed thread list."
+        }
+      },
+      "required": [
+        "courseId",
+        "number"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "list_activity",
+    "title": "List my activity",
+    "description": "List compact current-user activity, optionally filtered by course ID or code.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "courseId": {
+          "description": "Ed course ID or exact course code to filter by, for example 12345 or \"UNIT\". Omit for every course.",
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "filterType": {
+          "default": "all",
+          "description": "Kind of activity to keep. Defaults to \"all\".",
+          "type": "string",
+          "enum": [
+            "all",
+            "thread",
+            "answer",
+            "comment"
+          ]
+        },
+        "limit": {
+          "default": 30,
+          "description": "Maximum items, capped at 50; defaults to 30.",
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 50
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "read_thread",
+    "title": "Read thread",
+    "description": "Read one thread as Markdown. Pass either threadId, or courseId plus the course-local number.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "courseId": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ],
+          "description": "Ed course ID or exact course code, for example 12345 or \"UNIT\"."
+        },
+        "number": {
+          "description": "Course-local thread number; requires courseId.",
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "threadId": {
+          "description": "Global Ed thread ID; use instead of courseId and number.",
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "read_lesson",
+    "title": "Read lesson",
+    "description": "Read one lesson and its slides as Markdown.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "lessonId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Ed lesson ID."
+        }
+      },
+      "required": [
+        "lessonId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "read_slide",
+    "title": "Read slide",
+    "description": "Read one lesson slide as Markdown.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "slideId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Ed lesson slide ID."
+        }
+      },
+      "required": [
+        "slideId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "mark_lessons_read",
+    "title": "Mark lessons read",
+    "description": "Mark matching lessons and slides as read using a course ID or code.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "all": {
+          "default": false,
+          "description": "Mark every lesson in the course; required when queries is empty.",
+          "type": "boolean"
+        },
+        "courseId": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ],
+          "description": "Ed course ID or exact course code, for example 12345 or \"UNIT\"."
+        },
+        "delaySeconds": {
+          "default": 0,
+          "description": "Seconds to pause after each slide, 0 to 10; defaults to 0. Raise it to go easy on Ed.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "queries": {
+          "default": [],
+          "description": "Case-insensitive substrings that must all appear in the lesson title or module name; at most 10. When queries is empty, all must be true to mark every lesson of the course.",
+          "maxItems": 10,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "courseId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    }
+  },
+  {
+    "name": "submit_slide_answer",
+    "title": "Submit slide answer",
+    "description": "Submit one-based quiz choices for one question.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "amend": {
+          "default": false,
+          "description": "Overwrite an answer already saved for this question; defaults to false.",
+          "type": "boolean"
+        },
+        "choices": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "description": "One-based answer indexes as shown by list_slide_questions; pass several for multiple-selection questions."
+        },
+        "questionId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Ed question ID as returned by list_slide_questions."
+        }
+      },
+      "required": [
+        "choices",
+        "questionId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    }
+  },
+  {
+    "name": "submit_slide",
+    "title": "Submit slide",
+    "description": "Submit all saved answers for one quiz slide.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "slideId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Ed slide ID whose saved answers are submitted, as returned by get_lesson."
+        }
+      },
+      "required": [
+        "slideId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    }
+  },
+  {
+    "name": "create_thread",
+    "title": "Create thread",
+    "description": "Create a thread in one course. body is Markdown and is converted to Ed's document format. The thread is posted publicly to the course as the token owner and cannot be removed from here; ask the user before calling it.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "anonymous": {
+          "default": false,
+          "description": "Hide the author name from other students. Staff can still see it.",
+          "type": "boolean"
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Post body in Markdown. It is converted to Ed's document format before posting."
+        },
+        "category": {
+          "description": "Exact top-level category for the course, for example \"Applied\".",
+          "type": "string",
+          "minLength": 1
+        },
+        "courseId": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ],
+          "description": "Ed course ID or exact course code, for example 12345 or \"UNIT\"."
+        },
+        "private": {
+          "default": false,
+          "description": "Post privately to course staff instead of the whole course.",
+          "type": "boolean"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Thread title shown in the course thread list."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "question",
+            "post",
+            "announcement"
+          ],
+          "description": "Ed thread type. Use \"question\" to ask, \"post\" to discuss; \"announcement\" needs staff rights."
+        }
+      },
+      "required": [
+        "body",
+        "courseId",
+        "title",
+        "type"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    }
+  },
+  {
+    "name": "reply_thread",
+    "title": "Reply to thread",
+    "description": "Reply to one thread, or to one comment inside it. body is Markdown and is converted to Ed's document format. The reply is posted publicly as the token owner and cannot be removed from here; ask the user before calling it.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "anonymous": {
+          "default": false,
+          "description": "Hide the author name from other students. Staff can still see it.",
+          "type": "boolean"
+        },
+        "as": {
+          "description": "Reply kind. Defaults to \"answer\" on question threads and \"comment\" elsewhere.",
+          "type": "string",
+          "enum": [
+            "answer",
+            "comment"
+          ]
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Reply body in Markdown. It is converted to Ed's document format before posting."
+        },
+        "private": {
+          "default": false,
+          "description": "Post privately to course staff instead of the whole course.",
+          "type": "boolean"
+        },
+        "threadId": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Global Ed thread ID to reply to."
+        },
+        "toCommentId": {
+          "description": "Reply under this comment of the thread instead of at the top level. The comment must belong to threadId.",
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "body",
+        "threadId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    }
+  },
+  {
+    "name": "list_modules",
+    "title": "List lesson modules",
+    "description": "List the lesson modules of one course with the number of lessons in each. courseId accepts a numeric ID or course code. Use it to pick a module value for list_lessons.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "courseId": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ],
+          "description": "Ed course ID or exact course code, for example 12345 or \"UNIT\"."
+        }
+      },
+      "required": [
+        "courseId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  }
+]

@@ -1,0 +1,82 @@
+---
+title: "Posting"
+description: "Post a new thread or a reply, review the plan first, and understand what the Markdown conversion does and doesn't support."
+---
+
+`threads send` and `replies send` publish to Ed under your own name. Both are mutations: they print a plan, ask `y/N` on an interactive terminal, and require `--yes` everywhere else. See [Mutations](/concepts/mutations) for the general rules this section assumes.
+
+<Warning>
+  Posting publishes publicly (or to staff, with `--private`) and **cannot be undone from this tool**. There is no `threads delete` or `replies delete` command. Review the plan with `--dry-run` before you send anything you're not sure about.
+</Warning>
+
+<Warning>
+  Posting has only been tested against simulated Ed responses, not against Ed itself. `--dry-run` previews the plan and what would be sent, but it doesn't call Ed, so it can't confirm Ed will accept it. Treat your first real post as a test until you've confirmed it landed the way you expected.
+</Warning>
+
+## Post a new thread
+
+```bash
+edstem threads send UNIT --title "Week 3 sample solution" --body "Does **Q4** need induction?" --dry-run
+edstem threads send UNIT --title "Week 3 sample solution" --body-file ./post.md --type question --category Applied --yes
+```
+
+`--title` is required. The body comes from exactly one of `--body`, `--body-file`, or — on an interactive terminal, when neither flag is given — your `$EDITOR`. Passing both `--body` and `--body-file` is a usage error, and an empty body after trimming is also a usage error.
+
+| Flag | Effect |
+| --- | --- |
+| `--title <title>` | Thread title. Required. |
+| `--body <markdown>` | Body as Markdown. |
+| `--body-file <path>` | Read the Markdown body from a file, or `-` for stdin. |
+| `--type <type>` | `question` (default) or `post`. |
+| `-c, --category <category>` | Ed category for the thread. |
+| `--private` | Post to staff only, not the whole unit. |
+| `--anonymous` | Hide your name from other students; staff can still see it. |
+
+## Reply to a thread or a comment
+
+```bash
+edstem replies send UNIT#42 --body "Fixed by reinstalling." --yes
+edstem replies send UNIT#42 --to 88991 --as comment --body-file - --yes
+```
+
+`--body`/`--body-file` and `$EDITOR` work the same way as `threads send`. `--as` picks `answer` or `comment`; left unset, it defaults to `answer` on question threads and `comment` on every other thread type. `--to <commentId>` replies under one existing comment instead of the thread itself — the CLI checks that the comment actually belongs to the thread you named before posting, and refuses with a usage error if it doesn't, since Ed itself would otherwise accept a reply to a comment ID from a different thread while you thought you were replying to this one.
+
+| Flag | Effect |
+| --- | --- |
+| `--body <markdown>` / `--body-file <path>` | Same as `threads send`. |
+| `--as <kind>` | `answer` or `comment`. Defaults by thread type. |
+| `--to <commentId>` | Reply under this comment instead of the thread. |
+| `--private` | Post to staff only. |
+| `--anonymous` | Hide your name from other students. |
+
+## Review before sending
+
+```bash
+edstem threads send UNIT --title "..." --body "..." --dry-run
+```
+
+Every mutation prints a one-line summary and, on `--dry-run`, also prints the exact content that would be sent to stderr, so a conversion mismatch doesn't surprise you. `--dry-run` never calls Ed.
+
+## Markdown to Ed's document format
+
+The body you write is Markdown; Ed stores posts in its own document format, and the CLI converts one to the other before sending. It supports:
+
+- paragraphs (blank-line-separated blocks)
+- headings (`#` through `######`)
+- fenced code blocks
+- inline code spans
+- **bold** and *italic*
+- links, including a link that itself contains bold or italic text
+- bullet lists (`-`) and numbered lists (`1.`)
+
+It does not support tables, blockquotes, images, or nested lists — write those directly against Ed if you need them. Lines without a blank line between them are joined into a single paragraph, the same way Markdown normally treats a soft line break, so put a blank line between anything you want as separate paragraphs.
+
+Reading in the other direction — `threads read`, `replies` shown inline, `lessons read`, `slides read` — converts Ed's document format back to Markdown; see [Threads](/edstem/threads).
+
+## Writes are never retried
+
+A failed read is retried automatically with backoff; see [Ed Discussion CLI for scripts and agents](/developers/edstem#retries-and-rate-limits). A failed write is not, because retrying a post or a reply risks creating it twice. If a mutation fails partway, check Ed before running the command again.
+
+<Card title="Command reference: threads" icon="terminal" href="/edstem/reference/threads">
+  Full syntax for `threads send`.
+</Card>

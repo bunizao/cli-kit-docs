@@ -1,0 +1,653 @@
+$ edstem --help
+edstem v0.7.0
+Read and post on Ed Discussion from the command line
+
+Usage
+  edstem [options] [command]
+
+Core commands
+  threads                   List, search, show, or read Ed threads
+  replies                   Post replies to Ed threads
+  lessons                   List, show, read, or mark lessons as read
+  slides                    Show, read, or submit lesson slides
+  files                     List or download Ed-hosted lesson and thread files
+  units, courses, projects  List or show enrolled units
+
+Additional commands
+  user                      Show the current Ed identity and enrolled units
+  activity [unit]           List current-user activity
+  auth                      Manage Ed authentication
+  update                    Report or install the latest edstem-cli release
+
+Agent commands
+  commands                  Describe the complete command tree
+  skills                    Generate the agent skill
+
+Options
+  -V, --version        Show the version
+  --json               Emit JSON
+  --yaml               Emit YAML
+  --table              Emit a human-readable table
+  --fields <fields>    Select top-level fields
+  -o, --output <file>  Write output to a file
+  --verbose            Enable debug logging
+  --no-color           Disable color output
+  -y, --yes            Confirm mutations non-interactively
+  --dry-run            Print the mutation plan without applying it
+  -h, --help           Show help
+
+Try
+  edstem threads UNIT  # latest threads in a unit
+  edstem threads read UNIT#42
+  edstem threads send UNIT --title "Week 3 question"  # asks for the body in $EDITOR
+
+Run 'edstem <command> --help' for details on a command.
+
+
+$ edstem auth --help
+edstem auth
+Manage Ed authentication
+
+Usage
+  edstem auth [options] [command]
+
+Commands
+  login   Verify an Ed token and save it for later commands
+  logout  Remove the saved Ed token file
+  status  Verify the configured Ed token
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'edstem auth <command> --help' for details on a command.
+
+
+$ edstem auth login --help
+edstem auth login
+Verify an Ed token and save it for later commands
+
+Usage
+  edstem auth login [options]
+
+Options
+  --token-stdin  Read the token from the first line of stdin
+  -h, --help     Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem auth logout --help
+edstem auth logout
+Remove the saved Ed token file
+
+Usage
+  edstem auth logout [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem auth status --help
+edstem auth status
+Verify the configured Ed token
+
+Usage
+  edstem auth status [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem user --help
+edstem user
+Show the current Ed identity and enrolled units
+
+Usage
+  edstem user [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem units --help
+edstem units
+List or show enrolled units
+
+Usage
+  edstem units [options] [command]
+
+Commands
+  list         List enrolled units
+  show <unit>  Show one enrolled unit
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'edstem units <command> --help' for details on a command.
+
+
+$ edstem units list --help
+edstem units list
+List enrolled units
+
+Usage
+  edstem units list [options]
+
+Options
+  --archived  Include archived units
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem units show --help
+edstem units show
+Show one enrolled unit
+
+Usage
+  edstem units show [options] <unit>
+
+Arguments
+  unit  Unit ID or code
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads --help
+edstem threads
+List, search, show, or read Ed threads
+
+Usage
+  edstem threads [options] [command]
+
+Commands
+  list <unit>               List threads in a unit
+  search <unit> <query...>  Search threads in a unit
+  show <reference>          Show a thread
+  read <reference>          Read a thread body as Markdown
+  send <unit>               Post a new thread in a unit
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'edstem threads <command> --help' for details on a command.
+
+
+$ edstem threads list --help
+edstem threads list
+List threads in a unit
+
+Usage
+  edstem threads list [options] <unit>
+
+Arguments
+  unit  Unit ID or code
+
+Options
+  -n, --max <count>            Maximum threads to return
+  -s, --sort <order>           Ed sort order; defaults to new and pinned threads
+                               may remain first (choices: "new", "old", "top",
+                               "hot", default: "new")
+  -c, --category <category>    Filter by exact top-level category
+  --subcategory <subcategory>  Filter by exact second-level subcategory
+  -t, --type <type>            Filter by thread type
+  --answered                   Only answered threads
+  --unanswered                 Only unanswered threads
+  --offset <count>             Skip this many threads before filtering (default:
+                               0)
+  --since <when>               Only threads created at or after an ISO date or a
+                               relative offset such as 7d
+  -h, --help                   Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads search --help
+edstem threads search
+Search threads in a unit by words in the title and body
+
+Usage
+  edstem threads search [options] <unit> <query...>
+
+Arguments
+  unit   Unit ID or code
+  query  Words that must all appear in the title or body
+
+Options
+  -n, --max <count>            Maximum threads to return
+  -s, --sort <order>           Ed sort order; defaults to new and pinned threads
+                               may remain first (choices: "new", "old", "top",
+                               "hot", default: "new")
+  -c, --category <category>    Filter by exact top-level category
+  --subcategory <subcategory>  Filter by exact second-level subcategory
+  -t, --type <type>            Filter by thread type
+  --answered                   Only answered threads
+  --unanswered                 Only unanswered threads
+  --offset <count>             Skip this many threads before filtering (default:
+                               0)
+  --since <when>               Only threads created at or after an ISO date or a
+                               relative offset such as 7d
+  -h, --help                   Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads show --help
+edstem threads show
+Show a thread by ID or unit ID/code plus #number
+
+Usage
+  edstem threads show [options] <reference>
+
+Arguments
+  reference  Thread ID or unit ID/code plus #number
+
+Options
+  --include-html  Include Ed XML content
+  -h, --help      Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads read --help
+edstem threads read
+Read a thread body as Markdown
+
+Usage
+  edstem threads read [options] <reference>
+
+Arguments
+  reference  Thread ID or unit ID/code plus #number
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads send --help
+edstem threads send
+Post a new thread in a unit
+
+Usage
+  edstem threads send [options] <unit>
+
+Arguments
+  unit  Unit ID or code
+
+Options
+  --title <title>            Thread title
+  --body <markdown>          Thread body as Markdown
+  --body-file <path>         Read the Markdown body from a file, or - for stdin
+  --type <type>              Thread type (choices: "question", "post", default:
+                             "question")
+  -c, --category <category>  Ed category for the thread
+  --private                  Post privately to staff
+  --anonymous                Post anonymously
+  -h, --help                 Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem replies --help
+edstem replies
+Post replies to Ed threads
+
+Usage
+  edstem replies [options] [command]
+
+Commands
+  send <reference>  Post a reply to a thread or to one of its comments
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'edstem replies <command> --help' for details on a command.
+
+
+$ edstem replies send --help
+edstem replies send
+Post a reply to a thread or to one of its comments
+
+Usage
+  edstem replies send [options] <reference>
+
+Arguments
+  reference  Thread ID or unit ID/code plus #number
+
+Options
+  --body <markdown>   Reply body as Markdown
+  --body-file <path>  Read the Markdown body from a file, or - for stdin
+  --as <kind>         Reply kind; defaults to answer on question threads and
+                      comment elsewhere (choices: "answer", "comment")
+  --to <commentId>    Reply to one comment of the thread instead of the thread
+                      itself
+  --private           Post privately to staff
+  --anonymous         Post anonymously
+  -h, --help          Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem lessons --help
+edstem lessons
+List, show, read, or mark lessons as read
+
+Usage
+  edstem lessons [options] [command]
+
+Commands
+  list <unit>                    List lessons in a unit
+  show <lesson>                  Show one lesson and its slides
+  read <lesson>                  Read a lesson and its slides as Markdown
+  mark-read <unit> [queries...]  Mark matching lessons and slides as read
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'edstem lessons <command> --help' for details on a command.
+
+
+$ edstem lessons list --help
+edstem lessons list
+List lessons in a unit
+
+Usage
+  edstem lessons list [options] <unit>
+
+Arguments
+  unit  Unit ID or code
+
+Options
+  --module <module>  Module ID or name text; use all to disable
+  --type <type>      Exact lesson type, such as general; use all to disable
+  --state <state>    Exact state, such as active or scheduled; use all to
+                     disable
+  --status <status>  Progress: unattempted, attempted, completed, or all
+  -h, --help         Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem lessons show --help
+edstem lessons show
+Show one lesson and its slides
+
+Usage
+  edstem lessons show [options] <lesson>
+
+Arguments
+  lesson  Lesson ID
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem lessons read --help
+edstem lessons read
+Read a lesson and its slides as Markdown
+
+Usage
+  edstem lessons read [options] <lesson>
+
+Arguments
+  lesson  Lesson ID
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem lessons mark-read --help
+edstem lessons mark-read
+Mark matching lessons and slides as read
+
+Usage
+  edstem lessons mark-read [options] <unit> [queries...]
+
+Arguments
+  unit     Unit ID or code
+  queries  Words required in lesson or module names
+
+Options
+  --all              Mark every lesson in the unit; required when no queries are
+                     given
+  --delay <seconds>  Delay between slide updates (default: 0)
+  -h, --help         Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem slides --help
+edstem slides
+Show, read, or submit lesson slides
+
+Usage
+  edstem slides [options] [command]
+
+Commands
+  show <slide>    Show slide content, questions, responses, or quiz context
+  read <slide>    Read one slide as Markdown
+  submit <slide>  Save one answer or submit all saved answers for a slide
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'edstem slides <command> --help' for details on a command.
+
+
+$ edstem slides show --help
+edstem slides show
+Show slide content, questions, responses, or quiz context
+
+Usage
+  edstem slides show [options] <slide>
+
+Arguments
+  slide  Slide ID
+
+Options
+  --section <section>  Slide section (choices: "slide", "questions",
+                       "responses", "quiz", default: "slide")
+  -h, --help           Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem slides read --help
+edstem slides read
+Read one slide as Markdown
+
+Usage
+  edstem slides read [options] <slide>
+
+Arguments
+  slide  Slide ID
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem slides submit --help
+edstem slides submit
+Save one answer or submit all saved answers for a slide
+
+Usage
+  edstem slides submit [options] <slide>
+
+Arguments
+  slide  Slide ID
+
+Options
+  --question <question>  Question ID to answer
+  --choice <number>      One-based choice; repeat for multi-select (default: [])
+  --amend                Amend an existing response
+  -h, --help             Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem files --help
+edstem files
+List or download Ed-hosted lesson and thread files
+
+Usage
+  edstem files [options] [command]
+
+Commands
+  list <target>  List Ed-hosted downloadable files in one lesson or thread
+  get <target>   Download Ed-hosted files from one lesson or thread
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'edstem files <command> --help' for details on a command.
+
+
+$ edstem files list --help
+edstem files list
+List Ed-hosted downloadable files in one lesson or thread
+
+Usage
+  edstem files list [options] <target>
+
+Arguments
+  target  Lesson ID, or a thread as thread:<id> or thread:<unit>#<number>
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem files get --help
+edstem files get
+Download Ed-hosted files from one lesson or thread
+
+Usage
+  edstem files get [options] <target>
+
+Arguments
+  target  Lesson ID, or a thread as thread:<id> or thread:<unit>#<number>
+
+Options
+  --dest <directory>  Destination directory (default: ".")
+  --slide <slide>     Download only one slide file
+  --force             Replace existing files
+  -h, --help          Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem activity --help
+edstem activity
+List current-user activity
+
+Usage
+  edstem activity [options] [unit]
+
+Arguments
+  unit  Unit ID or code
+
+Options
+  -n, --max <count>    Maximum activity items
+  -f, --filter <type>  Activity type (default: "all")
+  -h, --help           Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem update --help
+edstem update
+Report or install the latest edstem-cli release
+
+Usage
+  edstem update [options]
+
+Options
+  --check     Only report the latest release
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem commands --help
+edstem commands
+Describe the complete command tree
+
+Usage
+  edstem commands [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem skills --help
+edstem skills
+Generate the agent skill
+
+Usage
+  edstem skills [options] [command]
+
+Commands
+  generate  Regenerate SKILL.md from command metadata
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'edstem skills <command> --help' for details on a command.
+
+
+$ edstem skills generate --help
+edstem skills generate
+Regenerate SKILL.md from command metadata
+
+Usage
+  edstem skills generate [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+

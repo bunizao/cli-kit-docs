@@ -1,0 +1,39 @@
+---
+title: "edstem auth"
+description: "Manage Ed authentication."
+sidebarTitle: "auth"
+---
+
+```bash
+edstem auth [options] [command]
+```
+
+## edstem auth login
+
+```bash
+edstem auth login [options]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--token-stdin` | Read the token from the first line of stdin. |
+
+## edstem auth logout
+
+```bash
+edstem auth logout [options]
+```
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## edstem auth status
+
+```bash
+edstem auth status [options]
+```
+
+Global options apply to every command. See [Global options](/edstem/reference/index#global-options).

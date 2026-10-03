@@ -1,0 +1,137 @@
+---
+title: "How MCP works"
+description: "In plain language, what each Moodle and Ed Discussion MCP surface does: what runs where, what talks to what, and where your credentials live."
+---
+
+This page is for deciding whether to trust a connection, not for building one. For a list of surfaces and which one to connect, see [MCP servers](/mcp/index). For a full breakdown of what's stored and how to revoke access, see [Security](/mcp/security).
+
+## Moodle
+
+```text
+Local           Your MCP client --> moodle mcp serve, on your computer --> Moodle
+                                     (uses the Moodle sign-in you already have)
+
+Bridge          Your MCP client --> moodle mcp bridge, on your computer --> your private server --> Moodle
+                                     (looks up your access token in your computer's keychain)
+
+Remote          Your MCP client --------------------------------------> your private server --> Moodle
+                                     (a token you hold, or an OAuth sign-in)
+```
+
+### Local server
+
+`moodle mcp serve` runs on your own computer and talks straight to Moodle, reusing the Moodle sign-in you already have in your browser. Nothing about your session leaves your machine except the requests you'd be making anyway. Because it can read files on your computer, it's the only surface that offers `submit` — a remote server has no files of yours to upload.
+
+### Bridge
+
+`moodle mcp bridge` is a small program on your computer that your client launches. It doesn't hold your sign-in itself — it looks up your access token in your computer's secure credential store (the same place your operating system keeps saved passwords) and uses that to talk to your own private server on your behalf. This is why `moodle mcp connect` sets clients up this way by default: the client's own settings file never contains your token, only instructions to run the bridge.
+
+### Remote server
+
+Your private server is a small program you deploy to your own Cloudflare account with `moodle mcp deploy`. It holds an encrypted copy of your Moodle sign-in and answers requests on your behalf, so you don't have to run anything locally. Your client reaches it one of two ways: with a token you hold, for clients that let you paste in a custom header, or through an OAuth sign-in, for clients like claude.ai that need a browser-based approval instead of a raw token.
+
+A background helper installed on your own computer keeps your stored sign-in fresh, so the server doesn't go stale between logins and you don't have to reconnect every time.
+
+### Pairing and OAuth, from your side
+
+Nothing is approved on your private server until you say so. Run `moodle mcp pair` yourself and it opens a short window and prints a one-time code. In the client, you sign in on your server's own approval page and enter that code; only then does the client receive a token, and the window closes as soon as you use the code or it times out. If nobody has opened a pairing window, there's nothing for an approval page to approve — so an unexpected sign-in prompt for this server is a sign something's off.
+
+### What it can and cannot do
+
+Every Moodle surface can only see what your own Moodle account can see. Only `submit`, and only on the local server, changes anything on Moodle; every other tool reads. Your private server is locked to one Moodle account: uploading a sign-in for a different account is refused outright, so one deployment can't quietly start answering for someone else.
+
+## Ed Discussion
+
+```text
+Local             Your MCP client --> edstem-mcp, on your computer, holding your Ed token --> Ed
+
+Self-deployed     Your MCP client --> a Worker you deployed --> Ed
+                                       (checks your token against Ed on every request; stores nothing permanently)
+
+Hosted            Your MCP client --> the hosted Ed service (OAuth sign-in) --> Ed
+                                       (stores your Ed token, encrypted, so you don't have to)
+```
+
+### Local server
+
+`edstem-mcp` reads your Ed token from an environment variable (or a saved token file) on your computer and talks to Ed directly. Every tool is listed; posting to a course fails unless you've explicitly turned that on. See [Security](/mcp/security) for what turns it on.
+
+### Self-deployed Worker
+
+A self-deployed Worker doesn't store anything permanently. On every request it checks the token you gave it against Ed's own systems, and briefly remembers who you are — not the token itself — so it doesn't have to re-check on every single call. Posting is off unless it's explicitly turned on when the Worker is deployed.
+
+### Hosted service
+
+`https://edstem.tuuhub.com/mcp` is a shared service you don't have to deploy yourself. It stores your Ed token, encrypted, so you can sign in once with OAuth instead of managing a token yourself. Reading only needs a normal sign-in; posting or changing your progress needs you to grant that permission explicitly when you sign in.
+
+## Results you get back
+
+Every tool comes back as structured content your client can read directly. Moodle tools return compact results with predictable shapes; when what you asked for is ambiguous — a unit name that matches more than one unit, say — the result offers a short list to choose from instead of guessing. A file comes back as its actual content, addressed by where it lives in Moodle rather than a link that can expire; an image comes back as a picture your client can show you directly, not a file you have to open separately.
+
+Ed Discussion's list and detail tools return the same kind of structured data. A few tools — `read_thread`, `read_lesson`, `read_slide` — return plain text formatted as Markdown, meant to be read directly rather than picked apart.
+
+## Result shapes
+
+Top-level keys a Moodle tool returns, not real data. Argument names match what each tool expects exactly. See [Examples](/mcp/examples) for the prompts these come from.
+
+`due`:
+
+```json
+{ "due": ["<item>", "..."], "total": 0 }
+```
+
+`unit`:
+
+```json
+{ "unit": "<unit>", "sections": ["<section>", "..."], "total": 0 }
+```
+
+`find`, then `file`:
+
+```json
+{ "results": ["<result>", "..."], "total": 0 }
+```
+
+```json
+{ "file": { "name": "...", "mime_type": "...", "bytes": 0, "uri": "..." } }
+```
+
+`grades`:
+
+```json
+{ "grades": ["<grade>", "..."], "total": 0 }
+```
+
+`search_forums`, then `thread`:
+
+```json
+{ "results": ["<result>", "..."], "total": 0, "forums": "...", "units": "...", "scope": "..." }
+```
+
+```json
+{ "thread": { "id": 0, "name": "...", "unit_id": 0, "forum_id": 0, "url": "...", "posts": ["<post>"], "posts_total": 0, "offset": 0 } }
+```
+
+`list_threads` (Ed Discussion) returns a JSON array of thread summaries, no wrapper key. `read_thread` returns the thread as Markdown text, not JSON.
+
+`mark_lessons_read` (Ed Discussion), one entry per matched lesson:
+
+```json
+[{ "id": 0, "title": "...", "status": "...", "success": true, "slideCount": 0, "completedSlides": 0, "viewedSlides": 0 }]
+```
+
+`submit` — a dry run returns a plan, a real upload returns Moodle's confirmation, same shape either way:
+
+```json
+{ "submission": "<plan-or-confirmation>" }
+```
+
+## Error responses
+
+Every Worker error is a `problem+json` body: a stable `type` you can match on, a human `title` and `detail`, the HTTP `status`, and a short `code`. A bad or missing token looks like this:
+
+```json
+{ "type": "/problems/invalid-bearer-token", "title": "...", "status": 401, "detail": "...", "code": "INVALID_BEARER_TOKEN" }
+```
+
+See [MCP troubleshooting](/mcp/troubleshooting) for what to do about each error you'll actually hit.

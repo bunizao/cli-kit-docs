@@ -1,0 +1,27 @@
+---
+title: "Activity"
+description: "List your own recent activity across one unit or every unit."
+---
+
+`edstem activity` lists your own recent activity — threads, answers and comments — across one unit or every unit you're enrolled in.
+
+```bash
+edstem activity
+edstem activity UNIT
+edstem activity UNIT --max 10 --filter all
+```
+
+`edstem activity` with no `<unit>` returns activity across every unit you're enrolled in. Passing `<unit>` scopes it to that one unit; `<unit>` resolves the same way it does everywhere else — see [Units](/edstem/units).
+
+| Flag | Effect |
+| --- | --- |
+| `-n, --max <count>` | Maximum activity items to return. |
+| `-f, --filter <type>` | Activity type. Defaults to `all`. |
+
+`--filter` accepts `all`, `thread`, `answer` or `comment`. The CLI doesn't check this value itself — a value outside that list is rejected by Ed, not by the CLI.
+
+Scripting this or wiring it into an agent? See [Ed Discussion CLI for scripts and agents](/developers/edstem#mcp-tools).
+
+<Card title="Command reference: activity" icon="terminal" href="/edstem/reference/activity">
+  Full syntax for `activity`.
+</Card>

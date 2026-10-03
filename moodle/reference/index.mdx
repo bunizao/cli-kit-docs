@@ -1,0 +1,73 @@
+---
+title: "moodle command reference"
+description: "Every moodle command, its arguments, options and defaults, generated from moodle commands --json."
+sidebarTitle: "Reference"
+---
+
+`moodle` v0.9.2 — Read Moodle and submit work from the command line.
+
+## Global options
+
+These options work on every command; command pages only list the options specific to that command.
+
+| Flags | Description |
+| --- | --- |
+| `-V, --version` | Show the version |
+| `--json` | Emit JSON |
+| `--yaml` | Emit YAML |
+| `--table` | Emit a human-readable table |
+| `--fields <fields>` | Select top-level fields |
+| `-o, --output <file>` | Write output to a file |
+| `-v, --verbose` | Enable debug logging |
+| `--no-color` | Disable color output |
+| `-y, --yes` | Confirm mutations non-interactively |
+| `--dry-run` | Print the mutation plan without applying it |
+| `--no-cache` | Bypass session cache reads and writes |
+| `--pretty` | Indent JSON output |
+| `--limit <number>` | Maximum returned rows |
+| `--days <number>` | Deadline window in days |
+| `-h, --help` | Show help |
+
+For what each exit code means, see [Errors and exit codes](/concepts/errors-and-exit-codes).
+
+## Core commands
+
+| Command | Aliases | Description |
+| --- | --- | --- |
+| [`due`](/moodle/reference/due) | — | Items due in a date window. |
+| [`news`](/moodle/reference/news) | — | Latest announcement threads with first-post text. |
+| [`find`](/moodle/reference/find) | — | Ranked sections, activities and discussion subjects. |
+| [`get`](/moodle/reference/get) | — | Download a resource by id, URL, or UNIT TASK phrase. |
+| [`open`](/moodle/reference/open) | — | Open a unit or activity reference in the browser. |
+| [`submit`](/moodle/reference/submit) | — | Upload local files into an assignment; returns the receipt Moodle shows afterwards. |
+| [`units`](/moodle/reference/units) | `courses` | Inspect enrolled units. |
+| [`activities`](/moodle/reference/activities) | — | Inspect activities. |
+| [`grades`](/moodle/reference/grades) | — | Inspect grades. |
+| [`threads`](/moodle/reference/threads) | — | Inspect forum discussion threads. |
+| [`forums`](/moodle/reference/forums) | — | Inspect forums. |
+
+## Additional commands
+
+| Command | Aliases | Description |
+| --- | --- | --- |
+| [`user`](/moodle/reference/user) | — | Show authenticated user info. |
+| [`todo`](/moodle/reference/todo) | — | List upcoming actionable timeline items. |
+| [`alerts`](/moodle/reference/alerts) | — | List notifications and message counts. |
+| [`overview`](/moodle/reference/overview) | — | Show a compact multi-source overview. |
+| [`download`](/moodle/reference/download) | `dl` | Download one authenticated Moodle file. |
+| [`auth`](/moodle/reference/auth) | — | Session and keepalive utilities. |
+| [`doctor`](/moodle/reference/doctor) | — | Diagnose runtime, browser access, session, background jobs and MCP setup. |
+| [`completion`](/moodle/reference/completion) | — | Print shell completion for zsh, bash or fish. |
+| [`uninstall`](/moodle/reference/uninstall) | — | Remove local background jobs; optionally remove the selected Worker and configuration. |
+
+## Agent commands
+
+| Command | Aliases | Description |
+| --- | --- | --- |
+| [`mcp`](/moodle/reference/mcp) | — | Deploy a private MCP Worker on Cloudflare; encrypted session storage and local renewal. Free-tier limits apply. |
+| [`commands`](/moodle/reference/commands) | — | Describe the complete command tree. |
+| [`skills`](/moodle/reference/skills) | — | Show skill metadata or delegate to the shared skills CLI. |
+
+<Note>
+This page and the pages under `moodle/reference` are generated from `moodle commands --json`. Run `npm run generate` to rebuild them after the CLI changes, and `npm run check` to confirm the checked-in pages still match the captured command tree.
+</Note>

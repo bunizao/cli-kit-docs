@@ -1,0 +1,51 @@
+---
+title: Agent skills
+description: Install the generated skill bundle so a coding agent knows which command answers which request.
+sidebarTitle: Skills
+icon: sparkles
+---
+
+Each CLI ships a `SKILL.md` file that teaches an agent its command surface without the agent having to read the whole `--help` tree first. Installing it is the same three-step shape everywhere: fetch the bundle, let the agent read it, run commands from it.
+
+## Install
+
+```bash
+npx skills add https://github.com/bunizao/moodle-cli
+npx skills add https://github.com/bunizao/edstem-cli
+npx skills add https://github.com/bunizao/ontrack-cli
+```
+
+Each CLI also wraps this in its own command, so you don't have to remember the `skills` package's own invocation:
+
+```bash
+moodle skills add       # shells out to `npx skills add` for you
+edstem skills generate  # regenerates SKILL.md locally; install it with npx skills add
+ontrack skills generate # regenerates SKILL.md locally; install it with npx skills add
+```
+
+Only moodle has a `skills add` subcommand. `edstem` and `ontrack` have `skills generate` alone — it rebuilds the tracked `SKILL.md` from the CLI's own commands, which is what you'd run if you were contributing to one of these repos, not what a person installing the skill runs day to day.
+
+## What `SKILL.md` contains
+
+Every `SKILL.md` in the family is generated from that CLI's own `commands --json` output, not hand-written, so it can't drift from what the binary actually does without someone noticing. It typically has:
+
+- An intent table — what a person or agent might ask for, mapped to the exact command, with `UNIT`/`TASK`/`SECTION` placeholders instead of real identifiers.
+- A short list of agent rules: prefer the narrowest command, use `read` for Markdown output, treat mutating commands as needing explicit intent plus confirmation or `--yes`, never print a token or session cookie.
+- A full command reference table (arguments, options, mutating flag) or a pointer to `commands --json` for the exact machine-readable version.
+- The exit-code table.
+
+<Info>
+  `moodle-cli` and `edstem-cli` verify automatically that `SKILL.md` still matches the CLI's actual commands, so the bundle can't ship stale. `ontrack` doesn't run that check yet — if you edit `ontrack`'s commands, regenerating the skill locally before committing is on you.
+</Info>
+
+## Where skills install
+
+`npx skills add <url>` is the shared installer across all three. It writes the skill's files under `.agents/skills/<name>/` in the current project and records what it installed in a `skills-lock.json` alongside it, so a later run can tell whether the installed copy still matches its source.
+
+## Codex
+
+`moodle-cli` additionally ships `agents/openai.yaml`, a Codex-specific agent manifest (display name, short description, and a default prompt: *"Use $moodle-cli to inspect my Moodle data, retrieve a file through MCP, or download selected files locally with the narrowest relevant operation."*). It's generated alongside `SKILL.md` and kept in sync the same way. Neither `edstem-cli` nor `ontrack` ships a Codex-specific manifest at this version.
+
+<Card title="Prompting an agent" icon="messages-square" href="/agents/prompting">
+  The intent → command mapping these skill bundles are built from, merged across all three tools.
+</Card>

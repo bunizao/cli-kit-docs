@@ -1,0 +1,76 @@
+---
+title: Submit
+description: Upload files into a Moodle assignment, review the plan, and optionally submit for grading.
+sidebarTitle: Submit
+icon: upload
+---
+
+`moodle submit` uploads local files into an assignment the same way you would through Moodle's own submission page: upload each file into your draft, save, and, with `--final`, confirm submission for grading. It reads back what Moodle actually shows afterward, so what you see reflects what Moodle recorded, not just that a request was sent.
+
+```bash
+moodle submit "UNIT TASK" file.pdf
+```
+
+`ref` is an assignment id, a Moodle URL, or a `UNIT TASK` phrase resolved the same way as [Daily use](/moodle/daily-use)'s bare-target syntax. See [`moodle submit`](/moodle/reference/submit) for exact flag syntax.
+
+## Every run plans first
+
+Before touching Moodle's submission state, moodle-cli loads the assignment, reads its upload limits and accepted file types, and checks your files against them. This plan runs whether or not you pass `--dry-run` — it's how refusals (wrong file type, a file too large, too many files) happen before anything uploads, not after.
+
+- `--dry-run` stops after the plan and prints it; nothing is uploaded, removed, or submitted.
+- Without `--dry-run`, moodle-cli shows you the plan's summary and asks for confirmation.
+- `--yes` skips that confirmation prompt.
+
+```bash
+moodle submit "UNIT TASK" file.pdf --dry-run --json
+```
+
+Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#non-interactive-use) for when `--yes` is required rather than optional.
+
+## Flags
+
+| Flag | Effect |
+| --- | --- |
+| `--replace` | Remove the files already in the submission before uploading the new ones |
+| `--accept-statement` | Agree to the site's submission statement, when the assignment requires one |
+| `--final` | Also submit for grading, after saving |
+
+Without `--replace`, new files are added alongside whatever's already in the submission, and a new file with the same name as one already there overwrites it in place; if Moodle refuses that overwrite, moodle-cli fails and names the file. Giving the same filename twice in one command is rejected outright — Moodle keeps one file per name. Use `--replace` to clear the submission first if you'd rather start from empty.
+
+If the assignment requires accepting a submission statement and you don't pass `--accept-statement`, moodle-cli refuses with a usage error that quotes the statement, rather than silently agreeing on your behalf.
+
+<Warning>
+  `--final` also submits the assignment for grading, and Moodle does not allow undoing this. Run with `--dry-run` first if you're not sure what will be sent, and check `--replace`'s effect before combining the two.
+</Warning>
+
+`--final` doesn't require new files — `moodle submit "UNIT TASK" --final` alone submits whatever is already in the draft.
+
+```bash
+moodle submit "UNIT TASK" file.pdf --final --accept-statement
+```
+
+## Refusals happen before upload
+
+moodle-cli checks limits before sending any file data:
+
+- A file larger than the assignment's per-file limit is refused, naming the file and the limit.
+- A submission whose total size (existing files plus new ones) would exceed the assignment's overall limit is refused, with a hint to use `--replace` if there are existing files.
+- A submission that would exceed the assignment's maximum file count is refused, with the same `--replace` hint.
+- A file whose extension isn't in the assignment's accepted types is refused, listing what's accepted.
+
+All four checks run against the plan, so they surface under `--dry-run` too, before any file is read into an upload request.
+
+## Drafts vs. submit on save
+
+Some assignments let a submission sit as a draft after you save it, until you (or the deadline) submits it for grading. Others submit immediately on save, with no separate draft state. moodle-cli reflects this in the `action` field rather than assuming one or the other:
+
+- `"saved"` — the assignment allows drafts, and this run only saved; nothing was submitted for grading.
+- `"submitted"` — either the assignment submits immediately on save and Moodle's page already reports it as submitted, or `--final` explicitly submitted it after saving.
+
+## What the command reports
+
+Every run reports back what Moodle actually recorded: the files now in your submission, whether the run only saved or also submitted for grading, and the assignment's due date and status.
+
+Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#submit-receipt) for the exact JSON shape.
+
+See [Mutations](/concepts/mutations) for how `--yes`/`--dry-run` work across every moodle-cli mutation, and [Errors and exit codes](/concepts/errors-and-exit-codes) for the exit codes these refusals use.

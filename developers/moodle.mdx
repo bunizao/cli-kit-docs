@@ -1,0 +1,252 @@
+---
+title: Moodle CLI for scripts and agents
+description: Output shapes, field names, error codes, environment variables and other details for script authors, integration builders and MCP clients.
+sidebarTitle: Moodle
+icon: code
+---
+
+This page collects what a script, CI job, or AI agent needs when it drives `moodle` directly: JSON shapes, error codes, environment variables, and non-interactive behavior. For the terminal-first walkthroughs this was extracted from, start at [Moodle CLI](/moodle/index).
+
+## Output formats and fields
+
+Every command accepts `--json` and `--yaml` alongside the default table view. See [Output formats](/concepts/output-formats) for the `--json`/`--yaml`/`--table`/`--fields` mechanics shared across all three CLIs in the family.
+
+`--fields <fields>` selects which top-level fields of the response come back.
+
+`--pretty` adds two-space indentation to `--json` output. It has no effect on `--yaml` or `--table` output.
+
+```bash
+moodle grades --json --pretty
+```
+
+## JSON shapes per command
+
+Every JSON response shares one envelope: on success, the command's own fields at the top level; on failure, `{"ok": false, "error": {...}, "exit_code": N}` — see [Error codes and exit codes](#error-codes-and-exit-codes) below. An array field is paired with a `total` count that can exceed what's returned when a limit trims the list.
+
+### units
+
+`units list` returns every unit you're enrolled in (up to 200): id, short code, full name, start and end dates (both an ISO timestamp and the raw epoch seconds), and whether the unit is hidden. `units show UNIT` resolves `UNIT` (code, name, id or URL) to one unit and returns its section index — each section's id, name, activity count, and whether it's hidden — plus which section the site (or moodle-cli's estimate) considers current. It does not include each section's activities; for that, use `moodle UNIT SECTION` or `activities list --section`.
+
+### due and todo
+
+`moodle todo` runs the same underlying lookup as `moodle due` with no unit scoping and its own `--days`/`--limit` defaults (both default to 20/14 respectively, matching `due`). Each row in either command's `due` array:
+
+| Field | Meaning |
+| --- | --- |
+| `id` | The calendar entry's id. |
+| `activity_id` | The course-module ID, when the calendar entry links to a `/mod/*/view.php` activity page; absent for calendar entries that don't link to one. |
+| `name` | The activity's name, falling back to the calendar entry's own name. |
+| `type` | The activity module type (`assign`, `quiz`, and so on). |
+| `unit_id` / `unit_code` | The owning unit's id and short code. |
+| `event` | Moodle's own event type for the calendar entry. |
+| `due` | An ISO 8601 timestamp with a UTC offset — see [Timezones in JSON](#timezones-in-json). |
+| `due_at` | The same instant as Unix epoch seconds. |
+| `actionable` | Whether Moodle still considers this something you need to act on. |
+
+`moodle due --json`:
+
+```json
+{
+  "due": [
+    {
+      "id": 4821,
+      "activity_id": 4821,
+      "name": "TASK",
+      "type": "assign",
+      "unit_id": 101,
+      "unit_code": "UNIT",
+      "event": "due",
+      "due": "2026-09-28T23:59:00-05:00",
+      "due_at": 1790024340,
+      "actionable": true
+    }
+  ],
+  "total": 1
+}
+```
+{/* Field names verified against the CLI's due-item output; no field beyond those was invented. Numeric id/timestamp values are illustrative placeholders. */}
+
+### alerts
+
+`moodle alerts` returns your notification and message counts (`notification_count`, `unread_notification_count`, `starred_message_count`, `direct_message_count`, `group_message_count`, `self_message_count`, and the `unread_` variant of each message count), plus up to `--limit` individual notifications. Each notification carries a `created_pretty` string exactly as Moodle renders it (its own relative-time phrasing, in the site's language) alongside the raw `created_at` epoch timestamp.
+
+### grades
+
+Each unit's `grades list` result carries `unit_id`, `code`, how many items are `graded` versus `total`, and the unit's own `total_grade` / `total_range` / `total_percentage` as Moodle displays them, plus a list of `items` — `name`, `type`, `grade`, `range`, `percentage`, `weight`, `contribution`, `feedback`, `status`, and, where it can be worked out, `due` / `due_at`. An item only gets a due date attached when its name matches exactly one entry in your deadline list and it isn't graded yet — a graded item's due date isn't shown, since it's no longer relevant to check.
+
+### activities
+
+`activities show ID` returns one activity's full detail: for an assignment or quiz, its due date and submission or grading status; for a resource or folder, its files; for a forum activity, its latest threads. `activities list` returns the same rows `moodle UNIT SECTION` shows, plus a `total` count independent of `--limit`. See [`moodle activities`](/moodle/reference/activities) for flag syntax.
+
+### threads
+
+`threads show DISCUSSION_ID` returns a discussion's posts; `--post <id>` narrows to one post and `--body` includes the full body instead of a preview. See [`moodle threads`](/moodle/reference/threads) for flag syntax; no field beyond what's described there is documented for this shape.
+
+### forums search
+
+```bash
+moodle forums search "extension" --unit UNIT --recent --json
+```
+
+```json
+{
+  "results": [
+    {
+      "unit_id": 101,
+      "forum_id": 5001,
+      "discussion_id": 91234,
+      "name": "TASK extension",
+      "post_id": 55123,
+      "snippet": "…asking for an extension on TASK because…",
+      "time_created": 1790000000,
+      "url": "https://moodle.example.edu/mod/forum/discuss.php?d=91234"
+    }
+  ],
+  "total": 1,
+  "forums": { "5001": "SECTION discussion" },
+  "units": { "101": "UNIT" },
+  "scope": { "max_forums": 20, "max_discussions_per_forum": 50 }
+}
+```
+{/* Fields taken from the search_forums output schema in src/intent-contract.ts — the shape both the CLI's --json and the MCP tool return. Numeric ids and the example URL are illustrative placeholders. */}
+
+`forums` and `units` map the ids used in `results` to display names, so a caller doesn't have to look each one up separately. `scope` reports the effective scan bounds `--limit-forums`/`--limit-discussions` applied.
+
+### download
+
+Every successful `download`/`dl` prints a receipt of what was written:
+
+```json
+{
+  "file_path": "/Users/you/handouts/week3.pdf",
+  "filename": "week3.pdf",
+  "bytes_written": 245678,
+  "content_type": "application/pdf",
+  "source_url": "https://moodle.example.edu/mod/resource/view.php?id=91234",
+  "final_url": "https://moodle.example.edu/pluginfile.php/12345/mod_resource/content/1/week3.pdf"
+}
+```
+{/* Fields taken from the DownloadReceipt interface in src/download.ts. Path, filename and byte count are illustrative placeholders. */}
+
+`source_url` is the reference you gave (or the resource's canonical URL, for a numeric ID); `final_url` is the URL the file actually downloaded from, after any redirect Moodle issues along the way. Both have query parameters other than `id`, `forcedownload` and `download` stripped, and never carry your session cookie.
+
+### submit receipt
+
+```json
+{
+  "id": 91234,
+  "name": "TASK",
+  "unit_id": 101,
+  "url": "https://moodle.example.edu/mod/assign/view.php?id=91234",
+  "action": "saved",
+  "submission_status": "Submitted for grading",
+  "grading_status": "Not graded",
+  "due": "2026-09-28T23:59:00+10:00",
+  "time_remaining": "7 days",
+  "last_modified": "2026-09-21T10:15:00+10:00",
+  "statement": "This assignment is my own work.",
+  "statement_accepted": true,
+  "files": [{ "name": "file.pdf", "url": "https://moodle.example.edu/pluginfile.php/12345/assignsubmission_file/submission_files/file.pdf" }],
+  "uploads": [{ "name": "file.pdf", "bytes": 245678, "path": "/Users/you/file.pdf" }],
+  "removed": [],
+  "limits": { "max_bytes": 10485760, "max_files": 5, "accepted_types": [".pdf"] },
+  "checked_at": "2026-09-21T10:15:03+10:00"
+}
+```
+{/* Fields taken from the SubmissionReceipt interface in src/moodle-assign-core.ts. Ids, names, dates and byte counts are illustrative placeholders. */}
+
+`action` is `"planned"` under `--dry-run` instead of `"saved"`/`"submitted"` — see [Submit](/moodle/submit#drafts-vs-submit-on-save) for what those two real states mean. `files` lists what Moodle's page shows in the submission after the run (or, for a plan, the draft area's current contents); `uploads` lists the local files this run sent; `removed` lists filenames removed by `--replace`; `limits` reports whichever of the assignment's per-file, total, count and type limits are actually set (an unset limit is left out, not reported as zero or unlimited).
+
+### get, find and open
+
+`get` resolves a resource id, a Moodle URL, or a `UNIT TASK` phrase the same way as the bare-target syntax in [Daily use](/moodle/daily-use#downloading-by-reference), then downloads the match — the resulting receipt is the same shape documented under [download](#download) above. `find` returns ranked matches (sections, activities, discussion subjects); `open` prints no structured data at all — it resolves a reference to a URL and hands that to your OS's default opener.
+
+## Error codes and exit codes
+
+moodle-cli uses the shared error and exit-code vocabulary in [Errors and exit codes](/concepts/errors-and-exit-codes): `--json`/`--yaml` put the failure at `error.code` and the exit status at `exit_code`. This table lists what triggers each code in moodle-cli specifically:
+
+| Code | Exit | What triggers it | Fix |
+| --- | --- | --- | --- |
+| `auth` | 3 | No usable Moodle session could be found: an env-set `MOODLE_TOKEN`/`MOODLE_SESSION` that didn't authenticate, a pasted cookie that didn't authenticate, or Moodle rejecting the session outright. | Run [`moodle auth login`](/moodle/sign-in#how-the-cli-finds-a-session), or `moodle auth login --paste` if the cookie store can't be read. Run `moodle doctor` first if you're not sure why. |
+| `config` | 1 | No Moodle site URL is configured, or the configured value fails validation (missing scheme, no hostname, includes a query string, and so on). | Run `moodle` once in an interactive shell to set it, or set `MOODLE_BASE_URL`. See [Configuration](/moodle/configuration). |
+| `usage` | 2 | A malformed invocation: a missing required argument, a flag the command doesn't have, an invalid `completion` shell choice. Also covers a `submit` run without `--yes` when stdin isn't interactive. | Run `moodle <command> --help`, or `moodle commands --json` for the full tree. |
+| `not_found` | 4 | A reference (unit, section, activity) resolved to nothing on Moodle. | Run `moodle units` or `moodle find <query>` to confirm the reference exists and how the CLI spells it. |
+| `upstream` | 5 | Moodle returned an error that isn't a login or not-found problem — a site-side failure. | Run `moodle doctor`, then retry. If it persists, the site itself is likely degraded. |
+| `network` | 1 | The request never reached Moodle: connection refused or reset, DNS failure, timeout. | Check the connection or VPN, then retry. |
+| `cancelled` | 130 | You declined a confirmation prompt or pressed Ctrl-C mid-command. | Retry when ready; nothing was changed. |
+| `unexpected` | 1 | Anything not covered above — treat it as a bug. | Run `moodle doctor`; rerun with `--verbose` for request timings, and report it if it repeats. |
+
+`moodle doctor` exits non-zero (3) if any check fails. Only `sqlite`, `config` and `browser` can report `fail` and drive that exit code; `session`, `job` and `mcp` only ever report `pass` or `warn`, so they show up in the output without changing the exit code — see [What `moodle doctor` checks mean](/moodle/troubleshooting#what-moodle-doctor-checks-mean).
+
+`submit`, `uninstall`, `auth login`, `auth keepalive install`/`auth keepalive uninstall`, and the `mcp` deployment commands all mutate state and go through the same plan-confirm flow; see [Mutations](/concepts/mutations) for the full list and how confirmation and `--dry-run` fit around these codes.
+
+## `ambiguous` and `candidates`
+
+moodle-cli never guesses a unit code's format — it matches what you type against the names and codes the account can actually see. At an interactive terminal, an ambiguous reference shows a numbered picker. Anywhere else — `--json`, `--yaml`, a pipe, a script — the command exits with `error.code: "ambiguous"`, `error.candidates` listing each match's id, name and type or code, and exit code `2`. A reference that matches nothing exits with `error.code: "not_found"` and exit code `4`.
+
+```bash
+moodle UNIT "Assignment 2" --json
+```
+
+```json
+{"ok":false,"error":{"code":"ambiguous","message":"Several items match 'Assignment 2'.","candidates":[{"id":91234,"name":"Assignment 2","type":"assign","code":"UNIT-A"},{"id":91580,"name":"Assignment 2","type":"assign","code":"UNIT-B"}],"hint":"Run `moodle units` to see this site's names, or refine the reference."},"exit_code":2}
+```
+
+Fix: use one of the listed candidate ids directly, or narrow the phrase until only one thing matches. See [How ambiguity resolves](/moodle/daily-use#how-ambiguity-resolves) for the interactive picker a terminal shows instead, and [Errors and exit codes](/concepts/errors-and-exit-codes) for the shared error-code table `ambiguous` sits alongside.
+
+## Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `MOODLE_BASE_URL` | Moodle site origin. Set, it skips the config file entirely. |
+| `MOODLE_URL` | Deprecated alias for `MOODLE_BASE_URL`. Using it prints a deprecation warning to stderr. |
+| `MOODLE_CONFIG` | Path to a config file to use instead of `~/.config/moodle-cli/config.yaml`. |
+| `MOODLE_TOKEN` | Your Moodle session cookie value, for signing in without a browser. |
+| `MOODLE_SESSION` | Same as `MOODLE_TOKEN`. If both are set, `MOODLE_TOKEN` wins. |
+
+`MOODLE_BASE_URL` and `MOODLE_URL` take priority over the config file — when either is set, moodle-cli uses it directly and never reads `config.yaml`. `MOODLE_TOKEN` and `MOODLE_SESSION` are read before moodle-cli tries the browser's cookie store or an interactive browser sign-in, so setting either is what makes the CLI usable in a non-interactive shell or CI job.
+
+<Warning>
+  Never put a real session cookie in these variables in a shared shell profile or a committed `.env` file. It grants the same access as the browser it came from.
+</Warning>
+
+### Audience detection: `CLI_AGENT`
+
+Every command decides once per run whether to treat the caller as a human or an agent: table output at an interactive terminal (both stdin and stdout) with no agent-signaling variable set is a human; `--json`/`--yaml`, a pipe, or CI is an agent. Setting `CLI_AGENT=1` (or `CLAUDECODE`/`CI`) forces agent treatment even when the shell looks interactive — no prompts, no spinners, a `usage` error instead of waiting on a confirmation that will never come. See [Humans and agents](/concepts/humans-and-agents) for the full detection logic and what changes for each audience.
+
+## Non-interactive use
+
+`-y`/`--yes` confirms a mutation non-interactively; `--dry-run` prints the plan without applying it. Both are global flags, accepted by every mutating command.
+
+`--yes` is required, not just accepted, whenever stdin isn't a TTY — `submit`, `uninstall`, and `mcp remove` all fail with a `usage` error rather than hang on a confirmation prompt no one can answer, if you run them from a script or CI job without `--yes` (or, for `submit`, `--dry-run`).
+
+```bash
+moodle submit "UNIT TASK" file.pdf --dry-run --json
+moodle uninstall --remote --purge --yes
+moodle mcp remove --yes
+```
+
+## Timezones in JSON
+
+Every date moodle-cli reports carries two forms: an ISO 8601 string with an explicit UTC offset (`due`, `created`, and so on) and the same instant as Unix epoch seconds (`due_at`, `created_at`/`time_created`). Use whichever form your tooling prefers. Both describe the same moment.
+
+The offset in the ISO string comes from resolving one timezone per request, in this order:
+
+1. **The site's own value** — the Moodle profile's `timezone` field (the same raw value `moodle user` prints). If it's a real IANA zone (not empty, and not Moodle's special `99` value for "use the server's default"), moodle-cli uses it and reports `timezone_source: "site"`.
+2. **The host machine's local zone** — when the site reports no usable value, moodle-cli falls back to whatever timezone the process itself is running in, and reports `timezone_source: "local"`.
+3. **UTC** — if the host's own zone also resolves to UTC (as it typically does on a deployed Worker), moodle-cli reports `timezone_source: "fallback"` so a caller can tell a genuine site-configured UTC apart from "nothing else was available."
+
+```json
+{"today":"2026-09-21","timezone":"America/Chicago","timezone_source":"site"}
+```
+{/* Field names and fallback order verified against the CLI's timezone resolution behavior, including the Worker/UTC case; illustrative values only. */}
+
+`moodle user` shows the raw, unresolved site timezone value on its own; see [Units and activities](/moodle/units-and-activities#user).
+
+## `commands --json` and `skills`
+
+`moodle commands --json` prints the CLI's entire command tree as data — every command's aliases, positional arguments, options, enum values, nested commands, and a `mutating` flag. This is what `moodle skills` reads to generate each tool's agent-manifest file. See [The command model](/concepts/command-model) for the shared mechanics across all three CLIs, and [Mutations](/concepts/mutations) for how the `mutating` flag lines up with confirmation prompts.
+
+## Local MCP server tools
+
+`moodle mcp serve` runs a local MCP server over your own session. Its full tool catalog — every tool's parameters, which surfaces (local, bridge, remote) expose it, and whether it writes to Moodle — is at [Moodle MCP tool catalog](/mcp/tools/moodle).

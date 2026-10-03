@@ -1,0 +1,31 @@
+---
+title: "moodle threads"
+description: "Inspect forum discussion threads."
+sidebarTitle: "threads"
+---
+
+```bash
+moodle threads [options] [command]
+```
+
+## moodle threads show
+
+```bash
+moodle threads show [options] <discussion>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `discussion` | Yes | Discussion ID or URL |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--offset <number>` | Skip this many posts. |
+| `--post <id>` | Show a specific post ID. |
+| `--body` | Show full post body. |
+
+Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

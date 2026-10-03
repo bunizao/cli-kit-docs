@@ -1,0 +1,48 @@
+---
+title: "MCP servers"
+description: "Connect Claude, ChatGPT, Cursor or another AI app to your Moodle and Ed Discussion data, and pick the right option for it."
+---
+
+The [Model Context Protocol](https://modelcontextprotocol.io) is an open standard that lets an AI client — a desktop app, a web chat, an IDE assistant — connect to tools and data directly. moodle-cli and edstem-cli each ship an MCP server so a client that can't run their commands itself can still read your units, deadlines, grades and discussions.
+
+OnTrack has no MCP server in this release. `ontrack` is CLI-only; see [`/ontrack/index`](/ontrack/index).
+
+## Your options
+
+| Product | Option | What it means | Pick it when |
+| --- | --- | --- | --- |
+| Moodle | On your computer | Your AI app starts `moodle mcp serve` and it uses the Moodle sign-in you already have. The only option that can upload assignment files. | The AI app runs on the same computer as `moodle` and you want `submit`. |
+| Moodle | Bridge to your private server | Your AI app starts `moodle mcp bridge`, which talks to the private server you deployed with `moodle mcp deploy`. Read-only. | The default: `moodle mcp connect <client>` sets this up for you. |
+| Moodle | Private server, direct | Your AI app connects to your private server's address itself, with a token you paste or an OAuth sign-in. Read-only. | The AI app is a website (claude.ai, ChatGPT) or can't start local programs. |
+| Ed Discussion | On your computer | Your AI app starts `edstem-mcp` with your Ed token. Can read, post and mark progress. | The AI app runs on your computer. |
+| Ed Discussion | Hosted service | Your AI app signs in to `https://edstem.tuuhub.com/mcp` with your Ed account. Nothing to deploy. | The AI app is a website or you don't want to run anything. |
+| Ed Discussion | Your own server | A server you deploy yourself, with your own token. | You want your own deployment instead of the shared hosted one. See [Developers](/developers/edstem). |
+
+Uploading assignment files (`submit`) only works from the "on your computer" Moodle option, because the files are on your computer. Every other Moodle tool is the same on every option. Posting to Ed is off until you turn it on; a posting tool then fails with a clear message instead of disappearing.
+
+## Is it safe?
+
+Your Moodle sign-in or Ed token never leaves your control: a local server reads it from your own computer, and a remote server keeps it encrypted in your own private deployment, not a shared one. Every surface can only see what your own account can already see — there's no separate service account with broader access. Nothing connects until you approve it yourself, whether that's pasting a token you generated or approving a one-time pairing code in your browser. If you ever want to cut a client off, revoking it stops its access immediately. See [Security](/mcp/security) for exactly what's stored, what's logged, and how to rotate or revoke access.
+
+## Which page to read
+
+<Steps>
+  <Step title="Find your client">
+    - Claude Code → [`/mcp/clients/claude-code`](/mcp/clients/claude-code)
+    - Claude Desktop → [`/mcp/clients/claude-desktop`](/mcp/clients/claude-desktop)
+    - claude.ai (web) → [`/mcp/clients/claude-ai`](/mcp/clients/claude-ai)
+    - Codex → [`/mcp/clients/codex`](/mcp/clients/codex)
+    - ChatGPT → [`/mcp/clients/chatgpt`](/mcp/clients/chatgpt)
+    - Cursor → [`/mcp/clients/cursor`](/mcp/clients/cursor)
+    - VS Code → [`/mcp/clients/vs-code`](/mcp/clients/vs-code)
+    - Windsurf → [`/mcp/clients/windsurf`](/mcp/clients/windsurf)
+    - Gemini CLI → [`/mcp/clients/gemini-cli`](/mcp/clients/gemini-cli)
+    - Anything else that speaks MCP → [`/mcp/clients/other`](/mcp/clients/other)
+  </Step>
+  <Step title="Pick a surface for each product">
+    Moodle: run `moodle mcp connect <client>` and let it set up the bridge. Ed Discussion: use the on-your-computer option if the app can start local programs, and the hosted service otherwise.
+  </Step>
+  <Step title="Verify the connection">
+    Each client page ends with the exact command or menu to confirm the server connected and to list its tools.
+  </Step>
+</Steps>

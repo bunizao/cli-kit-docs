@@ -1,0 +1,523 @@
+{
+  "name": "ontrack",
+  "version": "0.3.2",
+  "description": "Work with OnTrack tasks and chats from the command line.",
+  "commands": [
+    {
+      "name": "user",
+      "noun": "user",
+      "aliases": [],
+      "description": "Show the signed-in user",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": []
+    },
+    {
+      "name": "auth",
+      "noun": "auth",
+      "aliases": [],
+      "description": "Manage authentication",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "login",
+          "noun": "auth",
+          "aliases": [],
+          "description": "Sign in through OnTrack",
+          "positionals": [],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "status",
+          "noun": "auth",
+          "aliases": [],
+          "description": "Validate current credentials",
+          "positionals": [],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "logout",
+          "noun": "auth",
+          "aliases": [],
+          "description": "Remove the cached session",
+          "positionals": [],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        }
+      ]
+    },
+    {
+      "name": "units",
+      "noun": "units",
+      "aliases": [
+        "courses",
+        "projects"
+      ],
+      "description": "Enrolled units",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "list",
+          "noun": "units",
+          "verb": "list",
+          "aliases": [],
+          "description": "List units",
+          "positionals": [],
+          "options": [
+            {
+              "flags": "--include-inactive",
+              "description": "Include past units",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "show",
+          "noun": "units",
+          "verb": "show",
+          "aliases": [],
+          "description": "Show one unit",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit code, name or project id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "get",
+          "noun": "units",
+          "verb": "get",
+          "aliases": [],
+          "description": "Download unit resources",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit code, name or project id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--dest <path>",
+              "description": "Destination ZIP",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--force",
+              "description": "Replace an existing destination",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        }
+      ]
+    },
+    {
+      "name": "tasks",
+      "noun": "tasks",
+      "aliases": [],
+      "description": "Tasks in a unit: list, read, submit, set state",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "list",
+          "noun": "tasks",
+          "verb": "list",
+          "aliases": [],
+          "description": "List tasks",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit code, name or project id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--status <status...>",
+              "description": "Filter by raw task status",
+              "required": true,
+              "variadic": true
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "show",
+          "noun": "tasks",
+          "verb": "show",
+          "aliases": [],
+          "description": "Show one task",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit code, name or project id",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "task",
+              "description": "Task abbreviation, such as 1.1",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "read",
+          "noun": "tasks",
+          "verb": "read",
+          "aliases": [],
+          "description": "Print a task sheet as Markdown",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit code, name or project id",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "task",
+              "description": "Task abbreviation, such as 1.1",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "get",
+          "noun": "tasks",
+          "verb": "get",
+          "aliases": [],
+          "description": "Download a task sheet or resources",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit code, name or project id",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "task",
+              "description": "Task abbreviation, such as 1.1",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--resources",
+              "description": "Download linked task resources",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--dest <path>",
+              "description": "Destination path",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--force",
+              "description": "Replace an existing destination",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "set",
+          "noun": "tasks",
+          "verb": "set",
+          "aliases": [],
+          "description": "Change task workflow state",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit code, name or project id",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "task",
+              "description": "Task abbreviation, such as 1.1",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "state",
+              "description": "Workflow state",
+              "required": true,
+              "variadic": false,
+              "enumValues": [
+                "not_started",
+                "working_on_it",
+                "need_help"
+              ]
+            }
+          ],
+          "options": [],
+          "mutating": true,
+          "commands": []
+        },
+        {
+          "name": "submit",
+          "noun": "tasks",
+          "verb": "submit",
+          "aliases": [],
+          "description": "Submit task files",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit code, name or project id",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "task",
+              "description": "Task abbreviation, such as 1.1",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--file <path...>",
+              "description": "Files in upload-requirement order",
+              "required": true,
+              "variadic": true
+            },
+            {
+              "flags": "--type <type>",
+              "description": "Submission type",
+              "required": true,
+              "variadic": false,
+              "enumValues": [
+                "ready_for_feedback",
+                "need_help",
+                "assess_in_portfolio"
+              ]
+            },
+            {
+              "flags": "--comment <text>",
+              "description": "Submission comment",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--accept-tii-eula",
+              "description": "Accept the Turnitin EULA",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": true,
+          "commands": []
+        }
+      ]
+    },
+    {
+      "name": "chats",
+      "noun": "chats",
+      "aliases": [],
+      "description": "Read and send task chat messages",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "list",
+          "noun": "chats",
+          "verb": "list",
+          "aliases": [],
+          "description": "List unread chat counts",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit code, name or project id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "read",
+          "noun": "chats",
+          "verb": "read",
+          "aliases": [],
+          "description": "Read task chat history and mark comments read",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit code, name or project id",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "task",
+              "description": "Task abbreviation, such as 1.1",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": true,
+          "commands": []
+        },
+        {
+          "name": "mark-read",
+          "noun": "chats",
+          "verb": "mark-read",
+          "aliases": [],
+          "description": "Mark task chat comments read",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit code, name or project id",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "task",
+              "description": "Task abbreviation, such as 1.1",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": true,
+          "commands": []
+        },
+        {
+          "name": "send",
+          "noun": "chats",
+          "verb": "send",
+          "aliases": [],
+          "description": "Send a task chat message",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit code, name or project id",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "task",
+              "description": "Task abbreviation, such as 1.1",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--message <text>",
+              "description": "Exact message to send",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "mutating": true,
+          "commands": []
+        }
+      ]
+    },
+    {
+      "name": "roles",
+      "noun": "roles",
+      "aliases": [],
+      "description": "Teaching roles you hold",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "list",
+          "noun": "roles",
+          "verb": "list",
+          "aliases": [],
+          "description": "List teaching roles",
+          "positionals": [],
+          "options": [
+            {
+              "flags": "--all",
+              "description": "Include inactive roles",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        }
+      ]
+    },
+    {
+      "name": "commands",
+      "noun": "commands",
+      "aliases": [],
+      "description": "Describe the complete command tree",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": []
+    },
+    {
+      "name": "skills",
+      "noun": "skills",
+      "aliases": [],
+      "description": "Generate the agent skill",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "generate",
+          "noun": "skills",
+          "aliases": [],
+          "description": "Generate SKILL.md from the command tree",
+          "positionals": [],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        }
+      ]
+    }
+  ]
+}

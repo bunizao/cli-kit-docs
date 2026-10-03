@@ -1,0 +1,51 @@
+---
+title: Configuration
+description: Config file locations, environment variables and precedence, across all three CLIs.
+sidebarTitle: Configuration
+icon: sliders
+---
+
+Each CLI reads its own YAML config file and its own set of environment variables; nothing is shared between them. This page is the map — see each product's own configuration page for full detail on keys, defaults and resolution order.
+
+## Config files and credential storage
+
+| Tool | Config file | Session/token storage |
+| --- | --- | --- |
+| `moodle-cli` | `~/.config/moodle-cli/config.yaml` | `~/.cache/moodle-cli/session.json` — your session and profile fields, **encrypted at rest**, file and directory restricted to your user (`0600`/`0700`), expires after 24 hours |
+| `edstem-cli` | `~/.config/edstem-cli/config.yaml` | `~/.config/edstem-cli/token` — the API token, plaintext, file permissions restricted to your user (`0600`) |
+| `ontrack` | `~/.config/ontrack-cli/config.yaml` (or the platform default under `%APPDATA%` on Windows) | `session.json` next to the config file — plaintext, file permissions restricted to your user (`0600`) |
+
+Only moodle's local session cache is encrypted, using your OS's own protected storage — the keychain on macOS and Linux, and the equivalent built-in protection on Windows. Ed's token file and OnTrack's session file rely on file permissions (owner-only read/write) rather than encryption — treat both as sensitive files the same way you'd treat an SSH key, and never put their contents in a script, a fixture, or a committed `.env` file.
+
+## Environment variables
+
+| Tool | Variable | Purpose |
+| --- | --- | --- |
+| `moodle-cli` | `MOODLE_BASE_URL` | Site origin; set, it skips the config file entirely. |
+| | `MOODLE_URL` | Deprecated alias for `MOODLE_BASE_URL`. |
+| | `MOODLE_CONFIG` | Use a different config file path. |
+| | `MOODLE_TOKEN` / `MOODLE_SESSION` | A `MoodleSession` cookie value, for a non-browser environment. `MOODLE_TOKEN` wins if both are set. |
+| `edstem-cli` | `EDSTEM_BASE_URL` | Override the Ed API base URL. |
+| | `EDSTEM_TOKEN` | The Ed API token, skipping the saved token file. |
+| | `EDSTEM_CONFIG` | Use a different config file path. |
+| | `EDSTEM_ALLOW_POSTING` | Set to `1` to enable posting tools on the local `edstem-mcp` server. |
+| `ontrack` | `ONTRACK_BASE_URL` | The OnTrack site root. |
+| | `ONTRACK_USERNAME` / `ONTRACK_TOKEN` | Username and access token, for automation. |
+| | `ONTRACK_AUTH_TOKEN` | Legacy alias for `ONTRACK_TOKEN`. |
+| | `ONTRACK_CONFIG` | Use a different config file path. |
+
+## Precedence: environment over file
+
+All three follow the same rule — an environment variable, when set, is used directly and the config file is not consulted for that value. This is documented explicitly for `edstem-cli` ("`EDSTEM_TOKEN`, if set and non-empty, always wins over the saved token file — even right after `auth login` writes a new file") and holds the same way for `MOODLE_BASE_URL`/`MOODLE_TOKEN` and `ONTRACK_BASE_URL`/`ONTRACK_TOKEN`. None of the three merge a partial environment override with partial config-file values for the same setting.
+
+<Columns cols={3}>
+  <Card title="Moodle configuration" icon="graduation-cap" href="/moodle/configuration">
+    Config file order, session cache detail, `--verbose` and `--pretty`.
+  </Card>
+  <Card title="Ed Discussion configuration" icon="message-square" href="/edstem/configuration">
+    Config keys, retry tuning, and the posting environment flag.
+  </Card>
+  <Card title="OnTrack configuration" icon="list-checks" href="/ontrack/configuration">
+    Config file order, credential resolution, platform default paths.
+  </Card>
+</Columns>

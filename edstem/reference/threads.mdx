@@ -1,0 +1,122 @@
+---
+title: "edstem threads"
+description: "List, search, show, or read Ed threads."
+sidebarTitle: "threads"
+---
+
+```bash
+edstem threads [options] [command]
+```
+
+## edstem threads list
+
+```bash
+edstem threads list [options] <unit>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit ID or code |
+
+**Options**
+
+| Flags | Description | Choices |
+| --- | --- | --- |
+| `-n, --max <count>` | Maximum threads to return |  |
+| `-s, --sort <order>` | Ed sort order; defaults to new and pinned threads may remain first. | `new`, `old`, `top`, `hot` |
+| `-c, --category <category>` | Filter by exact top-level category. |  |
+| `--subcategory <subcategory>` | Filter by exact second-level subcategory. |  |
+| `-t, --type <type>` | Filter by thread type. |  |
+| `--answered` | Only answered threads. |  |
+| `--unanswered` | Only unanswered threads. |  |
+| `--offset <count>` | Skip this many threads before filtering. |  |
+| `--since <when>` | Only threads created at or after an ISO date or a relative offset such as 7d. |  |
+
+## edstem threads search
+
+```bash
+edstem threads search [options] <unit> <query...>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit ID or code |
+| `query...` | Yes | Words that must all appear in the title or body |
+
+**Options**
+
+| Flags | Description | Choices |
+| --- | --- | --- |
+| `-n, --max <count>` | Maximum threads to return |  |
+| `-s, --sort <order>` | Ed sort order; defaults to new and pinned threads may remain first. | `new`, `old`, `top`, `hot` |
+| `-c, --category <category>` | Filter by exact top-level category. |  |
+| `--subcategory <subcategory>` | Filter by exact second-level subcategory. |  |
+| `-t, --type <type>` | Filter by thread type. |  |
+| `--answered` | Only answered threads. |  |
+| `--unanswered` | Only unanswered threads. |  |
+| `--offset <count>` | Skip this many threads before filtering. |  |
+| `--since <when>` | Only threads created at or after an ISO date or a relative offset such as 7d. |  |
+
+## edstem threads show
+
+```bash
+edstem threads show [options] <reference>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `reference` | Yes | Thread ID or unit ID/code plus #number |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--include-html` | Include Ed XML content. |
+
+## edstem threads read
+
+```bash
+edstem threads read [options] <reference>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `reference` | Yes | Thread ID or unit ID/code plus #number |
+
+## edstem threads send
+
+```bash
+edstem threads send [options] <unit>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit ID or code |
+
+**Options**
+
+| Flags | Description | Choices |
+| --- | --- | --- |
+| `--title <title>` | Thread title. |  |
+| `--body <markdown>` | Thread body as Markdown. |  |
+| `--body-file <path>` | Read the Markdown body from a file, or - for stdin. |  |
+| `--type <type>` | Thread type. | `question`, `post` |
+| `-c, --category <category>` | Ed category for the thread. |  |
+| `--private` | Post privately to staff. |  |
+| `--anonymous` | Post anonymously. |  |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+Global options apply to every command. See [Global options](/edstem/reference/index#global-options).

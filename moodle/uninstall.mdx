@@ -1,0 +1,92 @@
+---
+title: Uninstall
+description: Remove moodle-cli's background jobs, remote deployment and local files.
+sidebarTitle: Uninstall
+icon: trash-2
+---
+
+`moodle uninstall` removes what the CLI put on your machine outside its own binary: the keepalive job and any MCP (Model Context Protocol) renewal jobs it registered. Removing the binary itself is a separate, package-manager-specific step — see [Removing the package](#removing-the-package).
+
+```bash
+moodle uninstall
+```
+
+By default it only touches local background jobs. Two flags widen what it removes:
+
+| Flag | Effect |
+| --- | --- |
+| `--remote` | Also removes the configured managed MCP deployment — the Cloudflare Worker and its stored credentials. |
+| `--purge` | Also deletes local configuration, saved deployment info and the session cache. |
+| `--dry-run` (global) | Prints the removal plan as JSON without touching anything. |
+| `--yes` (global) | Skips the confirmation prompt. |
+
+<Warning>
+  `--remote` tears down a deployed Worker, and `--purge` deletes local configuration and the encrypted session cache. Neither can be undone from the CLI. Preview with `--dry-run` first if you're unsure what's about to go.
+</Warning>
+
+```bash
+moodle uninstall --dry-run
+moodle uninstall --remote --purge --yes
+```
+
+## What "local jobs" means
+
+On macOS, local jobs are background jobs the CLI registered under `~/Library/LaunchAgents`: the keepalive job (`com.moodle-cli.keepalive.plist`) and one MCP renewal job per profile (`com.moodle-cli.mcp-renewal.<profile>.plist`). `moodle uninstall` removes the keepalive job, and unregisters renewal for every profile it finds a job or saved deployment info for. `moodle doctor`'s `job` check is what reports one of these as broken beforehand — see [Troubleshooting](/moodle/troubleshooting#what-moodle-doctor-checks-mean).
+
+Keepalive itself has nothing to remove on Linux, since it's a cron line you added yourself rather than a job the CLI installed — see [Keepalive](/moodle/sign-in#keepalive). MCP renewal is different: on Linux, `moodle mcp deploy` installs a recurring job per profile instead, and `moodle uninstall` removes it the same way.
+
+## `--remote`
+
+Without `--remote`, a managed MCP deployment is left running; only the local renewal job for it is removed, so it stops renewing itself and will eventually need `moodle mcp login` again to keep working. With `--remote`, the Worker and its stored credentials are removed the same way `moodle mcp remove` removes them — see [Connect an agent](/moodle/mcp-server) for what that deployment holds.
+
+## `--purge`
+
+`--purge` deletes `~/.config/moodle-cli` (configuration and saved deployment info) and `~/.cache/moodle-cli` (the encrypted session cache) after the jobs above are handled. It refuses to run if info for a managed deployment still exists and `--remote` wasn't also given, or if more than one does — purging first would throw away what's needed to clean up that Worker later:
+
+```bash
+moodle uninstall --purge
+# usage error: managed deployment receipts exist; remove the Worker before
+# purging its recovery information.
+```
+
+Remove each deployment first, then purge:
+
+```bash
+moodle mcp remove
+moodle uninstall --purge
+```
+
+## Installation footprint
+
+What's on disk depends on how you installed it. Configuration lives at `~/.config/moodle-cli` and the session cache at `~/.cache/moodle-cli` regardless of install path; what differs is where the executable itself sits.
+
+| Install path | What's on disk beyond config and cache |
+| --- | --- |
+| Installer script (`install.sh`) | The `moodle` binary at `~/.local/bin/moodle`, or `$MOODLE_INSTALL_DIR` if you set it. |
+| Manual binary download | Wherever you placed the executable. |
+| npm global (`npm i -g moodle-cli`) | The package under npm's global `node_modules`, with its bin symlink. |
+| Bun global (`bun i -g moodle-cli`) | The package under Bun's global install directory, with its bin symlink. |
+| `npx moodle-cli` | Nothing persistent beyond npm's execution cache; npm manages that cache itself. |
+| `bunx moodle-cli` | Nothing persistent beyond Bun's execution cache; Bun manages that cache itself. |
+
+Cloudflare deployment management uses a copy of its companion tool already on your `PATH` if present, or downloads one to `~/.config/moodle-cli/tools/wrangler@<version>` — `--purge` removes that along with the rest of the config directory.
+
+## Removing the package
+
+`moodle uninstall` never touches the installed package itself — it only knows about the jobs and files above. Remove the package with whichever tool installed it:
+
+```bash
+npm rm -g moodle-cli
+```
+
+```bash
+bun remove -g moodle-cli
+```
+
+For the installer script or a manual binary, delete the executable directly:
+
+```bash
+rm ~/.local/bin/moodle
+```
+
+`npx`/`bunx` installs leave nothing to remove beyond the package manager's own execution cache.

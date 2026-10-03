@@ -1,0 +1,74 @@
+---
+title: Developers
+description: Build against these CLIs — JSON shapes, exit codes, MCP internals, tool catalogs and agent skills.
+icon: code
+---
+
+This tab is for script authors, agent or integration builders, and contributors — anyone writing code against `moodle`, `edstem` or `ontrack` instead of typing commands at a keyboard. If you're a student or tutor looking to install a CLI, sign in, or connect an AI app, start at the [home page](/index) instead.
+
+## Shared behaviour
+
+All three CLIs share one command model, output format, exit code scheme and mutation-confirmation rule. Learn it once here.
+
+<CardGroup cols={3}>
+  <Card title="Command model" icon="terminal" href="/concepts/command-model">
+    How every command is structured, across all three CLIs.
+  </Card>
+  <Card title="Output formats" icon="brackets-curly" href="/concepts/output-formats">
+    How each CLI picks between a table and JSON, and how to force one.
+  </Card>
+  <Card title="Errors and exit codes" icon="triangle-alert" href="/concepts/errors-and-exit-codes">
+    The exit code scheme and error shape every command follows.
+  </Card>
+  <Card title="Mutations" icon="pencil" href="/concepts/mutations">
+    What counts as a write, and how confirmation works without a terminal attached.
+  </Card>
+  <Card title="Configuration" icon="sliders-horizontal" href="/concepts/configuration">
+    Env vars, config files and precedence, across all three CLIs.
+  </Card>
+  <Card title="Humans and agents" icon="users" href="/concepts/humans-and-agents">
+    How each CLI detects who's driving it, and what changes because of that.
+  </Card>
+</CardGroup>
+
+## Scripting each CLI
+
+<CardGroup cols={3}>
+  <Card title="Moodle CLI" icon="graduation-cap" href="/developers/moodle">
+    JSON shapes, exit codes and env vars for `moodle`.
+  </Card>
+  <Card title="Ed Discussion CLI" icon="message-square" href="/developers/edstem">
+    JSON shapes, exit codes and env vars for `edstem`.
+  </Card>
+  <Card title="OnTrack CLI" icon="list-checks" href="/developers/ontrack">
+    JSON shapes, exit codes and env vars for `ontrack`.
+  </Card>
+</CardGroup>
+
+## Agents
+
+<CardGroup cols={2}>
+  <Card title="Agent skills" icon="sparkles" href="/agents/skills">
+    Generate and install the skill bundle that teaches an agent which command answers which request.
+  </Card>
+  <Card title="Prompting" icon="message-circle" href="/agents/prompting">
+    Patterns for prompting an agent that has one of these CLIs or skills available.
+  </Card>
+</CardGroup>
+
+## MCP internals
+
+<CardGroup cols={2}>
+  <Card title="How MCP works" icon="workflow" href="/mcp/how-it-works">
+    What runs where, across every Moodle and Ed Discussion surface, and the result shapes tools return.
+  </Card>
+  <Card title="Security" icon="shield" href="/mcp/security">
+    Where credentials live, what gates a write, and how to revoke or rotate access.
+  </Card>
+  <Card title="Moodle tools" icon="graduation-cap" href="/mcp/tools/moodle">
+    The full Moodle MCP tool catalog: arguments, result shapes, and which surface offers each one.
+  </Card>
+  <Card title="Ed Discussion tools" icon="message-square" href="/mcp/tools/edstem">
+    The full Ed Discussion MCP tool catalog: arguments, result shapes, and posting gates.
+  </Card>
+</CardGroup>

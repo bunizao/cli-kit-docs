@@ -1,0 +1,22 @@
+---
+title: "moodle uninstall"
+description: "Remove local background jobs; optionally remove the selected Worker and configuration."
+sidebarTitle: "uninstall"
+---
+
+```bash
+moodle uninstall [options]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--remote` | Also remove the configured managed MCP deployment. |
+| `--purge` | Also delete local Moodle CLI configuration, receipts and cache. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

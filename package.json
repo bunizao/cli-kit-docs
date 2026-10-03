@@ -1,0 +1,29 @@
+{
+  "name": "cli-kit-docs",
+  "version": "1.0.0",
+  "description": "Documentation site for the moodle, edstem and ontrack CLIs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bunizao/cli-kit-docs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bunizao/cli-kit-docs/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "mint dev",
+    "validate": "mint validate",
+    "broken-links": "mint broken-links",
+    "generate": "node scripts/generate-reference.mjs",
+    "check": "node scripts/generate-reference.mjs --check",
+    "lint": "node scripts/lint-docs.mjs",
+    "test": "npm run check && npm run lint && npm run validate && npm run broken-links"
+  },
+  "devDependencies": {
+    "mint": "^4.2.909"
+  },
+  "private": true
+}

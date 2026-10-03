@@ -1,0 +1,49 @@
+---
+title: "Connect claude.ai"
+description: "Add the Moodle and Ed Discussion MCP servers to claude.ai as custom connectors."
+---
+
+claude.ai is a hosted client: it can't run a local process, so it can only reach a remote Model Context Protocol (MCP) server, and `moodle mcp connect` doesn't write a config file for it — you add it through claude.ai's own settings instead.
+
+Official references: [Getting started with custom connectors using remote MCP](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp) and [Third party connectors with remote MCP](https://claude.com/docs/connectors/custom/remote-mcp), both fetched 2026-09-21.
+
+## Prerequisites
+
+- A deployed Moodle Worker (`moodle mcp deploy`) or a deployed Ed Discussion Worker, or use Ed's hosted endpoint.
+- For Moodle: nothing more, since claude.ai authenticates through OAuth pairing.
+
+<Tabs>
+  <Tab title="Moodle">
+    Nothing is approved on your Worker until you open a pairing window yourself:
+
+    ```bash
+    moodle mcp pair
+    ```
+
+    This prints your connector URL and a one-time pairing code, valid for ten minutes and one approval.
+
+    In claude.ai:
+
+    1. Go to **Customize → Connectors** (Team/Enterprise owners: **Organization settings → Connectors** first, then members connect from **Customize → Connectors**).
+    2. Click **Add custom connector**.
+    3. Enter the connector URL `moodle mcp pair` printed.
+    4. Leave authentication on its default OAuth detection — don't switch to **No sign-in** or add a Request headers entry; the Worker only accepts OAuth from claude.ai.
+    5. Click **Add**, then **Connect**. claude.ai opens the Worker's approval page; sign in and enter the pairing code.
+
+    From then on, claude.ai stays signed in on its own, and you don't need to repeat pairing unless you revoke it.
+  </Tab>
+  <Tab title="Ed Discussion">
+    Use the hosted endpoint, which is already OAuth-only:
+
+    1. Go to **Customize → Connectors** and click **Add custom connector**.
+    2. Enter `https://edstem.tuuhub.com/mcp`.
+    3. Leave authentication on its default OAuth detection.
+    4. Click **Add**, then **Connect**, and sign in with your Ed credentials when prompted. Grant the write scope during consent only if you want `create_thread`, `reply_thread`, and the progress tools to work from claude.ai.
+
+    A self-deployed Ed Worker that only accepts `Authorization` or `X-API-Key` headers needs the **Request headers** option instead, which is a beta feature rolled out to a limited set of organizations — if you don't see that section in the Add custom connector dialog, use the hosted endpoint above instead.
+  </Tab>
+</Tabs>
+
+## Verify the connection
+
+Open the "+" menu in a chat and check **Connectors** — the server should be listed and toggled on. Enable it for the conversation and ask a question that requires a tool call; Claude will show a permission prompt naming the tool the first time it's used. Only click **Always allow** for a connector you trust.

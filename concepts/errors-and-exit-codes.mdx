@@ -1,0 +1,84 @@
+---
+title: Errors and exit codes
+description: The shared error JSON shape, the exit-code table, and the error vocabulary.
+sidebarTitle: Errors and exit codes
+icon: octagon-alert
+---
+
+Every command in the family reports a failure exactly once, on stderr, whether it came from `moodle`, `edstem` or `ontrack`. In a table-formatted run that's a plain line; in `--json` or `--yaml`, or whenever stdout isn't a terminal, it's one structured object:
+
+```json
+{
+  "ok": false,
+  "error": {
+    "code": "auth",
+    "message": "No Moodle session for https://moodle.example.edu.",
+    "hint": "Run `moodle auth login`."
+  },
+  "exit_code": 3
+}
+```
+
+`hint` is present only when the error has one to give. Nothing else is printed to stdout on a failing run — a script can rely on stdout being either the successful result or empty.
+
+## Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| `0` | Success. `--help` and `--version` exit `0` too — a run that only printed `--help` never reports an error. |
+| `1` | Configuration, network, or an error that doesn't fit any other category. |
+| `2` | Usage error: a bad flag, a missing required argument, or a mutation attempted without `--yes` outside a terminal. |
+| `3` | Authentication error: no valid session or token. |
+| `4` | The referenced unit, task, thread, activity or other entity wasn't found. |
+| `5` | The upstream platform (Moodle, Ed, OnTrack) rejected the request. |
+| `130` | Cancelled — Ctrl+C or Escape inside a prompt, reported like a terminal signal. |
+
+This table, and the error `code` vocabulary below, are stable across releases, so scripts written against one version keep working across minor and patch releases.
+
+## The error code vocabulary
+
+There are eight error codes, each mapped to one exit code above:
+
+| `error.code` | Exit | Comes from |
+| --- | --- | --- |
+| `usage` | 2 | A bad flag or missing argument, a mutation run non-interactively without `--yes`, or any other malformed call. |
+| `auth` | 3 | No session or an expired/invalid token. |
+| `config` | 1 | A missing or invalid configuration value (a base URL, a required setting). |
+| `not_found` | 4 | The referenced entity doesn't exist, or no unit matches a reference. |
+| `upstream` | 5 | The platform's own API rejected or failed the request. |
+| `network` | 1 | A transport failure — connection refused, reset, unreachable, timed out, DNS failure. |
+| `cancelled` | 130 | Ctrl+C or Escape inside an interactive prompt. |
+| `unexpected` | 1 | Anything the CLI couldn't classify more specifically. |
+
+### Product-specific codes
+
+Moodle adds one code outside this list: `ambiguous`, exit code `2`, when a unit or section reference matches more than one candidate. It's the same shape as any other error, with a `candidates` array attached so a caller can present the choice instead of retrying blind:
+
+```json
+{
+  "ok": false,
+  "error": {
+    "code": "ambiguous",
+    "message": "Several units match 'report'.",
+    "candidates": [{ "id": 12, "name": "Unit A", "code": "UNIT-A" }, { "id": 45, "name": "Unit B", "code": "UNIT-B" }]
+  },
+  "exit_code": 2
+}
+```
+
+OnTrack maps its own error categories onto this same shared vocabulary before printing the error, the same way moodle and edstem do. What you see in `error.code` from any of the three CLIs is always one of the eight codes above, plus moodle's `ambiguous`.
+
+## What an agent should do per code
+
+- **`usage` (2):** Fix the call — check `hint`, which for a missing argument carries the full usage line and argument descriptions. Don't retry unchanged.
+- **`auth` (3):** Re-run the CLI's sign-in command (`moodle auth login`, `edstem auth login`, `ontrack auth login`) before retrying.
+- **`config` (1):** A required setting is missing (commonly a base URL). Set it, then retry.
+- **`not_found` (4) / `ambiguous` (2, moodle only):** Don't guess. For `not_found`, check the spelling or ask the user; for `ambiguous`, present `candidates` and let the user or a picker choose.
+- **`upstream` (5):** The platform itself refused the request (permissions, a closed submission window, a disabled service). Report the message; retrying identically won't help.
+- **`network` (1):** Transient — safe to retry with backoff.
+- **`cancelled` (130):** The user (or you, acting for them) backed out of a prompt. Don't retry automatically.
+- **`unexpected` (1):** Treat as a bug; include the message when reporting it.
+
+<Card title="Mutations" icon="pencil" href="/concepts/mutations">
+  Why a non-interactive mutation without `--yes` is a `usage` error rather than a hang.
+</Card>

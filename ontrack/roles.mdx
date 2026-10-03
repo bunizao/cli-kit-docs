@@ -1,0 +1,30 @@
+---
+title: Roles and identity
+description: List the teaching roles you hold and check who you're signed in as.
+icon: id-card
+---
+
+List the teaching roles you hold across units, and check which identity you're signed in as.
+
+## Teaching roles
+
+```bash
+ontrack roles
+ontrack roles list --all
+```
+
+`roles` (equivalent to `roles list`) lists the teaching roles you hold across units — each row gives the role, the unit it applies to, and the id OnTrack uses for it. By default it shows active roles only; `--all` includes roles on units you no longer teach.
+
+The role itself is whatever string OnTrack reports for that assignment on the site — it isn't a fixed set this CLI defines. A student with no teaching roles gets an empty list.
+
+Full syntax: [`ontrack roles`](/ontrack/reference/roles).
+
+## Who you're signed in as
+
+```bash
+ontrack user
+```
+
+Returns your identity from the current session — username, and where available your name and email — along with the site's base URL and its authentication method. Unlike `auth status`, `user` doesn't report your unit or role counts; use `auth status` (see [Sign in](/ontrack/sign-in#checking-and-clearing-a-session)) when you want to confirm the session itself is live.
+
+Full syntax: [`ontrack user`](/ontrack/reference/user).

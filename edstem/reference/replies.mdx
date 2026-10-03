@@ -1,0 +1,38 @@
+---
+title: "edstem replies"
+description: "Post replies to Ed threads."
+sidebarTitle: "replies"
+---
+
+```bash
+edstem replies [options] [command]
+```
+
+## edstem replies send
+
+```bash
+edstem replies send [options] <reference>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `reference` | Yes | Thread ID or unit ID/code plus #number |
+
+**Options**
+
+| Flags | Description | Choices |
+| --- | --- | --- |
+| `--body <markdown>` | Reply body as Markdown. |  |
+| `--body-file <path>` | Read the Markdown body from a file, or - for stdin. |  |
+| `--as <kind>` | Reply kind; defaults to answer on question threads and comment elsewhere. | `answer`, `comment` |
+| `--to <commentId>` | Reply to one comment of the thread instead of the thread itself. |  |
+| `--private` | Post privately to staff. |  |
+| `--anonymous` | Post anonymously. |  |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+Global options apply to every command. See [Global options](/edstem/reference/index#global-options).

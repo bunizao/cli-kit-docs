@@ -1,0 +1,52 @@
+---
+title: Prompting an agent
+description: How to phrase a request so an agent with these tools runs the right command.
+sidebarTitle: Prompting
+icon: messages-square
+---
+
+These tables are the same intent → command mapping each CLI's `SKILL.md` carries on its own, merged across all three so you can see the whole surface at once. `UNIT`, `TASK` and `SECTION` are placeholders — the agent fills them from what you actually said (a unit's name or code, a task abbreviation), never from a guessed format. See [The command model](/concepts/command-model) for why no code format is assumed.
+
+## Reading
+
+| You ask for | Moodle | Ed Discussion | OnTrack |
+| --- | --- | --- | --- |
+| A dashboard / what's going on | `moodle` | — | — |
+| Deadlines | `moodle due [UNIT] --days 14` | — | `ontrack tasks UNIT` |
+| Unit names, so you can refer to one correctly | `moodle units` | `edstem units` | `ontrack units` |
+| A unit or section's detail | `moodle UNIT [SECTION]` | `edstem units show UNIT` | `ontrack units show UNIT` |
+| Grades and feedback | `moodle grades [UNIT]` | — | — |
+| Announcements | `moodle news [UNIT]` | — | — |
+| Find slides, a task, or an activity by keyword | `moodle find "QUERY" [UNIT]` | — | — |
+| Forum or thread text search | `moodle forums search "QUERY" --unit UNIT` | `edstem threads search UNIT QUERY...` | — |
+| Read a thread or lesson as text | `moodle threads show ID` | `edstem threads read REF`, `edstem lessons read LESSON` | — |
+| A task sheet or a task's status | `moodle UNIT "TASK"` | — | `ontrack tasks read UNIT TASK`, `ontrack tasks show UNIT TASK` |
+| Download a file | `moodle get "UNIT TASK" --to DIR`, `moodle download ID --dest FILE` | `edstem files get TARGET --dest DIR` | `ontrack tasks get UNIT TASK --dest PATH`, `ontrack units get UNIT --dest PATH` |
+| Tutor feedback / unread task chat | — | — | `ontrack chats UNIT` |
+| Teaching roles | — | — | `ontrack roles` |
+| Am I signed in / is it working | `moodle auth status`, `moodle doctor` | `edstem auth status` | `ontrack auth status` |
+
+## Writing — always plan first
+
+Every write below follows the same two-step pattern: run it once with `--dry-run` to show the plan, confirm with the person, then run it again with `--yes`. An agent should never skip straight to `--yes` on a first attempt, even when the request sounds unambiguous.
+
+| You ask for (only when explicitly requested) | Moodle | Ed Discussion | OnTrack |
+| --- | --- | --- | --- |
+| Submit assignment files | `moodle submit "UNIT TASK" FILE... --dry-run` → `moodle submit "UNIT TASK" FILE... --yes` (add `--final --accept-statement` only when told to submit for grading — it cannot be undone) | — | `ontrack tasks submit UNIT TASK --file FILE --dry-run` → `... --yes` |
+| Change a task's status | — | — | `ontrack tasks set UNIT TASK STATE --dry-run` → `... --yes` |
+| Post a thread or reply | — | `edstem threads send UNIT --title "..." --body "..." --dry-run` → `... --yes` | — |
+| Answer a quiz slide | — | `edstem slides submit SLIDE --question Q --choice N --dry-run` → `... --yes` | — |
+| Message a tutor on a task | — | — | `ontrack chats send UNIT TASK --message "..." --dry-run` → `... --yes` |
+| Mark lessons read | — | `edstem lessons mark-read UNIT [QUERIES...] --dry-run` → `... --yes` | — |
+
+## Rules an agent should follow
+
+- **Ask before a mutation runs for real.** A `--dry-run` plan is safe to show without asking; running the same command with `--yes` changes something on the platform and should follow an explicit yes from the person, not an inferred one.
+- **Dry-run first, every time.** Even when the request is unambiguous, show the plan before applying it — it's the only chance to catch a wrong `UNIT`/`TASK` before it's sent.
+- **Never print or echo a token or session cookie.** `MOODLE_TOKEN`/`MOODLE_SESSION`, `EDSTEM_TOKEN`, `ONTRACK_TOKEN`/`ONTRACK_AUTH_TOKEN`, and any file under a CLI's config or cache directory hold live credentials. Don't include their values in a message back to the person, a log, or a committed file.
+- **Prefer `--fields`** to cut a response down to what's actually needed, instead of parsing a full table or object and discarding most of it — `edstem threads list UNIT --fields id,title,unread` is cheaper to read than the full row for every thread.
+- **Page instead of pulling everything.** `--limit` (moodle's `todo`, for example) and `--max`/`-n` (edstem's list commands) cap how much comes back in one call; ask for another page rather than requesting an unbounded list up front.
+
+<Card title="Choose a surface" icon="split" href="/choose-a-surface">
+  Whether an agent should run the CLI directly or go through MCP (Model Context Protocol) for a given situation.
+</Card>

@@ -1,0 +1,58 @@
+---
+title: "edstem command reference"
+description: "Every edstem command, its arguments, options and defaults, generated from edstem commands --json."
+sidebarTitle: "Reference"
+---
+
+`edstem` v0.7.0 — Read and post on Ed Discussion from the command line.
+
+## Global options
+
+These options work on every command; command pages only list the options specific to that command.
+
+| Flags | Description |
+| --- | --- |
+| `-V, --version` | Show the version |
+| `--json` | Emit JSON |
+| `--yaml` | Emit YAML |
+| `--table` | Emit a human-readable table |
+| `--fields <fields>` | Select top-level fields |
+| `-o, --output <file>` | Write output to a file |
+| `--verbose` | Enable debug logging |
+| `--no-color` | Disable color output |
+| `-y, --yes` | Confirm mutations non-interactively |
+| `--dry-run` | Print the mutation plan without applying it |
+| `-h, --help` | Show help |
+
+For what each exit code means, see [Errors and exit codes](/concepts/errors-and-exit-codes).
+
+## Core commands
+
+| Command | Aliases | Description |
+| --- | --- | --- |
+| [`threads`](/edstem/reference/threads) | — | List, search, show, or read Ed threads. |
+| [`replies`](/edstem/reference/replies) | — | Post replies to Ed threads. |
+| [`lessons`](/edstem/reference/lessons) | — | List, show, read, or mark lessons as read. |
+| [`slides`](/edstem/reference/slides) | — | Show, read, or submit lesson slides. |
+| [`files`](/edstem/reference/files) | — | List or download Ed-hosted lesson and thread files. |
+| [`units`](/edstem/reference/units) | `courses`, `projects` | List or show enrolled units. |
+
+## Additional commands
+
+| Command | Aliases | Description |
+| --- | --- | --- |
+| [`user`](/edstem/reference/user) | — | Show the current Ed identity and enrolled units. |
+| [`activity`](/edstem/reference/activity) | — | List current-user activity. |
+| [`auth`](/edstem/reference/auth) | — | Manage Ed authentication. |
+| [`update`](/edstem/reference/update) | — | Report or install the latest edstem-cli release. |
+
+## Agent commands
+
+| Command | Aliases | Description |
+| --- | --- | --- |
+| [`commands`](/edstem/reference/commands) | — | Describe the complete command tree. |
+| [`skills`](/edstem/reference/skills) | — | Generate the agent skill. |
+
+<Note>
+This page and the pages under `edstem/reference` are generated from `edstem commands --json`. Run `npm run generate` to rebuild them after the CLI changes, and `npm run check` to confirm the checked-in pages still match the captured command tree.
+</Note>

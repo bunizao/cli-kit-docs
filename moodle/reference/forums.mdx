@@ -1,0 +1,66 @@
+---
+title: "moodle forums"
+description: "Inspect forums."
+sidebarTitle: "forums"
+---
+
+```bash
+moodle forums [options] [command]
+```
+
+## moodle forums show
+
+```bash
+moodle forums show [options] <forum>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `forum` | Yes | Forum ID or URL |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--query <query>` | Filter discussion titles by query. |
+
+## moodle forums list
+
+```bash
+moodle forums list [options] <unit>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit ID or unique name |
+
+## moodle forums search
+
+```bash
+moodle forums search [options] <query>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `query` | Yes | Search query |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--unit <unit>` | Restrict to a unit code, name, id or URL. |
+| `--course <course>` | Restrict to a course ID or unique course name match. |
+| `--forum <forum>` | Restrict to a forum ID or forum URL. |
+| `--titles-only` | Only search discussion titles. |
+| `--unread-only` | Only include unread matches. |
+| `--recent` | Sort matches by newest activity. |
+| `--limit-forums <number>` | Maximum number of forums to scan. |
+| `--limit-discussions <number>` | Maximum number of discussions per forum. |
+
+Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

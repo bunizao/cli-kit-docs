@@ -1,0 +1,92 @@
+---
+title: "Connect Windsurf"
+description: "Add the Moodle and Ed Discussion MCP servers to Windsurf's Cascade."
+---
+
+Windsurf's Cascade can run the Moodle and Ed Discussion Model Context Protocol (MCP) servers as local processes or connect to either over a remote URL. `moodle mcp connect` doesn't support Windsurf yet, so add both servers by hand.
+
+Official reference: [Model Context Protocol (MCP)](https://docs.devin.ai/desktop/cascade/mcp), fetched 2026-09-21 (docs.windsurf.com redirects here).
+
+## Prerequisites
+
+- moodle-cli and edstem-cli installed and signed in. See [Install](/moodle/install) and [Install](/edstem/install).
+- Windsurf installed.
+
+Windsurf reads MCP servers from `~/.codeium/windsurf/mcp_config.json`. Open it from Cascade: click the **MCPs** icon in the top-right of the Cascade panel, or go to **Devin Settings → Cascade → MCP Servers**. Windsurf rebranded to Devin Desktop; the config path and Cascade panel are unchanged, but the settings menu now reads "Devin Settings".
+
+<Tabs>
+  <Tab title="Moodle">
+    ### Bridge, local
+
+    ```json
+    {
+      "mcpServers": {
+        "moodle": {
+          "command": "moodle",
+          "args": ["mcp", "bridge"]
+        }
+      }
+    }
+    ```
+
+    This keeps your MCP access token in the OS keychain instead of in this file.
+
+    ### Remote, header auth
+
+    ```json
+    {
+      "mcpServers": {
+        "moodle": {
+          "serverUrl": "https://<worker-host>/mcp",
+          "headers": { "Authorization": "Bearer <your-token>" }
+        }
+      }
+    }
+    ```
+
+    Get `<your-token>` with `moodle mcp connect codex --mode remote --show-token` (any supported client's `--show-token` prints the same Worker token). That command also writes a Codex entry to `~/.codex/config.toml`; delete it afterwards if you don't use Codex.
+  </Tab>
+  <Tab title="Ed Discussion">
+    ### Stdio, local
+
+    ```json
+    {
+      "mcpServers": {
+        "edstem": {
+          "command": "edstem-mcp",
+          "env": { "EDSTEM_TOKEN": "<your-token>" }
+        }
+      }
+    }
+    ```
+
+    ### Remote, hosted OAuth
+
+    ```json
+    {
+      "mcpServers": {
+        "edstem": { "serverUrl": "https://edstem.tuuhub.com/mcp" }
+      }
+    }
+    ```
+
+    Windsurf prompts for sign-in on first connection.
+
+    ### Remote, self-deployed Worker
+
+    ```json
+    {
+      "mcpServers": {
+        "edstem": {
+          "serverUrl": "https://<your-worker>/mcp",
+          "headers": { "Authorization": "Bearer <your-token>" }
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Verify the connection
+
+Open the **MCPs** panel again — a connected server lists its tools; a failed one shows an error you can expand. Windsurf also marks official, first-party servers with a checkmark, which won't appear for a private Moodle or Ed Worker since those are yours, not a marketplace listing.

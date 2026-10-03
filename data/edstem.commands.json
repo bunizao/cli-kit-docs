@@ -1,0 +1,836 @@
+{
+  "name": "edstem",
+  "version": "0.7.0",
+  "description": "Read and post on Ed Discussion from the command line.",
+  "commands": [
+    {
+      "name": "auth",
+      "noun": "auth",
+      "aliases": [],
+      "description": "Manage Ed authentication.",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "login",
+          "noun": "auth",
+          "aliases": [],
+          "description": "Verify an Ed token and save it for later commands.",
+          "positionals": [],
+          "options": [
+            {
+              "flags": "--token-stdin",
+              "description": "Read the token from the first line of stdin.",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "logout",
+          "noun": "auth",
+          "aliases": [],
+          "description": "Remove the saved Ed token file.",
+          "positionals": [],
+          "options": [],
+          "mutating": true,
+          "commands": []
+        },
+        {
+          "name": "status",
+          "noun": "auth",
+          "aliases": [],
+          "description": "Verify the configured Ed token.",
+          "positionals": [],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        }
+      ]
+    },
+    {
+      "name": "user",
+      "noun": "user",
+      "aliases": [],
+      "description": "Show the current Ed identity and enrolled units.",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": []
+    },
+    {
+      "name": "units",
+      "noun": "units",
+      "aliases": [
+        "courses",
+        "projects"
+      ],
+      "description": "List or show enrolled units.",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "list",
+          "noun": "units",
+          "verb": "list",
+          "aliases": [],
+          "description": "List enrolled units.",
+          "positionals": [],
+          "options": [
+            {
+              "flags": "--archived",
+              "description": "Include archived units.",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "show",
+          "noun": "units",
+          "verb": "show",
+          "aliases": [],
+          "description": "Show one enrolled unit.",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit ID or code",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        }
+      ]
+    },
+    {
+      "name": "threads",
+      "noun": "threads",
+      "aliases": [],
+      "description": "List, search, show, or read Ed threads.",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "list",
+          "noun": "threads",
+          "verb": "list",
+          "aliases": [],
+          "description": "List threads in a unit.",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit ID or code",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-n, --max <count>",
+              "description": "Maximum threads to return",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "-s, --sort <order>",
+              "description": "Ed sort order; defaults to new and pinned threads may remain first.",
+              "required": true,
+              "variadic": false,
+              "enumValues": [
+                "new",
+                "old",
+                "top",
+                "hot"
+              ]
+            },
+            {
+              "flags": "-c, --category <category>",
+              "description": "Filter by exact top-level category.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--subcategory <subcategory>",
+              "description": "Filter by exact second-level subcategory.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "-t, --type <type>",
+              "description": "Filter by thread type.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--answered",
+              "description": "Only answered threads.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--unanswered",
+              "description": "Only unanswered threads.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--offset <count>",
+              "description": "Skip this many threads before filtering.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--since <when>",
+              "description": "Only threads created at or after an ISO date or a relative offset such as 7d.",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "search",
+          "noun": "threads",
+          "verb": "search",
+          "aliases": [],
+          "description": "Search threads in a unit by words in the title and body.",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit ID or code",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "query",
+              "description": "Words that must all appear in the title or body",
+              "required": true,
+              "variadic": true
+            }
+          ],
+          "options": [
+            {
+              "flags": "-n, --max <count>",
+              "description": "Maximum threads to return",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "-s, --sort <order>",
+              "description": "Ed sort order; defaults to new and pinned threads may remain first.",
+              "required": true,
+              "variadic": false,
+              "enumValues": [
+                "new",
+                "old",
+                "top",
+                "hot"
+              ]
+            },
+            {
+              "flags": "-c, --category <category>",
+              "description": "Filter by exact top-level category.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--subcategory <subcategory>",
+              "description": "Filter by exact second-level subcategory.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "-t, --type <type>",
+              "description": "Filter by thread type.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--answered",
+              "description": "Only answered threads.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--unanswered",
+              "description": "Only unanswered threads.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--offset <count>",
+              "description": "Skip this many threads before filtering.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--since <when>",
+              "description": "Only threads created at or after an ISO date or a relative offset such as 7d.",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "show",
+          "noun": "threads",
+          "verb": "show",
+          "aliases": [],
+          "description": "Show a thread by ID or unit ID/code plus #number.",
+          "positionals": [
+            {
+              "name": "reference",
+              "description": "Thread ID or unit ID/code plus #number",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--include-html",
+              "description": "Include Ed XML content.",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "read",
+          "noun": "threads",
+          "verb": "read",
+          "aliases": [],
+          "description": "Read a thread body as Markdown.",
+          "positionals": [
+            {
+              "name": "reference",
+              "description": "Thread ID or unit ID/code plus #number",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "send",
+          "noun": "threads",
+          "verb": "send",
+          "aliases": [],
+          "description": "Post a new thread in a unit.",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit ID or code",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--title <title>",
+              "description": "Thread title.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--body <markdown>",
+              "description": "Thread body as Markdown.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--body-file <path>",
+              "description": "Read the Markdown body from a file, or - for stdin.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--type <type>",
+              "description": "Thread type.",
+              "required": true,
+              "variadic": false,
+              "enumValues": [
+                "question",
+                "post"
+              ]
+            },
+            {
+              "flags": "-c, --category <category>",
+              "description": "Ed category for the thread.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--private",
+              "description": "Post privately to staff.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--anonymous",
+              "description": "Post anonymously.",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": true,
+          "commands": []
+        }
+      ]
+    },
+    {
+      "name": "replies",
+      "noun": "replies",
+      "aliases": [],
+      "description": "Post replies to Ed threads.",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "send",
+          "noun": "replies",
+          "verb": "send",
+          "aliases": [],
+          "description": "Post a reply to a thread or to one of its comments.",
+          "positionals": [
+            {
+              "name": "reference",
+              "description": "Thread ID or unit ID/code plus #number",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--body <markdown>",
+              "description": "Reply body as Markdown.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--body-file <path>",
+              "description": "Read the Markdown body from a file, or - for stdin.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--as <kind>",
+              "description": "Reply kind; defaults to answer on question threads and comment elsewhere.",
+              "required": true,
+              "variadic": false,
+              "enumValues": [
+                "answer",
+                "comment"
+              ]
+            },
+            {
+              "flags": "--to <commentId>",
+              "description": "Reply to one comment of the thread instead of the thread itself.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--private",
+              "description": "Post privately to staff.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--anonymous",
+              "description": "Post anonymously.",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": true,
+          "commands": []
+        }
+      ]
+    },
+    {
+      "name": "lessons",
+      "noun": "lessons",
+      "aliases": [],
+      "description": "List, show, read, or mark lessons as read.",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "list",
+          "noun": "lessons",
+          "verb": "list",
+          "aliases": [],
+          "description": "List lessons in a unit.",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit ID or code",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--module <module>",
+              "description": "Module ID or name text; use all to disable.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--type <type>",
+              "description": "Exact lesson type, such as general; use all to disable.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--state <state>",
+              "description": "Exact state, such as active or scheduled; use all to disable.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--status <status>",
+              "description": "Progress: unattempted, attempted, completed, or all.",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "show",
+          "noun": "lessons",
+          "verb": "show",
+          "aliases": [],
+          "description": "Show one lesson and its slides.",
+          "positionals": [
+            {
+              "name": "lesson",
+              "description": "Lesson ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "read",
+          "noun": "lessons",
+          "verb": "read",
+          "aliases": [],
+          "description": "Read a lesson and its slides as Markdown.",
+          "positionals": [
+            {
+              "name": "lesson",
+              "description": "Lesson ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "mark-read",
+          "noun": "lessons",
+          "verb": "mark-read",
+          "aliases": [],
+          "description": "Mark matching lessons and slides as read.",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit ID or code",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "queries",
+              "description": "Words required in lesson or module names",
+              "required": false,
+              "variadic": true
+            }
+          ],
+          "options": [
+            {
+              "flags": "--all",
+              "description": "Mark every lesson in the unit; required when no queries are given",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--delay <seconds>",
+              "description": "Delay between slide updates",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "mutating": true,
+          "commands": []
+        }
+      ]
+    },
+    {
+      "name": "slides",
+      "noun": "slides",
+      "aliases": [],
+      "description": "Show, read, or submit lesson slides.",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "show",
+          "noun": "slides",
+          "verb": "show",
+          "aliases": [],
+          "description": "Show slide content, questions, responses, or quiz context.",
+          "positionals": [
+            {
+              "name": "slide",
+              "description": "Slide ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--section <section>",
+              "description": "Slide section",
+              "required": true,
+              "variadic": false,
+              "enumValues": [
+                "slide",
+                "questions",
+                "responses",
+                "quiz"
+              ]
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "read",
+          "noun": "slides",
+          "verb": "read",
+          "aliases": [],
+          "description": "Read one slide as Markdown.",
+          "positionals": [
+            {
+              "name": "slide",
+              "description": "Slide ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "submit",
+          "noun": "slides",
+          "verb": "submit",
+          "aliases": [],
+          "description": "Save one answer or submit all saved answers for a slide.",
+          "positionals": [
+            {
+              "name": "slide",
+              "description": "Slide ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--question <question>",
+              "description": "Question ID to answer",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--choice <number>",
+              "description": "One-based choice; repeat for multi-select",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--amend",
+              "description": "Amend an existing response.",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": true,
+          "commands": []
+        }
+      ]
+    },
+    {
+      "name": "files",
+      "noun": "files",
+      "aliases": [],
+      "description": "List or download Ed-hosted lesson and thread files.",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "list",
+          "noun": "files",
+          "verb": "list",
+          "aliases": [],
+          "description": "List Ed-hosted downloadable files in one lesson or thread.",
+          "positionals": [
+            {
+              "name": "target",
+              "description": "Lesson ID, or a thread as thread:<id> or thread:<unit>#<number>",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "get",
+          "noun": "files",
+          "verb": "get",
+          "aliases": [],
+          "description": "Download Ed-hosted files from one lesson or thread.",
+          "positionals": [
+            {
+              "name": "target",
+              "description": "Lesson ID, or a thread as thread:<id> or thread:<unit>#<number>",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--dest <directory>",
+              "description": "Destination directory",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--slide <slide>",
+              "description": "Download only one slide file",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--force",
+              "description": "Replace existing files.",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        }
+      ]
+    },
+    {
+      "name": "activity",
+      "noun": "activity",
+      "aliases": [],
+      "description": "List current-user activity.",
+      "positionals": [
+        {
+          "name": "unit",
+          "description": "Unit ID or code",
+          "required": false,
+          "variadic": false
+        }
+      ],
+      "options": [
+        {
+          "flags": "-n, --max <count>",
+          "description": "Maximum activity items",
+          "required": true,
+          "variadic": false
+        },
+        {
+          "flags": "-f, --filter <type>",
+          "description": "Activity type",
+          "required": true,
+          "variadic": false
+        }
+      ],
+      "mutating": false,
+      "commands": []
+    },
+    {
+      "name": "update",
+      "noun": "update",
+      "aliases": [],
+      "description": "Report or install the latest edstem-cli release.",
+      "positionals": [],
+      "options": [
+        {
+          "flags": "--check",
+          "description": "Only report the latest release.",
+          "required": false,
+          "variadic": false
+        }
+      ],
+      "mutating": true,
+      "commands": []
+    },
+    {
+      "name": "commands",
+      "noun": "commands",
+      "aliases": [],
+      "description": "Describe the complete command tree.",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": []
+    },
+    {
+      "name": "skills",
+      "noun": "skills",
+      "aliases": [],
+      "description": "Generate the agent skill.",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "generate",
+          "noun": "skills",
+          "aliases": [],
+          "description": "Regenerate SKILL.md from command metadata.",
+          "positionals": [],
+          "options": [],
+          "mutating": false,
+          "commands": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+---
+title: Install
+description: Install moodle-cli as a standalone binary, an npm package, or a Bun package.
+sidebarTitle: Install
+icon: download
+---
+
+moodle-cli 0.9.2 ships three ways: a standalone binary with its runtime bundled in, an npm package, or a Bun package. Pick whichever fits how you already manage tools.
+
+## Standalone binary
+
+The install script downloads a prebuilt binary and puts it on your `PATH`. It supports macOS on Apple Silicon (`arm64`) and Linux on `x86_64` — on any other platform it prints a message telling you to use npm instead and exits.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/bunizao/moodle-cli/main/install.sh | sh
+```
+
+The script:
+
+1. Detects your OS and architecture and picks the matching release asset (`moodle-darwin-arm64` or `moodle-linux-x64`).
+2. Downloads it from the latest GitHub release into a temporary directory.
+3. Makes it executable and runs `--version` as a sanity check.
+4. Installs it to `~/.local/bin/moodle`, creating the directory if needed.
+
+Two environment variables change where it installs from and to:
+
+| Variable | Effect |
+| --- | --- |
+| `MOODLE_INSTALL_DIR` | Install directory, instead of `~/.local/bin`. |
+| `MOODLE_VERSION` | A specific release tag, such as `v0.9.2`, instead of the latest release. |
+
+Add the install directory to your `PATH` if it isn't already:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+<Note>
+  GitHub Releases may include other platform binaries. The install script itself only picks a binary for macOS arm64 and Linux x64; on any other OS or architecture it steps aside for npm.
+</Note>
+
+## npm
+
+```bash
+npm install -g moodle-cli
+moodle --version
+```
+
+Run it without a global install:
+
+```bash
+npx moodle-cli --help
+```
+
+## Bun
+
+```bash
+bun add --global moodle-cli
+moodle --version
+```
+
+Run it without a global install:
+
+```bash
+bunx --bun moodle-cli --help
+```
+
+## Node.js version
+
+moodle-cli requires Node.js 22.13 or newer, because reading cookies out of a Chromium-based browser needs a feature Node only ships from that version on. On an older Node, `moodle auth login` fails with a message to upgrade Node or switch to Bun, which works on any version. Reading Safari's cookie store doesn't have this requirement.
+
+If you're on an older Node and can't upgrade it, use Bun instead:
+
+```bash
+bunx --bun moodle-cli --help
+```
+
+## Update
+
+There's no built-in self-update command. Update the way you installed:
+
+<CodeGroup>
+```bash npm
+npm install -g moodle-cli@latest
+```
+
+```bash Bun
+bun add --global moodle-cli@latest
+```
+</CodeGroup>
+
+For the standalone binary, rerun the install script — it fetches the latest release by default:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/bunizao/moodle-cli/main/install.sh | sh
+```
+
+## Shell completion
+
+`moodle completion <shell>` prints a completion script for `zsh`, `bash` or `fish`. It completes top-level command names only.
+
+<Tabs>
+  <Tab title="Zsh">
+    Save the script somewhere on your `fpath` and let `compinit` pick it up:
+
+    ```bash
+    mkdir -p ~/.zfunc
+    moodle completion zsh > ~/.zfunc/_moodle
+    ```
+
+    Then add this to `~/.zshrc`, before `compinit` runs:
+
+    ```bash
+    fpath=(~/.zfunc $fpath)
+    autoload -Uz compinit && compinit
+    ```
+
+    Open a new shell to pick up the change.
+  </Tab>
+  <Tab title="Bash">
+    Add this to `~/.bashrc`:
+
+    ```bash
+    eval "$(moodle completion bash)"
+    ```
+  </Tab>
+  <Tab title="Fish">
+    Save the script to fish's completions directory, which it loads automatically:
+
+    ```bash
+    mkdir -p ~/.config/fish/completions
+    moodle completion fish > ~/.config/fish/completions/moodle.fish
+    ```
+  </Tab>
+</Tabs>

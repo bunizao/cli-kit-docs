@@ -1,0 +1,129 @@
+---
+title: "Examples"
+description: "What to ask an AI app connected to the Moodle or Ed Discussion MCP servers, and what comes back."
+---
+
+These are real prompts, in plain language, and what the assistant does with them. Building an integration and need the exact arguments and result shapes? See [Developers](/developers/index).
+
+## What's due this fortnight
+
+<Steps>
+  <Step title="You ask">
+    "What's due for me in the next two weeks?"
+  </Step>
+  <Step title="What happens">
+    The assistant calls `due`, which already covers a two-week window, so it doesn't need anything else from you.
+  </Step>
+  <Step title="The assistant says">
+    A short list of what's due, ordered by date, naming the unit and the days remaining for each — and says plainly if nothing is due.
+  </Step>
+</Steps>
+
+## Open a unit section
+
+<Steps>
+  <Step title="You ask">
+    "Show me what's in UNIT this week — section 5."
+  </Step>
+  <Step title="What happens">
+    The assistant calls `unit` with the unit and section you named.
+  </Step>
+  <Step title="The assistant says">
+    The section's activities and files, grouped in the order Moodle shows them, flagging anything with an upcoming due date.
+  </Step>
+</Steps>
+
+## Find and fetch slides
+
+<Steps>
+  <Step title="You ask">
+    "Find the week 3 lecture slides in UNIT and show me what's on them."
+  </Step>
+  <Step title="What happens">
+    The assistant searches with `find`, then opens the matching file with `file`. A PDF or text file comes back as content the assistant can read directly; an image comes back as a picture it can show you, not a link you have to open yourself.
+  </Step>
+  <Step title="The assistant says">
+    Confirms which file it opened and summarizes or describes its content, rather than only linking to it.
+  </Step>
+</Steps>
+
+## Read grades
+
+<Steps>
+  <Step title="You ask">
+    "What are my grades in UNIT?"
+  </Step>
+  <Step title="What happens">
+    The assistant calls `grades` for the unit you named.
+  </Step>
+  <Step title="The assistant says">
+    Each graded item with its mark, and separately notes anything still ungraded — offering to look up an ungraded item with `item` if you want its status.
+  </Step>
+</Steps>
+
+## Search a forum, then read the thread
+
+<Steps>
+  <Step title="You ask">
+    "Has anyone asked about a TASK extension on the UNIT forum?"
+  </Step>
+  <Step title="What happens">
+    The assistant searches with `search_forums`, then opens the matching discussion with `thread`.
+  </Step>
+  <Step title="The assistant says">
+    Whether the question was already asked and answered, with a short summary of the thread and a link to it.
+  </Step>
+</Steps>
+
+## Ed Discussion: latest threads, then read one
+
+<Steps>
+  <Step title="You ask">
+    "What are the newest unanswered threads in UNIT on Ed? Summarize the most recent one."
+  </Step>
+  <Step title="What happens">
+    The assistant lists the newest unanswered threads with `list_threads`, then reads the top one with `read_thread`, which comes back as plain text ready to summarize.
+  </Step>
+  <Step title="The assistant says">
+    The list of unanswered threads by title and age, then a plain-language summary of the newest one's question and any replies so far.
+  </Step>
+</Steps>
+
+## Mark lessons read (ask first)
+
+<Steps>
+  <Step title="You ask">
+    "Mark the week 4 lessons as read for me on Ed, UNIT."
+  </Step>
+  <Step title="The assistant asks first">
+    `mark_lessons_read` changes your progress on Ed and can't be scoped to a preview — the assistant states exactly what it's about to mark ("every lesson in UNIT whose title or module matches 'week 4'") and waits for you to confirm before calling it, the same way it would before any other write.
+  </Step>
+  <Step title="What happens">
+    Once you confirm, the assistant calls `mark_lessons_read` and reports back which lessons it matched and whether each one succeeded.
+  </Step>
+  <Step title="The assistant says">
+    How many lessons it marked and whether any failed, by title.
+  </Step>
+</Steps>
+
+## Submit an assignment: dry run, then real
+
+`submit` only exists on the local server (`moodle mcp serve`), because it uploads files from the machine the server runs on. See [Security](/mcp/security#posting-and-write-gates).
+
+<Steps>
+  <Step title="You ask">
+    "Submit report.pdf to TASK in UNIT."
+  </Step>
+  <Step title="What happens (plan only)">
+    The assistant calls `submit`, which plans the submission without uploading anything yet. It gets back which assignment, which files, and whether a submission statement is required.
+  </Step>
+  <Step title="The assistant shows the plan and asks first">
+    States exactly what will upload and whether it's a draft or final submission, and waits for you to say go ahead — marking it final submits for grading and can't be undone.
+  </Step>
+  <Step title="What happens (real upload)">
+    Once you say go ahead, the assistant calls `submit` again with the upload turned on and gets back Moodle's own confirmation, including the submission time.
+  </Step>
+  <Step title="The assistant says">
+    Confirms the submission went through and repeats back what Moodle confirms, including the submission time.
+  </Step>
+</Steps>

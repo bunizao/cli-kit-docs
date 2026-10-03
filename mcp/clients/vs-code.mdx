@@ -1,0 +1,98 @@
+---
+title: "Connect VS Code"
+description: "Add the Moodle and Ed Discussion MCP servers to VS Code's agent mode."
+---
+
+VS Code's agent mode runs local processes and can also connect to a remote server directly, so it supports every Moodle and Ed Discussion Model Context Protocol (MCP) surface described in [MCP servers](/mcp/index).
+
+Official reference: [Use MCP servers in VS Code](https://code.visualstudio.com/docs/copilot/chat/mcp-servers), fetched 2026-09-21.
+
+## Prerequisites
+
+- moodle-cli and edstem-cli installed and signed in. See [Install](/moodle/install) and [Install](/edstem/install).
+- VS Code with GitHub Copilot Chat's agent mode.
+
+VS Code reads MCP servers from a workspace file, `.vscode/mcp.json`, or from a user-profile file opened with the **MCP: Open User Configuration** command. Both use a `servers` key, not `mcpServers`.
+
+<Tabs>
+  <Tab title="Moodle">
+    ### Preferred: `moodle mcp connect`
+
+    ```bash
+    moodle mcp connect vscode
+    ```
+
+    This writes a bridge entry to your user-profile `mcp.json`:
+
+    ```json
+    {
+      "servers": {
+        "moodle-<profile>": {
+          "command": "moodle",
+          "args": ["mcp", "bridge", "--profile", "<profile>"]
+        }
+      }
+    }
+    ```
+
+    ### Manual: remote, header auth
+
+    ```json
+    {
+      "servers": {
+        "moodle": {
+          "type": "http",
+          "url": "https://<worker-host>/mcp",
+          "headers": { "Authorization": "Bearer <your-token>" }
+        }
+      }
+    }
+    ```
+
+    Get `<your-token>` with `moodle mcp connect vscode --mode remote --show-token`. Avoid hardcoding it in a workspace `.vscode/mcp.json` you commit — use the user-profile file, or an input variable, instead.
+  </Tab>
+  <Tab title="Ed Discussion">
+    ### Stdio, local
+
+    ```json
+    {
+      "servers": {
+        "edstem": {
+          "command": "edstem-mcp",
+          "env": { "EDSTEM_TOKEN": "<your-token>" }
+        }
+      }
+    }
+    ```
+
+    ### Remote, hosted OAuth
+
+    ```json
+    {
+      "servers": {
+        "edstem": { "type": "http", "url": "https://edstem.tuuhub.com/mcp" }
+      }
+    }
+    ```
+
+    ### Remote, self-deployed Worker
+
+    ```json
+    {
+      "servers": {
+        "edstem": {
+          "type": "http",
+          "url": "https://<your-worker>/mcp",
+          "headers": { "Authorization": "Bearer <your-token>" }
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+You can also add either server through the command palette: run **MCP: Add Server**, choose **Workspace** or **Global** scope, and follow the prompts instead of editing JSON by hand.
+
+## Verify the connection
+
+Run **MCP: List Servers** from the command palette to see each server's status and its tools. Use **MCP: Reset Trust** if VS Code is refusing to start a server you've already configured correctly.

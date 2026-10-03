@@ -1,0 +1,85 @@
+---
+title: "Install and sign in"
+description: "Install edstem-cli, create an Ed API token, and save it for later commands."
+---
+
+This page installs `edstem-cli`, creates a personal Ed API token, and saves it so later commands don't ask again.
+
+## Prerequisites
+
+`edstem-cli` needs Node.js 20 or later.
+
+## Install
+
+<CodeGroup>
+
+```bash npm
+npm install -g edstem-cli
+```
+
+```bash bun
+bun add -g edstem-cli
+```
+
+```bash npx
+npx edstem-cli --version
+```
+
+</CodeGroup>
+
+`npx` runs the CLI without a global install; every other example on this site assumes `edstem` is on your `PATH`.
+
+## Create an Ed API token
+
+Create a token at [Ed settings → API tokens](https://edstem.org/settings/api-tokens). `edstem auth login` links to the same page if you run it without a token first.
+
+## Sign in
+
+```bash
+edstem auth login
+```
+
+This prompts for the token without echoing it, verifies it against Ed, and saves it to the token file.
+
+Signing in from a script or CI job? See [Ed Discussion CLI for scripts and agents](/developers/edstem#non-interactive-use) for piping a token in without a prompt.
+
+`auth login` does not require `--yes` or a saved token beforehand: entering a token at the prompt is already an explicit action. If `EDSTEM_TOKEN` is already set in the environment, login still verifies and saves the pasted token, but warns that the environment variable takes precedence over the file at runtime.
+
+<Note>
+  A terminal session with no saved token walks you through this automatically: the first command that needs Ed shows the wordmark, asks for a token, and verifies it before saving.
+</Note>
+
+### Token file
+
+The token is saved to `~/.config/edstem-cli/token`, readable only by you, inside a `~/.config/edstem-cli` directory with the same restricted access. Nothing else is stored in that file — no expiry, no refresh token, only the token text.
+
+## Check what's active
+
+```bash
+edstem auth status
+```
+
+Reports whether the current token was read from `EDSTEM_TOKEN` or from the token file, and verifies it against Ed. `EDSTEM_TOKEN` always takes precedence over the saved file when both are present.
+
+## Sign out
+
+```bash
+edstem auth logout --yes
+```
+
+Removes the token file. This is a mutation like any other: an interactive terminal asks `y/N` first, and a non-interactive shell needs `--yes`. See [Mutations](/concepts/mutations) for why. Logging out does not touch `EDSTEM_TOKEN` — unset it yourself if it's exported in your shell profile.
+
+## Stay current
+
+```bash
+edstem update --check   # report the latest release without installing it
+edstem update --yes     # install the latest release
+```
+
+`update` only prompts for confirmation when a newer release exists and `--check` is not set; `--check` always reports without installing.
+
+## Next
+
+<Card title="Units and unit references" icon="graduation-cap" href="/edstem/units">
+  How `<unit>` arguments resolve, and the `unit#number` thread reference.
+</Card>

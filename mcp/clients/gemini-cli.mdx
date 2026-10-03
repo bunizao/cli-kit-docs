@@ -1,0 +1,97 @@
+---
+title: "Connect Gemini CLI"
+description: "Add the Moodle and Ed Discussion MCP servers to Gemini CLI."
+---
+
+Gemini CLI can run the Moodle and Ed Discussion Model Context Protocol (MCP) servers as local processes or connect to either over a remote URL. `moodle mcp connect` doesn't support Gemini CLI yet, so add both servers by hand.
+
+Official reference: [MCP servers with the Gemini CLI](https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md), fetched 2026-09-21.
+
+## Prerequisites
+
+- moodle-cli and edstem-cli installed and signed in. See [Install](/moodle/install) and [Install](/edstem/install).
+- Gemini CLI installed.
+
+Gemini CLI reads MCP servers from `~/.gemini/settings.json` (every project) or `.gemini/settings.json` (one project), under a `mcpServers` key.
+
+<Tabs>
+  <Tab title="Moodle">
+    ### Bridge, local
+
+    ```json
+    {
+      "mcpServers": {
+        "moodle": {
+          "command": "moodle",
+          "args": ["mcp", "bridge"]
+        }
+      }
+    }
+    ```
+
+    This keeps your MCP access token in the OS keychain instead of in this file.
+
+    ### Remote, header auth
+
+    ```json
+    {
+      "mcpServers": {
+        "moodle": {
+          "httpUrl": "https://<worker-host>/mcp",
+          "headers": { "Authorization": "Bearer <your-token>" }
+        }
+      }
+    }
+    ```
+
+    Get `<your-token>` with `moodle mcp connect codex --mode remote --show-token` (any supported client's `--show-token` prints the same Worker token). That command also writes a Codex entry to `~/.codex/config.toml`; delete it afterwards if you don't use Codex.
+  </Tab>
+  <Tab title="Ed Discussion">
+    ### Stdio, local
+
+    ```json
+    {
+      "mcpServers": {
+        "edstem": {
+          "command": "edstem-mcp",
+          "env": { "EDSTEM_TOKEN": "<your-token>" }
+        }
+      }
+    }
+    ```
+
+    ### Remote, hosted OAuth
+
+    ```json
+    {
+      "mcpServers": {
+        "edstem": {
+          "httpUrl": "https://edstem.tuuhub.com/mcp",
+          "oauth": { "enabled": true }
+        }
+      }
+    }
+    ```
+
+    ### Remote, self-deployed Worker
+
+    ```json
+    {
+      "mcpServers": {
+        "edstem": {
+          "httpUrl": "https://<your-worker>/mcp",
+          "headers": { "Authorization": "Bearer <your-token>" }
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Verify the connection
+
+```text
+/mcp
+```
+
+Run this inside the Gemini CLI to see the server list, connection status, and each server's available tools.

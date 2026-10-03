@@ -1,0 +1,47 @@
+---
+title: "Connect another client"
+description: "Configure any MCP client — a local process or a remote URL — against Moodle or Ed Discussion by hand."
+---
+
+If your client isn't one of the ones with its own page, it almost certainly supports one of two shapes: launching a local process, or calling a remote URL with a header. Check your client's own Model Context Protocol (MCP) documentation for its exact config key names, then adapt one of these.
+
+## Generic stdio
+
+Any client that can launch a local command takes the same two fields: the command to run, and its arguments.
+
+```json
+{
+  "command": "moodle",
+  "args": ["mcp", "bridge"]
+}
+```
+
+```json
+{
+  "command": "edstem-mcp",
+  "env": { "EDSTEM_TOKEN": "<your-token>" }
+}
+```
+
+The Moodle bridge needs no environment variable — it reads its token from the OS keychain. `moodle mcp serve --stdio` is the local server directly, if your client needs the server itself rather than the bridge (this is the only way to get the `submit` tool).
+
+## Generic remote connection with a header
+
+Any client that can send a custom header on a remote MCP connection can use either Worker directly, without a bridge:
+
+```json
+{
+  "url": "https://<worker-host>/mcp",
+  "headers": { "Authorization": "Bearer <your-token>" }
+}
+```
+
+Get a Moodle token with `moodle mcp connect <any-supported-client> --mode remote --show-token`; the token is the same regardless of which client name you pass. The command also writes that client's config entry, so pick one you use or remove the entry afterwards. Ed's self-deployed Worker accepts either `Authorization: Bearer <your-token>` or `X-API-Key: <your-token>`.
+
+## Choosing OAuth or a header
+
+Use a header (Bearer or `X-API-Key`) when your client runs somewhere you control and can store a secret safely — a local process, a server you manage. It's simpler: no pairing flow, no browser round trip.
+
+Use OAuth when your client is hosted and you don't want to paste a long-lived token into a web form, or when the client does not support custom headers at all — most browser-based hosted clients fall into this category. For Moodle, that means `moodle mcp pair` and signing in through the browser, the same way [claude.ai](/mcp/clients/claude-ai) does. For Ed Discussion, that means the hosted endpoint at `https://edstem.tuuhub.com/mcp`.
+
+If your client supports both, prefer the bridge (for Moodle) or a stdio server (for Ed) when it can run one at all — see [Security](/mcp/security#practical-advice) for why keeping the token out of client config is worth the extra local process.

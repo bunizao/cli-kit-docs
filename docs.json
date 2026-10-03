@@ -1,0 +1,271 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "cli-kit",
+  "description": "Terminal and MCP access to Moodle, Ed Discussion and OnTrack for students, staff, scripts and AI agents.",
+  "colors": {
+    "primary": "#0B7285",
+    "light": "#5AC8D8",
+    "dark": "#0B7285"
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "favicon": "/favicon.svg",
+  "fonts": {
+    "heading": {
+      "family": "IBM Plex Sans"
+    },
+    "body": {
+      "family": "IBM Plex Sans"
+    }
+  },
+  "appearance": {
+    "default": "system"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/bunizao/cli-kit-docs"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Quickstart",
+      "href": "/quickstart"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/bunizao/cli-kit-docs"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": [
+              "index",
+              "quickstart",
+              "choose-a-surface"
+            ]
+          },
+          {
+            "group": "Compare",
+            "pages": [
+              "compare/features",
+              "compare/web-coverage"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Moodle",
+        "groups": [
+          {
+            "group": "Moodle CLI",
+            "pages": [
+              "moodle/index",
+              "moodle/install",
+              "moodle/sign-in",
+              "moodle/daily-use",
+              "moodle/units-and-activities",
+              "moodle/grades-and-deadlines",
+              "moodle/forums",
+              "moodle/downloads",
+              "moodle/submit",
+              "moodle/mcp-server",
+              "moodle/configuration",
+              "moodle/troubleshooting",
+              "moodle/uninstall"
+            ]
+          },
+          {
+            "group": "Command reference",
+            "expanded": false,
+            "pages": [
+              "moodle/reference/index",
+              "moodle/reference/due",
+              "moodle/reference/news",
+              "moodle/reference/find",
+              "moodle/reference/get",
+              "moodle/reference/submit",
+              "moodle/reference/open",
+              "moodle/reference/user",
+              "moodle/reference/units",
+              "moodle/reference/todo",
+              "moodle/reference/alerts",
+              "moodle/reference/overview",
+              "moodle/reference/activities",
+              "moodle/reference/download",
+              "moodle/reference/grades",
+              "moodle/reference/threads",
+              "moodle/reference/forums",
+              "moodle/reference/doctor",
+              "moodle/reference/completion",
+              "moodle/reference/uninstall",
+              "moodle/reference/auth",
+              "moodle/reference/mcp",
+              "moodle/reference/commands",
+              "moodle/reference/skills"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Ed Discussion",
+        "groups": [
+          {
+            "group": "Ed Discussion CLI",
+            "pages": [
+              "edstem/index",
+              "edstem/install",
+              "edstem/units",
+              "edstem/threads",
+              "edstem/posting",
+              "edstem/lessons-and-slides",
+              "edstem/files",
+              "edstem/activity",
+              "edstem/mcp-server",
+              "edstem/configuration",
+              "edstem/troubleshooting"
+            ]
+          },
+          {
+            "group": "Command reference",
+            "expanded": false,
+            "pages": [
+              "edstem/reference/index",
+              "edstem/reference/auth",
+              "edstem/reference/user",
+              "edstem/reference/units",
+              "edstem/reference/threads",
+              "edstem/reference/replies",
+              "edstem/reference/lessons",
+              "edstem/reference/slides",
+              "edstem/reference/files",
+              "edstem/reference/activity",
+              "edstem/reference/update",
+              "edstem/reference/commands",
+              "edstem/reference/skills"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "OnTrack",
+        "groups": [
+          {
+            "group": "OnTrack CLI",
+            "pages": [
+              "ontrack/index",
+              "ontrack/install",
+              "ontrack/sign-in",
+              "ontrack/units-and-tasks",
+              "ontrack/downloads",
+              "ontrack/task-workflow",
+              "ontrack/chats",
+              "ontrack/roles",
+              "ontrack/configuration",
+              "ontrack/troubleshooting"
+            ]
+          },
+          {
+            "group": "Command reference",
+            "expanded": false,
+            "pages": [
+              "ontrack/reference/index",
+              "ontrack/reference/user",
+              "ontrack/reference/auth",
+              "ontrack/reference/units",
+              "ontrack/reference/tasks",
+              "ontrack/reference/chats",
+              "ontrack/reference/roles",
+              "ontrack/reference/commands",
+              "ontrack/reference/skills"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "MCP",
+        "groups": [
+          {
+            "group": "Connect an AI app",
+            "pages": [
+              "mcp/index",
+              "mcp/examples",
+              "mcp/troubleshooting"
+            ]
+          },
+          {
+            "group": "Connect a client",
+            "pages": [
+              "mcp/clients/claude-code",
+              "mcp/clients/claude-desktop",
+              "mcp/clients/claude-ai",
+              "mcp/clients/codex",
+              "mcp/clients/chatgpt",
+              "mcp/clients/cursor",
+              "mcp/clients/vs-code",
+              "mcp/clients/windsurf",
+              "mcp/clients/gemini-cli",
+              "mcp/clients/other"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Developers",
+        "groups": [
+          {
+            "group": "Developers",
+            "pages": [
+              "developers/index"
+            ]
+          },
+          {
+            "group": "Shared behaviour",
+            "pages": [
+              "concepts/command-model",
+              "concepts/output-formats",
+              "concepts/errors-and-exit-codes",
+              "concepts/mutations",
+              "concepts/humans-and-agents",
+              "concepts/configuration"
+            ]
+          },
+          {
+            "group": "Scripting each CLI",
+            "pages": [
+              "developers/moodle",
+              "developers/edstem",
+              "developers/ontrack"
+            ]
+          },
+          {
+            "group": "Agents",
+            "pages": [
+              "agents/skills",
+              "agents/prompting"
+            ]
+          },
+          {
+            "group": "MCP internals",
+            "pages": [
+              "mcp/how-it-works",
+              "mcp/security",
+              "mcp/tools/moodle",
+              "mcp/tools/edstem"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

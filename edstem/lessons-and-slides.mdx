@@ -1,0 +1,104 @@
+---
+title: "Lessons and slides"
+description: "List and read Ed Lessons, mark them read, and show or submit quiz slides."
+---
+
+List and read Ed Lessons, mark them read, and show or submit answers to quiz slides.
+
+## Lessons
+
+### List lessons in a unit
+
+```bash
+edstem lessons UNIT
+edstem lessons list UNIT --module "Week 2" --status unattempted
+```
+
+`edstem lessons UNIT` defaults to `list`.
+
+| Flag | Effect |
+| --- | --- |
+| `--module <module>` | Module ID, or text matched against the module name. `all` disables the filter. |
+| `--type <type>` | Exact lesson type, such as `general`. `all` disables the filter. |
+| `--state <state>` | Exact state, such as `active` or `scheduled`. `all` disables the filter. |
+| `--status <status>` | Progress: `unattempted`, `attempted`, `completed`, or `all`. |
+
+Filters are case-insensitive and match exactly, except `--module`, which also accepts a substring of the module name. Passing a value that doesn't match anything in the unit is a usage error that names the values that *do* exist, so you don't have to guess:
+
+```text
+Unknown lesson status "grade". Available values: attempted, completed, unattempted. Use "all" or omit the filter to include every value.
+```
+
+If an **unfiltered** `lessons list` returns an empty array, that unit has no Ed Lessons at all — not a filtering problem.
+
+### Show and read a lesson
+
+```bash
+edstem lessons show 67890
+edstem lessons read 67890
+```
+
+`show` returns the lesson and its slides as structured data. `read` renders the same lesson as Markdown and never changes anything on Ed.
+
+### Mark lessons as read
+
+```bash
+edstem lessons mark-read UNIT Pre-Reading --dry-run
+edstem lessons mark-read UNIT Pre-Reading --yes
+edstem lessons mark-read UNIT --all --yes
+```
+
+`mark-read` is a mutation. Every word you pass after `<unit>` must appear in the lesson's title or its module name (case-insensitive, all words required) for that lesson to be selected. Selecting the whole unit needs `--all` explicitly — queries alone never match everything, so a typo in a query can't silently mark nothing instead of what you meant, and an empty query list without `--all` is a usage error rather than a silent no-op.
+
+For each matching lesson, the CLI opens it, then walks its slides: a quiz slide is opened (recorded as **viewed**), and every other slide type is marked complete (recorded as **completed**). `--delay <seconds>` (default `0`) waits between each slide update, useful if you're marking a lot of lessons read and don't want to hammer Ed. If a lesson fails partway through, the result for that lesson reports the error and marks it `partial` when at least one slide succeeded before the failure — lessons that succeeded earlier in the same run are unaffected.
+
+## Slides
+
+### Show a slide's content, questions, responses, or quiz context
+
+```bash
+edstem slides show 4401
+edstem slides show 4401 --section questions
+edstem slides show 4401 --section responses
+```
+
+`--section` chooses what `show` returns:
+
+| Value | Returns |
+| --- | --- |
+| `slide` (default) | The slide itself: content, type, status, file URL. |
+| `questions` | The slide's quiz questions. |
+| `quiz` | Same as `questions`; Ed treats a quiz as its questions. |
+| `responses` | Your recorded responses to the slide's questions. |
+
+### Read a slide as Markdown
+
+```bash
+edstem slides read 4401
+```
+
+Renders the slide's content as Markdown; never changes anything on Ed.
+
+### Submit a slide
+
+Submitting is a two-step flow: save an answer for one question, then submit everything you've saved for the slide.
+
+```bash
+# Step 1 — save an answer for one question. Choices are one-based; repeat --choice for multi-select.
+edstem slides submit 4401 --question 991 --choice 2 --yes
+
+# Step 2 — submit all saved answers for the slide.
+edstem slides submit 4401 --yes
+```
+
+| Flag | Effect |
+| --- | --- |
+| `--question <question>` | Question ID to save an answer for. |
+| `--choice <number>` | One-based choice index. Repeat for a multi-select answer. |
+| `--amend` | Amend an existing response instead of rejecting a duplicate. |
+
+`--question` and `--choice` come as a pair: `--choice` without `--question` and `--question` without at least one `--choice` are both usage errors, and so is `--amend` without `--question`. Call `slides submit <slide>` with no `--question` to submit every answer you've saved for that slide — that's the call that finalizes the quiz slide.
+
+<Card title="Download lesson files" icon="download" href="/edstem/files">
+  PDF slides and Ed-hosted attachments.
+</Card>

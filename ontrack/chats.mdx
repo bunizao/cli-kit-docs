@@ -1,0 +1,56 @@
+---
+title: Chats
+description: Check unread counts, read a task's comment history, and message a tutor.
+icon: message-circle
+---
+
+Check unread comment counts, read a task's full comment history, and send a message to a tutor.
+
+## Unread counts
+
+```bash
+ontrack chats UNIT
+```
+
+Lists every task in the unit with its status and unread comment count — a scan for what needs your attention, without marking anything read.
+
+## Reading a task's history
+
+```bash
+ontrack chats read UNIT TASK --yes
+```
+
+`chats read` prints the full comment history for one task. It always requires `--yes`, even at an interactive terminal that would normally get a y/N prompt:
+
+```text
+Reading OnTrack chat history marks non-discussion comments read.
+Re-run with --yes after acknowledging this side effect.
+```
+
+That's because OnTrack itself marks non-discussion comments as read the moment you fetch a task's history — there's no read-only way to view it. `ontrack` refuses to do that silently, so it makes you pass `--yes` explicitly and prints a warning to stderr every time it does. Use `--dry-run` to see the same warning without fetching anything.
+
+Full syntax: [`ontrack chats read`](/ontrack/reference/chats).
+
+## Marking comments read without reading them
+
+```bash
+ontrack chats mark-read UNIT TASK
+```
+
+This is the explicit version of the same side effect: it marks a task's comments read without printing the history. Like other mutations, it prompts for confirmation at a terminal, or takes `--yes` / `--dry-run` elsewhere — see [Mutations](/concepts/mutations).
+
+## Sending a message
+
+```bash
+ontrack chats send UNIT TASK --message "Please review this." --yes
+```
+
+`--message` is sent exactly as given, up to 4095 characters. The plan echoes the message and its target task before asking for confirmation:
+
+```text
+Send  "Please review this."
+  to  task 1.1 in project 1041
+Continue? (y/N)
+```
+
+Full syntax: [`ontrack chats`](/ontrack/reference/chats).

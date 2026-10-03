@@ -1,0 +1,83 @@
+---
+title: "Connect Codex"
+description: "Add the Moodle and Ed Discussion MCP servers to Codex CLI."
+---
+
+Codex CLI runs local processes and can also connect to a remote server directly, so it supports every Moodle and Ed Discussion Model Context Protocol (MCP) surface described in [MCP servers](/mcp/index).
+
+Official reference: [MCP in Codex](https://learn.chatgpt.com/docs/extend/mcp?surface=cli), fetched 2026-09-21.
+
+## Prerequisites
+
+- moodle-cli and edstem-cli installed and signed in. See [Install](/moodle/install) and [Install](/edstem/install).
+- Codex CLI installed.
+
+Codex reads MCP servers from `~/.codex/config.toml` (or `.codex/config.toml` for a project-scoped config).
+
+<Tabs>
+  <Tab title="Moodle">
+    ### Preferred: `moodle mcp connect`
+
+    ```bash
+    moodle mcp connect codex
+    ```
+
+    This writes a bridge block to `~/.codex/config.toml`, wrapped in `# >>> moodle-cli mcp:...` markers so it can find and update its own entry later:
+
+    ```toml
+    [mcp_servers."moodle-<profile>"]
+    command = "moodle"
+    args = ["mcp", "bridge", "--profile", "<profile>"]
+    ```
+
+    ### Manual: remote, header auth
+
+    ```toml
+    [mcp_servers."moodle"]
+    url = "https://<worker-host>/mcp"
+    http_headers = { Authorization = "Bearer <your-token>" }
+    ```
+
+    Get `<your-token>` with `moodle mcp connect codex --mode remote --show-token`.
+  </Tab>
+  <Tab title="Ed Discussion">
+    ### Stdio, local
+
+    ```bash
+    codex mcp add edstem --env EDSTEM_TOKEN=<your-token> -- edstem-mcp
+    ```
+
+    or directly in `config.toml`:
+
+    ```toml
+    [mcp_servers.edstem]
+    command = "edstem-mcp"
+    env_vars = ["EDSTEM_TOKEN"]
+    ```
+
+    ### Remote, hosted OAuth
+
+    ```toml
+    [mcp_servers.edstem]
+    url = "https://edstem.tuuhub.com/mcp"
+    ```
+
+    Then run `codex mcp login edstem` to complete the OAuth sign-in.
+
+    ### Remote, self-deployed Worker
+
+    ```toml
+    [mcp_servers.edstem]
+    url = "https://<your-worker>/mcp"
+    http_headers = { Authorization = "Bearer <your-token>" }
+    ```
+  </Tab>
+</Tabs>
+
+## Verify the connection
+
+```bash
+codex mcp list
+```
+
+Or, inside a Codex session, run `/mcp` to see active servers and their tools.

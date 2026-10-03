@@ -1,0 +1,97 @@
+---
+title: "Connect Cursor"
+description: "Add the Moodle and Ed Discussion MCP servers to Cursor."
+---
+
+Cursor runs local processes and can also connect to a remote server directly, so it supports every Moodle and Ed Discussion Model Context Protocol (MCP) surface described in [MCP servers](/mcp/index).
+
+Official reference: [Model Context Protocol (MCP)](https://cursor.com/docs/context/mcp), fetched 2026-09-21.
+
+## Prerequisites
+
+- moodle-cli and edstem-cli installed and signed in. See [Install](/moodle/install) and [Install](/edstem/install).
+- Cursor installed.
+
+Cursor reads MCP servers from `~/.cursor/mcp.json` (every project) or `.cursor/mcp.json` in a project root (that project only).
+
+<Tabs>
+  <Tab title="Moodle">
+    ### Preferred: `moodle mcp connect`
+
+    ```bash
+    moodle mcp connect cursor
+    ```
+
+    This writes a bridge entry to `~/.cursor/mcp.json`:
+
+    ```json
+    {
+      "mcpServers": {
+        "moodle-<profile>": {
+          "command": "moodle",
+          "args": ["mcp", "bridge", "--profile", "<profile>"]
+        }
+      }
+    }
+    ```
+
+    ### Manual: remote, header auth
+
+    ```json
+    {
+      "mcpServers": {
+        "moodle": {
+          "type": "http",
+          "url": "https://<worker-host>/mcp",
+          "headers": { "Authorization": "Bearer <your-token>" }
+        }
+      }
+    }
+    ```
+
+    Get `<your-token>` with `moodle mcp connect cursor --mode remote --show-token`.
+  </Tab>
+  <Tab title="Ed Discussion">
+    ### Stdio, local
+
+    ```json
+    {
+      "mcpServers": {
+        "edstem": {
+          "command": "edstem-mcp",
+          "env": { "EDSTEM_TOKEN": "<your-token>" }
+        }
+      }
+    }
+    ```
+
+    ### Remote, hosted OAuth
+
+    ```json
+    {
+      "mcpServers": {
+        "edstem": { "url": "https://edstem.tuuhub.com/mcp" }
+      }
+    }
+    ```
+
+    Cursor prompts for OAuth sign-in the first time it connects.
+
+    ### Remote, self-deployed Worker
+
+    ```json
+    {
+      "mcpServers": {
+        "edstem": {
+          "url": "https://<your-worker>/mcp",
+          "headers": { "Authorization": "Bearer <your-token>" }
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Verify the connection
+
+Open Cursor's **Customize** sidebar panel to see each server's connection state and toggle it on or off. If a server fails to connect, check **MCP Logs** in Cursor's Output panel (Cmd+Shift+U) for the error.

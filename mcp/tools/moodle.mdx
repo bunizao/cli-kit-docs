@@ -1,0 +1,230 @@
+---
+title: "Moodle MCP tool catalog"
+description: "Every tool the Moodle MCP servers expose, with its parameters, server availability, and whether it writes to Moodle."
+---
+
+This catalog lists the 12 tools the Moodle Model Context Protocol (MCP) server provides, in the order it lists them. Descriptions are the exact text the server ships for each tool.
+
+Eleven tools are read-only and available on every Moodle MCP surface: the local stdio server (`moodle mcp serve`), the bridge (`moodle mcp bridge`), and the remote Worker (Bearer or OAuth). `submit` is the exception — it needs the files it uploads to sit on the same machine as the server, so it is local-only.
+
+For how these surfaces differ, see [How MCP works](/mcp/how-it-works). For argument syntax on the CLI equivalents, see [`/moodle/reference`](/moodle/reference/index).
+
+### home
+
+Today, timezone, due items and unread counts. Use when: dashboard. Not for: due for longer deadline lists. Refs: days defaults to 14. Then: unit or item. Cost: small dashboard.
+
+<ParamField path="days" type="integer" default="14">
+  Window size in days. Minimum 1, maximum 365.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
+### due
+
+Items due in a date window. Use when: deadlines. Not for: item for submission details. Refs: unit code, name, id or URL. Then: item with activity_id. Cost: up to 20 rows by default.
+
+<ParamField path="unit" type="string | integer">
+  Unit code, name, id or URL. Omit to cover every enrolled unit.
+</ParamField>
+
+<ParamField path="days" type="integer" default="14">
+  Window size in days. Minimum 1, maximum 365.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="20">
+  Maximum rows to return. Minimum 1, maximum 200.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
+### units
+
+Enrolled units with ids, codes and names. Use when: unit names. Not for: unit for sections. Refs: none. Then: unit with a name or id. Cost: small list.
+
+<ParamField path="limit" type="integer" default="200">
+  Maximum units to return. Minimum 1, maximum 200.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
+### unit
+
+Section index and current section; section argument returns activities and files. Use when: a unit or section. Not for: find for a named item. Refs: unit code, name, id or URL; section number or name. Then: item or file with activity id. Cost: index about 4 KB; section about 0.5 KB.
+
+<ParamField path="unit" type="string | integer" required>
+  Unit code, name, id or URL.
+</ParamField>
+
+<ParamField path="section" type="string | integer">
+  Section number or name. Omit to return the section index and the current section.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
+### find
+
+Ranked sections, activities and discussion subjects. Use when: find slides or a task. Not for: search_forums for post text; due for deadlines. Refs: query and optional unit code, name, id or URL. Then: item or file with id. Cost: up to 20 rows by default.
+
+<ParamField path="query" type="string" required>
+  Search text. At least 1 character.
+</ParamField>
+
+<ParamField path="unit" type="string | integer">
+  Unit code, name, id or URL to narrow the search.
+</ParamField>
+
+<ParamField path="types" type="string[]">
+  Result types to include.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="20">
+  Maximum rows to return. Minimum 1, maximum 200.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
+### item
+
+Activity due dates, status, grades, files, or latest forum threads. Use when: submission or item detail. Not for: file for binary content. Refs: id, same-site URL, or UNIT TASK phrase. Then: file with id or files URL. Cost: one item.
+
+<ParamField path="ref" type="string | integer" required>
+  Activity id, a same-site URL, or a `UNIT TASK` phrase.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
+### grades
+
+Grades across units or in one unit. Use when: my grades. Not for: item for submission status. Refs: optional unit code, name, id or URL. Then: item for an ungraded task. Cost: graded_only narrows output.
+
+<ParamField path="unit" type="string | integer">
+  Unit code, name, id or URL. Omit to cover every enrolled unit.
+</ParamField>
+
+<ParamField path="graded_only" type="boolean" default="false">
+  Return only items that already have a grade.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
+### news
+
+Latest announcement threads with first-post text. Use when: announcements. Not for: search_forums for other discussions. Refs: optional unit code, name, id or URL. Then: thread with discussion id. Cost: up to 5 announcements by default.
+
+<ParamField path="unit" type="string | integer">
+  Unit code, name, id or URL. Omit to cover every enrolled unit.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="5">
+  Maximum announcements to return. Minimum 1, maximum 200.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
+### thread
+
+A discussion and a page of compact posts, with attachment links. Use when: discussion posts. Not for: news for announcements. Refs: discussion_id; offset and limit. Then: increase offset while posts_total exceeds returned. Cost: up to 20 posts by default.
+
+<ParamField path="discussion_id" type="integer" required>
+  Discussion id. Must be greater than 0.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="20">
+  Maximum posts to return. Minimum 1, maximum 200.
+</ParamField>
+
+<ParamField path="offset" type="integer" default="0">
+  Posts to skip before the returned page.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
+### search_forums
+
+Matching posts with unit and forum name maps. Use when: forum post text. Not for: find for activity names. Refs: query, optional unit or courseId and forumId. Then: thread with discussion_id. Cost: bounded forum scan; total covers scanned scope.
+
+<ParamField path="query" type="string" required>
+  Search text. At least 1 character.
+</ParamField>
+
+<ParamField path="unit" type="string | integer">
+  Unit code, name, id or URL to narrow the search.
+</ParamField>
+
+<ParamField path="courseId" type="integer">
+  Moodle course id, as an alternative to `unit`.
+</ParamField>
+
+<ParamField path="forumId" type="integer">
+  Moodle forum id to narrow the search to one forum.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="20">
+  Maximum matching posts to return. Minimum 1, maximum 200.
+</ParamField>
+
+<ParamField path="includePostText" type="boolean" default="true">
+  Include post body text in the results.
+</ParamField>
+
+<ParamField path="titlesOnly" type="boolean" default="false">
+  Match against discussion titles only, not post bodies.
+</ParamField>
+
+<ParamField path="unreadOnly" type="boolean" default="false">
+  Return only unread posts.
+</ParamField>
+
+<ParamField path="sortBy" type="string" default="relevance">
+  `relevance` or `recent`.
+</ParamField>
+
+<ParamField path="maxForums" type="integer" default="20">
+  Maximum forums to scan. Minimum 1, maximum 200.
+</ParamField>
+
+<ParamField path="maxDiscussionsPerForum" type="integer" default="50">
+  Maximum discussions to scan per forum. Minimum 1, maximum 200.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
+### submit
+
+Upload local files into an assignment; returns the receipt Moodle shows afterwards. Use when: upload assignment files. Not for: item for status only. Refs: assignment id, same-site URL or UNIT TASK phrase; local file paths. Then: dry_run (default) only plans; show the plan to the person, then rerun with dry_run false; final submits for grading and cannot be undone. Cost: writes to Moodle.
+
+<ParamField path="ref" type="string | integer" required>
+  Assignment id, a same-site URL, or a `UNIT TASK` phrase.
+</ParamField>
+
+<ParamField path="files" type="string[]" default="[]">
+  Local file paths to upload. At most 20.
+</ParamField>
+
+<ParamField path="final" type="boolean" default="false">
+  Submit for grading instead of saving a draft. Cannot be undone.
+</ParamField>
+
+<ParamField path="replace" type="boolean" default="false">
+  Replace files already attached to the submission instead of adding to them.
+</ParamField>
+
+<ParamField path="accept_statement" type="boolean" default="false">
+  Accept the submission statement the assignment requires, when it requires one.
+</ParamField>
+
+<ParamField path="dry_run" type="boolean" default="true">
+  Plan the upload without writing to Moodle. Set to `false` to actually upload.
+</ParamField>
+
+Available on: **local only** (`moodle mcp serve`). Writes to Moodle when `dry_run` is `false`.
+
+### file
+
+One authenticated file as embedded content, at most 16 MiB. Use when: download a file. Not for: item for file choices. Refs: resource id, same-site URL, or UNIT TASK phrase. Then: read the returned resource. Cost: binary content up to 16 MiB.
+
+<ParamField path="ref" type="string | integer" required>
+  Resource id, a same-site URL, or a `UNIT TASK` phrase.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.

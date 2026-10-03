@@ -1,0 +1,30 @@
+---
+title: "moodle submit"
+description: "Upload local files into an assignment; returns the receipt Moodle shows afterwards."
+sidebarTitle: "submit"
+---
+
+```bash
+moodle submit [options] <ref> [files...]
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `ref` | Yes | Assignment id, URL, or UNIT TASK phrase |
+| `files...` | No | Local files to upload |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--final` | Also submit for grading. Moodle does not allow undoing this. |
+| `--replace` | Remove the files already in the submission first. |
+| `--accept-statement` | Agree to the site's submission statement when it requires one. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

@@ -1,0 +1,120 @@
+---
+title: "ontrack tasks"
+description: "Tasks in a unit: list, read, submit, set state"
+sidebarTitle: "tasks"
+---
+
+```bash
+ontrack tasks [options] [command]
+```
+
+## ontrack tasks list
+
+```bash
+ontrack tasks list [options] <unit>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit code, name or project id |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--status <status...>` | Filter by raw task status |
+
+## ontrack tasks show
+
+```bash
+ontrack tasks show [options] <unit> <task>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit code, name or project id |
+| `task` | Yes | Task abbreviation, such as 1.1 |
+
+## ontrack tasks read
+
+```bash
+ontrack tasks read [options] <unit> <task>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit code, name or project id |
+| `task` | Yes | Task abbreviation, such as 1.1 |
+
+## ontrack tasks get
+
+```bash
+ontrack tasks get [options] <unit> <task>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit code, name or project id |
+| `task` | Yes | Task abbreviation, such as 1.1 |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--resources` | Download linked task resources |
+| `--dest <path>` | Destination path |
+| `--force` | Replace an existing destination |
+
+## ontrack tasks set
+
+```bash
+ontrack tasks set [options] <unit> <task> <state>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit code, name or project id |
+| `task` | Yes | Task abbreviation, such as 1.1 |
+| `state` | Yes | Workflow state |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## ontrack tasks submit
+
+```bash
+ontrack tasks submit [options] <unit> <task>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit code, name or project id |
+| `task` | Yes | Task abbreviation, such as 1.1 |
+
+**Options**
+
+| Flags | Description | Choices |
+| --- | --- | --- |
+| `--file <path...>` | Files in upload-requirement order |  |
+| `--type <type>` | Submission type | `ready_for_feedback`, `need_help`, `assess_in_portfolio` |
+| `--comment <text>` | Submission comment |  |
+| `--accept-tii-eula` | Accept the Turnitin EULA |  |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+Global options apply to every command. See [Global options](/ontrack/reference/index#global-options).

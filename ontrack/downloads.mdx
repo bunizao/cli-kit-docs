@@ -1,0 +1,53 @@
+---
+title: Downloads
+description: Download unit resources and task sheets, and what --dest, --force and -o each control.
+icon: download
+---
+
+`units get` downloads a ZIP of every resource attached to a unit; `tasks get` downloads one task's sheet by default, or its linked resources with `--resources`.
+
+```bash
+ontrack units get UNIT --dest unit-resources.zip
+ontrack tasks get UNIT TASK --dest task-sheet.pdf
+ontrack tasks get UNIT TASK --resources --dest task-resources.zip
+```
+
+Full syntax: [`ontrack units`](/ontrack/reference/units), [`ontrack tasks`](/ontrack/reference/tasks).
+
+## `--dest` vs. `-o`/`--output`
+
+These control two different files:
+
+- `--dest <path>` is where the **downloaded content** (the ZIP or the task sheet PDF) is written. It's specific to `units get` and `tasks get`.
+- `-o, --output <file>` is the global flag that writes the **command's own result** — the JSON, YAML or table describing what happened — to a file instead of stdout. It works on every command.
+
+You can use both on the same download: `--dest` places the file, `-o` captures the confirmation record.
+
+```bash
+ontrack tasks get UNIT TASK --dest task-sheet.pdf -o result.json
+```
+
+If you omit `--dest`, `units get` writes `ontrack-resources-<project-id>.zip` and `tasks get` writes the filename OnTrack reports for the task's sheet or resources, both in the current directory.
+
+## Refusing to overwrite
+
+A download refuses to replace an existing file at the destination:
+
+```text
+Output file already exists: /home/you/task-sheet.pdf
+```
+
+This is checked before the download starts, and enforced again as the file is written, so a file that appears between the check and the write still stops the command. Pass `--force` to replace it.
+
+## How `--force` replaces a file
+
+Every download writes to a temporary file next to the destination first, then either:
+
+- links it to the destination (default) — this fails if the destination exists, which is the second overwrite guard above, or
+- renames it onto the destination (`--force`) — an atomic replace, so a reader never sees a half-written file.
+
+The temporary file is always cleaned up, whether the download succeeds, fails, or is cancelled with `Ctrl-C`.
+
+<Note>
+  A task with no task sheet or no resources returns an `upstream_api` error rather than an empty file. See [Troubleshooting](/ontrack/troubleshooting) for that and other error codes.
+</Note>

@@ -1,0 +1,132 @@
+---
+title: MCP server
+description: What moodle mcp serve, bridge, deploy and its other subcommands do, from the CLI side.
+sidebarTitle: MCP server
+icon: server
+---
+
+`moodle mcp <subcommand>` runs and manages moodle-cli's MCP (Model Context Protocol) server — the interface an AI agent uses to read your Moodle data. This page covers what each subcommand does on your machine. For connecting a specific client app (Claude Code, Claude Desktop, Codex, VS Code, Cursor, and others) once a server is running, see [MCP servers](/mcp/index), [How it works](/mcp/how-it-works) and the client pages under [Connect a client](/mcp/clients/claude-code).
+
+## Local: `mcp serve`
+
+```bash
+moodle mcp serve
+```
+
+Runs an MCP server using your local session — no Cloudflare account, deployment, or network exposure required. This is what a locally-run client (Claude Code, Claude Desktop, Codex, Cursor) talks to directly.
+
+The local server exposes one tool the managed remote server does not: `submit`, which uploads local files into an assignment. It only appears locally because the remote server has no filesystem to read files from. Calling it without explicitly asking for an upload only gets the plan, never an upload, matching the CLI's own plan-first behavior described in [Submit](/moodle/submit).
+
+See the full list of tools it exposes, with their parameters and read/write status, at [Moodle MCP tool catalog](/mcp/tools/moodle).
+
+## Managed deployment: `mcp deploy`
+
+```bash
+moodle mcp deploy
+```
+
+Deploys (or updates) a private MCP server to your own Cloudflare account, so hosted clients that can't run a local process (like claude.ai) can reach it. This needs a Cloudflare account; Cloudflare's free tier covers it within its usage limits.
+
+`deploy` runs through these steps, in order:
+
+1. Validating your Moodle session
+2. Checking Cloudflare access
+3. Preparing a Worker release
+4. Uploading private credentials
+5. Deploying the new version
+6. Uploading your Moodle session
+7. Running MCP and Moodle checks
+8. Installing renewal and connecting your local client
+
+Two credentials come out of this: an MCP access token (what clients use to read data from the deployed server) and a session sync token (what this computer uses to push a fresh Moodle session to it later). Both are stored in your OS's credential manager — Keychain on macOS, the Secret Service on Linux, or Credential Manager on Windows — never in logs or project files. Where none of those is available, moodle-cli falls back to a permission-restricted local file, encrypted on Windows.
+
+Flags:
+
+| Flag | Effect |
+| --- | --- |
+| `--dry-run` | Preview deployment changes without applying them |
+| `--repair` | Repair authentication and managed deployment state |
+| `--rotate-key` | Rotate the session encryption key and migrate the active session |
+| `--rotate-token` | Rotate the MCP access token, with an overlap window so in-flight clients don't break |
+| `--rollback` | Restore the previous healthy Worker release |
+
+### Managing the deployment tool
+
+`deploy` needs a small companion tool to manage the Worker on your Cloudflare account. moodle-cli uses one already on your system if it's a compatible version; otherwise it downloads the right version once, with your confirmation, into `~/.config/moodle-cli/tools/wrangler@<version>` and reuses it from there on every later `deploy`.
+
+## `mcp status`
+
+```bash
+moodle mcp status
+```
+
+Reports local and remote Moodle MCP readiness. `--verbose` includes sanitized deployment diagnostics; `--logs` includes sanitized recent Worker logs.
+
+## `mcp login`
+
+```bash
+moodle mcp login
+```
+
+Gets a fresh Moodle session locally and uploads it to your deployed server, using the session sync token from `mcp deploy`. Run this after your Moodle session expires and the deployed copy has gone stale — `mcp session push` and the renewal job (below) are the other two ways a deployed session gets refreshed.
+
+## `mcp connect`
+
+```bash
+moodle mcp connect codex
+moodle mcp connect claude-code --mode remote --show-token
+```
+
+Connects a supported MCP client by writing (or updating) that client's own configuration file. The supported clients are `codex`, `claude-desktop` (also matched by plain `claude`), `claude-code`, `vscode` (also matched by `vs-code`), and `cursor`. Passed with no argument, `connect` targets whichever supported clients it detects installed.
+
+`--mode` is `bridge` (the default) or `remote`:
+
+- **`bridge`** writes a command invocation (`moodle mcp bridge --profile ...`) into the client's config. No token is ever written to disk in the client's own file — the bridge process reads the access token from your OS credential manager at connect time and attaches it to each request itself.
+- **`remote`** writes the deployed server's address and the access token directly into the client's config, for clients that connect to a remote MCP server directly.
+
+`--show-token` reveals the access token once, after you confirm — useful for a client `connect` doesn't have a built-in setup for; see [Other clients](/mcp/clients/other).
+
+## `mcp bridge`
+
+```bash
+moodle mcp bridge --profile default
+```
+
+Runs the process that `mcp connect --mode bridge` wires into a client's config. It reads MCP requests from the local client, forwards them to the managed remote server with the access token attached, and streams the response back — the client process never sees or stores the token itself.
+
+## `mcp pair`
+
+```bash
+moodle mcp pair
+```
+
+Opens a pairing window so Claude can connect to the remote MCP server through OAuth. The window lasts 10 minutes and the code it prints is good for one approval — request a new one if it expires or you need to pair a second time.
+
+## `mcp clients` and `mcp revoke`
+
+```bash
+moodle mcp clients
+moodle mcp revoke CLIENT_ID
+moodle mcp revoke --all
+```
+
+`clients` lists pending and approved OAuth clients on your deployed server. `revoke` removes one client by id, or every client, token, pending authorization and pairing window at once with `--all`.
+
+## `mcp session push` and `mcp renewal run`
+
+```bash
+moodle mcp session push --stdin < cookie.txt
+moodle mcp renewal run --profile default
+```
+
+`session push` uploads a Moodle cookie from stdin directly, an advanced path for scripting a session refresh without a browser. `renewal run` is what the installed background renewal job (set up during `mcp deploy`'s last step) actually runs: it checks the deployed session's freshness and renews it if needed.
+
+## `mcp remove`
+
+```bash
+moodle mcp remove
+```
+
+Removes one managed Moodle MCP deployment: deletes the Worker, the local renewal job, client registrations, and deployment credentials; keeps your local Moodle configuration but clears its matching authentication cache. Without `--yes`, it asks you to type the Worker's name to confirm — required, since deleting the Worker can't be undone; `--yes` skips the prompt.
+
+For removing everything moodle-cli has installed locally, including background jobs and configuration, see [Uninstall](/moodle/uninstall).

@@ -1,0 +1,46 @@
+---
+title: Feature matrix
+description: What each CLI can do, side by side, backed by their command trees and MCP tool catalogs.
+sidebarTitle: Features
+icon: table
+---
+
+This table lines up every command and MCP (Model Context Protocol) tool across the three CLIs, so you can see what each one covers at a glance. Every cell names the command or MCP tool that provides the capability, or `—` when that CLI doesn't have one. Rows come from what at least one of the three CLIs does; a `—` means that product's platform either doesn't have the concept or the CLI doesn't cover it yet, not that the row is wrong for that product. See [Web coverage](/compare/web-coverage) for how each of these compares to what the platform's own web UI offers.
+
+| Capability | Moodle | Ed Discussion | OnTrack |
+| --- | --- | --- | --- |
+| List units | `units list` (alias `courses`) | `units list` (alias `courses`, `projects`) | `units list` (alias `courses`, `projects`) |
+| Unit detail | `units show` | `units show` | `units show` |
+| Deadlines | `due` | — | `tasks list` (shows each task's due date) |
+| Grades | `grades` | — | — |
+| Announcements / news | `news` | — | — |
+| Forum / thread read | `threads show` | `threads show`, `threads read` | — |
+| Thread search | `forums search` | `threads search` | — |
+| Post / reply | — | `threads send`, `replies send` | — |
+| Lesson / slide content | — | `lessons show`, `slides show` | — |
+| Quiz answer | — | `slides submit` | — |
+| Files download | `download` (alias `dl`), `get` | `files get` | `units get`, `tasks get` |
+| Assignment / task submit | `submit` | — | `tasks submit` |
+| Task state | — | — | `tasks set` |
+| Chat with tutor | — | — | `chats list`, `chats read`, `chats send` |
+| Roles | — | — | `roles list` |
+| Notifications | `alerts` | — | — |
+| Dashboard | bare `moodle`, `overview` | — | — |
+| Open in browser | `open` | — | — |
+| Shell completion | `completion` | — | — |
+| Self-update | — (`npm`/`bun` reinstall only) | `update` | — (`npm`/`bun` reinstall only) |
+| Agent skill generation | `skills generate`, `skills add` | `skills generate` | `skills generate` |
+| `commands --json` | `commands --json` | `commands --json` | `commands --json` |
+| Local MCP | `mcp serve` | `edstem-mcp` (separate binary) | — |
+| Remote MCP | `mcp deploy` (your own Cloudflare Worker) | Hosted at a fixed URL, or self-deployed via the Cloudflare button | — |
+| OAuth for hosted clients | `mcp pair` | Built into the hosted server | — |
+| Keepalive / renewal | `auth keepalive`, `mcp renewal` | — (tokens don't need renewal) | — |
+| Uninstall | `uninstall` (a CLI command) | — (manual `npm`/`bun` removal) | — (manual `npm`/`bun` removal) |
+
+<Note>
+  Rows come from each CLI's full command list and MCP tool catalog, so they stay in sync with what's actually shipped. "Self-update" and "Uninstall" list a `—` where the product has no dedicated command, even though the package can still be removed or updated with `npm`/`bun` directly.
+</Note>
+
+<Card title="Web coverage" icon="globe" href="/compare/web-coverage">
+  What each platform's web UI offers that the CLI doesn't reach yet.
+</Card>

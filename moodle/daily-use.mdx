@@ -1,0 +1,125 @@
+---
+title: Daily use
+description: The short forms moodle-cli resolves against your enrolled units — no subcommand required for most of what you check every day.
+sidebarTitle: Daily use
+icon: terminal
+---
+
+Most days you don't need a subcommand name. moodle-cli treats the words after `moodle` as a target — a unit, a section, an item, or a pasted Moodle URL — and works out what you mean against your own enrolled units. This page covers that shorthand. For exact flags on any command, follow the links to `/moodle/reference`.
+
+## The dashboard
+
+```bash
+moodle
+```
+
+With no target, moodle-cli shows today's date in your site's timezone, upcoming due items, unread notification and message counts, and your enrolled units with their current section. It's the same data `moodle overview` returns, shaped for a glance.
+
+## A unit
+
+```bash
+moodle UNIT
+```
+
+`UNIT` can be the site's own short code, its full name, a numeric id, or a unit URL — moodle-cli resolves it against your enrolled units, never against a guessed format. Bare `moodle UNIT` shows the section index, plus the current section's activities, due items in the unit, and the latest news post, when the terminal renders a table (JSON output stays at the index).
+
+A few words right after `UNIT` are treated as shortcuts to other commands instead of a section or item lookup:
+
+| Word after `UNIT` | Same as |
+| --- | --- |
+| `grades` | `moodle grades UNIT` |
+| `news` | `moodle news UNIT` |
+| `due` | `moodle due UNIT` |
+| `files` | `moodle find "*" UNIT --types resource,folder` |
+| `forums` | Same forum list as `moodle forums list UNIT`, but unlimited — `forums list` caps at 50 by default. |
+
+## A section
+
+```bash
+moodle UNIT SECTION
+```
+
+`SECTION` matches a section by name first. If nothing matches by name and `SECTION` is a bare number, moodle-cli falls back to matching that number as a standalone token inside a section's name — not a substring. `moodle UNIT 7` matches a section named with the token `7` (for example a section titled `Week 7`), and never matches a section named `Week 17`, because `17` and `7` are different tokens even though one contains the other's digit.
+
+```bash
+moodle UNIT 7        # matches a section whose name contains the token "7"
+```
+
+If the site names its sections generically (`Section 1`, `Section 2`, ...) and no section name contains that token at all, moodle-cli falls back once more to the section's own positional number, and marks the result `positional` in its output so you know the match came from position, not from the name you typed.
+
+## An item by phrase
+
+```bash
+moodle UNIT "TASK"
+```
+
+Anything after `UNIT` that isn't a section reference is looked up as an item phrase — an assignment, quiz, resource, page, folder, or forum activity name (or close to it). A single unambiguous match returns that item's detail: due date and status for assignments and quizzes, files for resources and folders, or the latest threads for a forum activity.
+
+```bash
+moodle UNIT "Assignment 2"
+moodle UNIT "week 3 lecture slides"
+```
+
+## Pasting a Moodle URL
+
+```bash
+moodle 'https://moodle.example.edu/mod/assign/view.php?id=91234'
+```
+
+Pass any single argument that parses as a URL and moodle-cli dispatches on its path instead of treating it as a unit or item phrase. The URL's host must match your configured Moodle site exactly, or it's rejected. moodle-cli recognizes these paths:
+
+| URL path | Resolves to |
+| --- | --- |
+| `/mod/forum/discuss.php?d=` | A forum discussion (`#pNNNN` in the URL shows just that post) |
+| `/mod/forum/view.php?id=` | A forum's list of discussions |
+| `/mod/assign/view.php?id=` | An assignment's detail |
+| `/mod/quiz/view.php?id=` | A quiz's detail |
+| `/mod/resource/view.php?id=` | A resource's detail and files |
+| `/mod/url/view.php?id=` | A link (URL) activity's detail |
+| `/mod/page/view.php?id=` | A page's detail |
+| `/mod/folder/view.php?id=` | A folder's detail and files |
+| `/course/view.php?id=` | The unit overview |
+| `/course/user.php?mode=grade&id=` or any `/grade/report/...` path | The unit's grades |
+
+Any other `/mod/*/view.php` URL — a lesson, a choice, a book, a feedback activity, and so on — resolves to its parent unit, not to that activity's own detail, because moodle-cli only has dedicated handling for the module types listed above. There's no general "show me this activity" fallback for module types outside that list.
+
+<Note>
+  Both `moodle get` and `moodle download` accept file and resource URLs; see [Downloads](/moodle/downloads) rather than duplicating that here.
+</Note>
+
+## Finding things across a unit (or all of them)
+
+```bash
+moodle find "week 7 slides" UNIT
+```
+
+`find` ranks sections, activities and discussion subjects by how well they match your words, across one unit or, with `unit` omitted, across everything you're enrolled in. See [`moodle find`](/moodle/reference/find) for its flags, including `--types` to narrow the search to specific activity kinds.
+
+## Downloading by reference
+
+```bash
+moodle get "UNIT week 7 slides" --to ./downloads --force
+```
+
+`get` resolves a resource id, a Moodle URL, or a `UNIT TASK` phrase the same way the bare-target syntax above does, then downloads the matching file. `--to` sets the destination directory and `--force` replaces a file already there. This is distinct from `moodle download` (alias `dl`), which takes a course-module ID or an authenticated Moodle file URL directly, with no phrase resolution — see [Downloads](/moodle/downloads) for the difference and the rest of its flags.
+
+## Opening a reference in your browser
+
+```bash
+moodle open UNIT
+moodle open "UNIT Assignment 2"
+```
+
+`open` resolves a unit or activity reference the same way as the bare-target syntax, then hands the resulting URL to your OS's default opener (`open` on macOS, `xdg-open` on Linux, `explorer.exe` on Windows) instead of printing structured data. It accepts a numeric id, a Moodle URL, or a `UNIT TASK` phrase. See [`moodle open`](/moodle/reference/open).
+
+## How ambiguity resolves
+
+moodle-cli never guesses a unit code's format — it matches what you type against the names and codes your account can actually see. When more than one unit, section or item matches, and you're at an interactive terminal, you get a numbered picker built from the candidate list to choose from.
+
+Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#ambiguous-and-candidates) for what happens outside a terminal.
+
+## The JSON output
+
+Every command accepts `--json` for a script or another program to consume; at an interactive terminal, table output is the default and needs no flag.
+
+Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#json-shapes-per-command) for each command's field-by-field shape.

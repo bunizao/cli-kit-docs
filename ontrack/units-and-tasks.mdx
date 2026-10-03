@@ -1,0 +1,82 @@
+---
+title: Units and tasks
+description: List your units, resolve a UNIT reference, and read tasks and task sheets.
+icon: list-checks
+---
+
+List your enrolled units, resolve a `UNIT` reference, and read a unit's tasks and task sheets.
+
+## Units
+
+```bash
+ontrack units
+ontrack units list --include-inactive
+ontrack units show UNIT
+```
+
+`units` (aliases `courses`, `projects`) lists what you're enrolled in. By default it shows active units only; `--include-inactive` adds past ones. `units show UNIT` returns the unit's task definitions alongside your project for it — including `target_grade` and `submitted_grade` at the project level, and per task a `target_grade` / `target_grade_label`, current `grade` / `grade_label`, `status` / `status_label`, and the dates that decide whether it's overdue.
+
+Full syntax: [`ontrack units`](/ontrack/reference/units).
+
+## Resolving UNIT
+
+`UNIT` is a project ID, or the unit's code or name exactly as OnTrack shows it. A digit-only reference is always read as a project ID directly. Anything else is matched, in order:
+
+1. An exact, case-insensitive match on the unit code, among your **active** units.
+2. Failing that, a case-insensitive substring match against the code or the name, among active units.
+3. Failing that, the same two passes again against **every** unit, including inactive ones.
+
+If a reference matches more than one project at any of these steps, `ontrack` refuses to guess: it exits with a usage error listing the matching project IDs, and you rerun the command with one of them.
+
+```text
+Unit UNIT matches multiple projects: 1041, 1187. Use a project ID.
+```
+
+<Info>
+  The CLI never assumes what a unit code looks like — it resolves purely against your own unit list. Run `ontrack units --include-inactive` to see the full vocabulary for your site.
+</Info>
+
+## Tasks
+
+```bash
+ontrack tasks UNIT
+ontrack tasks show UNIT TASK
+ontrack tasks read UNIT TASK
+```
+
+`tasks UNIT` lists every task in the unit with its status and due date. `tasks show` returns one task's full row plus its description, upload requirements, and whether it has a task sheet or resources. `tasks read` converts the task sheet PDF to Markdown and prints it — the same content, in a form you can grep or hand to an agent.
+
+Full syntax: [`ontrack tasks`](/ontrack/reference/tasks).
+
+### Resolving TASK
+
+`TASK` is the task abbreviation shown by `ontrack tasks UNIT` (for example `1.1`), matched case-insensitively, or the numeric task definition ID.
+
+### Filtering by status
+
+```bash
+ontrack tasks UNIT --status working_on_it
+ontrack tasks UNIT --status ready_for_feedback --status redo
+```
+
+`--status` takes one or more raw OnTrack status values:
+
+| Status | Meaning |
+| --- | --- |
+| `not_started` | Not begun yet |
+| `working_on_it` | In progress |
+| `need_help` | Flagged for tutor help |
+| `ready_for_feedback` | Submitted, awaiting review |
+| `redo` | Sent back for another attempt |
+| `fix_and_resubmit` | Needs a fix and another submission |
+| `discuss` | Held for a discussion with a tutor |
+| `rediscuss` | Sent back for another discussion |
+| `demonstrate` | Needs an in-person demonstration |
+| `attention_required` | Flagged by staff |
+| `complete` | Finished |
+| `fail` | Marked failed |
+| `time_exceeded` | Closed for exceeding the time allowed |
+| `feedback_exceeded` | Closed after exceeding feedback attempts |
+| `assess_in_portfolio` | Deferred to portfolio assessment |
+
+Only the first three — `not_started`, `working_on_it`, `need_help` — are ones you can set yourself. The rest are set by OnTrack in response to a submission or a tutor action; see [Task workflow](/ontrack/task-workflow) for the states you can write and [Downloads](/ontrack/downloads) for pulling a task's sheet or resources to disk.

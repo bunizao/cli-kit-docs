@@ -1,0 +1,76 @@
+---
+title: The command model
+description: The shared shape every command in the family follows, and how references resolve.
+sidebarTitle: Command model
+icon: terminal
+---
+
+Every command in `moodle`, `edstem` and `ontrack` follows the same shape:
+
+```text
+<tool> <plural-noun> [verb] [scope] [id] [flags]
+```
+
+`edstem threads search 12345 assignment deadline`, `ontrack tasks set UNIT TASK working_on_it`, and `moodle activities list UNIT` are all instances of the same pattern: a noun (what you're working with), a verb (what to do with it), then scope and identifiers.
+
+## Verbs
+
+The verb vocabulary is shared across all three CLIs and stable across releases:
+
+```text
+list, show, read, get, search, send, submit, set, mark-read
+```
+
+A domain command at noun depth must use one of these — there's no other verb to type. `auth` and `skills` are the exception — they're action groups (`login`, `status`, `logout`, `keepalive` under `auth`; `generate`, `add` under `skills`), not nouns with verbs, so their subcommands carry no `verb` field.
+
+## Default verbs by arity
+
+Typing the verb is usually optional. The CLI looks at how many arguments follow a noun and inserts the matching default verb for that count — `edstem units` (zero arguments) becomes `edstem units list`; `edstem units UNIT` (one argument) becomes `edstem units show UNIT`. This still works when flags are mixed in with the arguments.
+
+## Noun aliases
+
+`units` is the canonical enrolment noun in all three CLIs; `courses` and `projects` are equivalent aliases everywhere. `moodle courses` and `moodle units` are the same command.
+
+## References: UNIT, TASK, SECTION
+
+A `UNIT` argument accepts whatever the site itself uses to identify it — a numeric id, the exact code, or the exact name — and, in `moodle`, a URL. None of the three tools assumes a code follows a particular format (letters plus digits, a fixed length, and so on): they resolve what you typed against the site's own unit list, because that list is the only thing that's actually true across institutions. Run `<tool> units` to see the vocabulary a given site uses.
+
+`TASK` (OnTrack) and thread/lesson references (Ed) work the same way: a short form you'd recognize from the site, or a numeric id.
+
+`SECTION` (Moodle only) is a section number or name inside a unit. A bare number matches that number in the site's own section name, not a sequential index — a reference to `7` never matches a section actually named `17`.
+
+### Ambiguity
+
+When a reference matches more than one thing, the CLI never guesses. At a terminal, you get a picker; anywhere else, the JSON error carries a `candidates` array alongside the error code, so a script or agent can present the choice instead of failing blind. Moodle, for example, reports `code: "ambiguous"` with a `candidates` list of `{ id, name, code }` when more than one unit or section matches, and `code: "not_found"` when none do. See [Errors and exit codes](/concepts/errors-and-exit-codes) for how that shows up in the JSON output.
+
+## Moodle's extra porcelain
+
+Moodle layers two conveniences on top of the shared model that the other two CLIs don't have:
+
+- `moodle UNIT [SECTION]` — a bare unit (and optional section) reference at the top level, without a noun, opens that unit directly.
+- Pasting a Moodle URL as the target: `moodle 'https://moodle.example.edu/course/view.php?id=34637'` and `moodle download 'https://moodle.example.edu/mod/resource/view.php?id=91234' --dest ./file.pdf` both work, because the CLI recognizes course, forum, assignment, quiz, resource, page, folder and grade-report URLs and resolves them the same way it resolves a typed reference.
+
+## `commands --json` as self-description
+
+Every CLI in the family can describe its own commands as data: `moodle commands --json`, `edstem commands --json`, `ontrack commands --json`. The output includes every command's aliases, positional arguments, options, enum values, nested commands and a `mutating` flag — this is what `skills generate` reads to build each tool's `SKILL.md`.
+
+A trimmed excerpt from `ontrack.commands.json`:
+
+```json
+{
+  "name": "tasks",
+  "noun": "tasks",
+  "description": "Tasks in a unit: list, read, submit, set state",
+  "mutating": false,
+  "commands": [
+    { "name": "list", "verb": "list", "mutating": false, "positionals": [{ "name": "unit", "required": true }] },
+    { "name": "read", "verb": "read", "mutating": false, "positionals": [{ "name": "unit", "required": true }, { "name": "task", "required": true }] },
+    { "name": "set", "verb": "set", "mutating": true, "positionals": [{ "name": "unit", "required": true }, { "name": "task", "required": true }, { "name": "state", "required": true }] },
+    { "name": "submit", "verb": "submit", "mutating": true, "positionals": [{ "name": "unit", "required": true }, { "name": "task", "required": true }] }
+  ]
+}
+```
+
+<Card title="Output formats" icon="brackets-curly" href="/concepts/output-formats">
+  What the table and JSON forms of a command's output look like.
+</Card>

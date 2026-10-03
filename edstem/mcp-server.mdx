@@ -1,0 +1,58 @@
+---
+title: "MCP server"
+description: "Run edstem-mcp on your machine, connect to the hosted server, or deploy your own Cloudflare Worker."
+---
+
+Ed Discussion is available over MCP (Model Context Protocol) in three ways: a server that runs on your machine, a hosted server, and a Cloudflare Worker you can deploy yourself from the same source. All three expose the same tool catalog — see [Ed Discussion MCP tools](/mcp/tools/edstem) — and all three need an Ed API token somewhere in the chain. For how to point a specific client (Claude, Codex, ChatGPT, and others) at any of these, see [Connect a client](/mcp/clients/codex) and its sibling pages; this page only covers what each option does.
+
+## Run it locally: `edstem-mcp`
+
+The package also installs `edstem-mcp`, an MCP server that runs on your own machine — your MCP client starts it for you:
+
+```json
+{
+  "mcpServers": {
+    "edstem": {
+      "command": "edstem-mcp",
+      "env": { "EDSTEM_TOKEN": "<your-token>" }
+    }
+  }
+}
+```
+
+It authenticates with `EDSTEM_TOKEN`, the same environment variable the CLI reads, falling back to the saved token file if the variable isn't set.
+
+The `create_thread` and `reply_thread` tools — the only tools that post to Ed — are disabled by default. Set `EDSTEM_ALLOW_POSTING=1` in the server's environment to enable them. Every other tool is always available without that variable, but not all of them are read-only: `mark_lessons_read`, `submit_slide`, and `submit_slide_answer` write to Ed too, marking lesson progress and submitting quiz answers, without needing `EDSTEM_ALLOW_POSTING`.
+
+## Hosted server
+
+A hosted server is available at `https://edstem.tuuhub.com/mcp` for clients that connect over OAuth rather than running a local program.
+
+### What the hosted service stores
+
+You paste your Ed token into the service's authorization, reconnect, or settings form. The service checks it against Ed before storing anything — a token that fails verification is never stored.
+
+Your token is encrypted before it's stored, and the key that decrypts it is kept separately, as a server secret. Alongside it the service keeps only your Ed user ID, your Ed user name, when it was last verified, and whether it's still valid — never the token in readable form.
+
+Your MCP client never receives your raw Ed token. Instead, the service issues its own access and refresh tokens for your client to use, so those can be revoked or expire independently of your Ed account.
+
+Full data handling and retention terms, including what account deletion removes and what backups may retain, are in the service's [Terms of Service](https://github.com/bunizao/edstem-cli/blob/main/TOS.md).
+
+## Self-hosting
+
+Want your own endpoint instead of the hosted one? See [Ed Discussion CLI for scripts and agents](/developers/edstem#self-deploying-the-ed-worker) for the deploy steps, the Worker's environment variables, and the static-token mode it accepts instead of OAuth.
+
+<CardGroup cols={2}>
+  <Card title="MCP overview" icon="server" href="/mcp/index">
+    What an MCP server is and how the moodle-cli family exposes one.
+  </Card>
+  <Card title="How MCP servers work here" icon="git-branch" href="/mcp/how-it-works">
+    Local vs. hosted MCP servers, and how tools map to CLI commands.
+  </Card>
+  <Card title="Ed Discussion tool catalog" icon="list" href="/mcp/tools/edstem">
+    Every tool, what it accepts, and whether it writes.
+  </Card>
+  <Card title="Connect a client" icon="plug" href="/mcp/clients/codex">
+    Client-specific setup for Codex, Claude, ChatGPT, and others.
+  </Card>
+</CardGroup>

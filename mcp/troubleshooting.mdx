@@ -1,0 +1,68 @@
+---
+title: "MCP troubleshooting"
+description: "Fixes for the errors you'll actually hit connecting a client to the Moodle or Ed Discussion MCP servers."
+---
+
+## Client can't connect at all
+
+Check that the command or URL in your client's config matches exactly what `moodle mcp connect` wrote, or what you typed by hand — a stdio entry needs the right `command` and `args`, a remote entry needs the right URL and header name. See your client's page under [Connect a client](/mcp/clients/other) and the client's own Model Context Protocol (MCP) logs; most clients (Claude Desktop, VS Code, Cursor) write a per-server log you can check before assuming the server itself is broken.
+
+For a local stdio server (`moodle mcp serve`, `edstem-mcp`, or `moodle mcp bridge`), confirm the binary runs at all outside the client:
+
+```bash
+moodle mcp serve --stdio
+```
+
+If that hangs waiting on stdin without an error, the binary is fine and the problem is in the client's config.
+
+## 401 or 403 error
+
+An authorization error like this means the credential in your request didn't match. For a native header connection, check the token in your client config and re-run `moodle mcp connect <client> --mode remote --show-token` if you're not sure it's current. For OAuth, a 403 during approval usually means no pairing window is open — see below. Ed's self-deployed Worker rejects the request instead if you send both `Authorization` and `X-API-Key` with different values; send one or make them match.
+
+Building on this? The exact error shape is in [How MCP works](/mcp/how-it-works#error-responses).
+
+## Session expired
+
+```bash
+moodle mcp login
+moodle mcp status
+```
+
+`moodle mcp login` acquires a fresh Moodle session and uploads it to the Worker. Run `moodle mcp status --verbose` first if you want to see what expired before fixing it.
+
+## Pairing code rejected
+
+The code from `moodle mcp pair` is valid for ten minutes and allows five wrong guesses before the window closes outright. If it's rejected, check you copied it in full and that ten minutes hasn't passed — then run `moodle mcp pair` again for a new code and a new window. A stale approval page left open past that point has nothing left to approve.
+
+## A tool is missing or won't run
+
+These are two different symptoms:
+
+- **`submit` isn't in the tool list at all** when you're connected to the remote Worker or the bridge. This is correct — `submit` only exists on `moodle mcp serve`, because it needs local files. Switch to a local stdio connection if you need it.
+- **A tool is listed but fails with `INSUFFICIENT_SCOPE`.** This is Ed Discussion's posting and write gate: `create_thread` and `reply_thread` need `EDSTEM_ALLOW_POSTING=1` (stdio) or `MCP_ALLOW_POSTING=1` (a self-deployed Worker), or the write scope granted on the hosted service's OAuth consent screen. The tool stays listed either way; only the call fails. See [Security](/mcp/security#posting-and-write-gates).
+
+## Bridge can't find a token in the keychain
+
+`moodle mcp bridge` reads the MCP access token from the OS keychain and the endpoint from your last deployment; if either is missing you'll see a usage error rather than a connection attempt. This means no deployment exists for that profile yet, or it was created under a different profile than the one the bridge is using:
+
+```bash
+moodle mcp status
+moodle mcp deploy
+```
+
+Deploy (or redeploy) under the right profile, then reconnect the client.
+
+## Worker deploy fails
+
+`moodle mcp deploy` needs a Cloudflare account it can sign in to. A failure early in the deployment steps (`moodle mcp status --logs` shows which one) usually means the Cloudflare sign-in expired or the account has hit a free-tier limit:
+
+```bash
+moodle mcp status --logs
+moodle --yes mcp deploy --repair
+```
+
+`--repair` repairs your stored Moodle session after an interrupted upload, without redeploying the whole Worker. If the deploy itself is broken (not only the session), rerun `moodle mcp deploy` after confirming Cloudflare access outside the CLI.
+
+## Ed: revoked a token but it still works for a few minutes
+
+A self-deployed Ed Worker remembers a verified token for five minutes so it doesn't have to re-check Ed on every request. That means a token you just revoked on Ed's side can keep working against that Worker until that memory expires — it never stores the raw token, only that it was valid. If you need a revocation to take effect immediately, redeploy the Worker to clear it, or wait five minutes.

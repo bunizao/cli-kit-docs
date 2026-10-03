@@ -1,0 +1,17 @@
+node_modules/
+.mintlify/
+.DS_Store
+
+# Local credentials and debug output.
+.env
+.env.*
+*.log
+
+# Local agent installations and configuration.
+.agents/
+.claude/
+.codex/
+.kiro/
+.qwen/
+.rovodev/
+skills-lock.json

@@ -1,0 +1,68 @@
+---
+title: Humans and agents
+description: How the CLI decides who it's talking to, and what changes because of it.
+sidebarTitle: Humans and agents
+icon: users
+---
+
+Every command in the family draws its output and asks its questions differently depending on who's on the other end. That decision is made once per run and used everywhere: prompts, spinners, table color, and the shape of an error.
+
+## How the CLI decides
+
+The CLI treats you as a human only when all of these hold:
+
+- The requested output format is `table` (not `json` or `yaml` — if you passed `--json`, you're treated as an agent even at a terminal).
+- `stdin` is a TTY — an interactive terminal, not a pipe or a redirected file.
+- `stdout` is a TTY, the same way.
+- None of `CLI_AGENT`, `CLAUDECODE`, or `CI` is set in the environment (checked with a truthy test: unset, empty, `0` and `false` all count as not set).
+
+Anyone who fails any of those checks is an "agent" for this run — which covers a real script, a CI job, and a coding agent that runs commands through a non-interactive shell, even one with both streams technically attached to a pseudo-terminal (pty). That's why the family documents `CLI_AGENT=1`: it's the one signal an agent can set for itself when its shell does look like a terminal.
+
+## What each audience gets
+
+<Tabs>
+  <Tab title="Human">
+    - Tables instead of JSON, colored by the shared theme (see below).
+    - A picker when a required argument is missing — `edstem threads` with no unit prompts a `select` populated from your own units, not a "missing required argument" error.
+    - `threads send` prompts for `--title` and opens `$EDITOR` for the body when neither `--body` nor `--body-file` is given.
+    - A `y/N` confirmation before any mutation, instead of requiring `--yes`.
+    - Spinners for long-running steps, drawn on stderr so stdout stays clean even if you're piping this particular run for some other reason.
+    - A guided first-run sign-in the first time a command needs a session and finds none — moodle shows a wordmark, explains what's about to happen, and offers a menu of sign-in methods (your own browser, a CLI-controlled browser, or pasting a cookie) that comes back after a failed attempt instead of exiting.
+  </Tab>
+  <Tab title="Agent">
+    - JSON by default (or YAML/table if explicitly requested).
+    - No prompts, ever. A missing required argument is a `usage` error whose `hint` is the full usage line and argument descriptions — enough to retry correctly without needing `--help`.
+    - No mutation confirmation: pass `--yes` or the command fails with a `usage` error rather than waiting on an answer that will never come.
+    - No spinners; a step's outcome is printed as one plain completed line once it's done.
+  </Tab>
+</Tabs>
+
+## The shared color roles
+
+When color is on, every CLI paints four roles consistently, so the meaning transfers between tools:
+
+| Role | Color | Means |
+| --- | --- | --- |
+| `key` | Cyan | An identifier you could type back — a unit code, a task number. |
+| `subject` | Bold | What you gave the command — files, a message, a title. |
+| `target` | Bold cyan | Where it's going — the assignment, the thread, the unit. |
+| `dim` | Dim | A secondary fact — a date, a count, a label. |
+
+Status words (`overdue`, `graded`, `not started`, `announcement`, and similar) are colored by meaning rather than by column: `overdue` reads as danger (red), `graded` as success (green), `not started` as muted (dim), `announcement` as accent (magenta), regardless of which product or which column they appear in. A negated word like "not graded" is checked before the positive form it contains, so it doesn't get misread as success.
+
+None of this shows up in a pipe or with `NO_COLOR` set — the exact same text renders with no escape codes at all, so grepping a piped table works the same as parsing its JSON.
+
+## Escapes for a prompt that can't run
+
+Some interactive prompts have a non-interactive equivalent built in, for exactly the case where an agent needs the data a prompt would collect but can't answer one:
+
+- A masked password prompt, used for a token, throws without a terminal; the calling command offers a `--token-stdin` style flag instead — `edstem auth login --token-stdin` reads the token from the first line of stdin.
+- An editor prompt, used for a post body, throws without a terminal; the calling command offers a `--body-file` style flag instead — `edstem replies send ... --body-file -` reads the body from stdin, or a path reads from that file. `$VISUAL` or `$EDITOR` is what opens when a person runs the same command interactively without either flag.
+
+## Ctrl+C
+
+Cancelling an interactive prompt — Ctrl+C or Escape — is treated as the person's decision, not a failure: it produces a `cancelled` error and exit code `130`, the same convention a shell uses for a process killed by a signal.
+
+<Card title="Errors and exit codes" icon="octagon-alert" href="/concepts/errors-and-exit-codes">
+  The full exit-code table, including `130` for cancellation.
+</Card>

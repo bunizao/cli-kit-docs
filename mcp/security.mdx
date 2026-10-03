@@ -1,0 +1,77 @@
+---
+title: "Security"
+description: "Where MCP credentials live, what gates a write, and how to revoke or rotate access."
+---
+
+This page covers the threat model behind each Model Context Protocol (MCP) surface: where secrets are stored, what a write requires, and how to take access back. For the request path each of these sits on, see [How MCP works](/mcp/how-it-works).
+
+## Where credentials live
+
+<Tabs>
+  <Tab title="Moodle">
+    A deployment keeps three secrets in the OS keychain (macOS Keychain, Linux Secret Service, or Windows Credential Manager, all under the service name `moodle-cli-mcp`, falling back to an OS-protected file only when the native backend is unavailable):
+
+    - The **MCP access token**, what a bridge or native header client presents as its Bearer token.
+    - The **session sync token**, which lets your machine push a refreshed Moodle session to the Worker.
+    - The **session encryption key**, which the Worker uses to encrypt the Moodle session at rest.
+
+    The Worker itself never stores your tokens in plain text: it only keeps a way to check that a token presented to it is correct, plus the key it uses to encrypt your session. Your Moodle sign-in — the browser cookie and related account details — is encrypted and stored in your own private Worker, one per deployment.
+  </Tab>
+  <Tab title="Ed Discussion">
+    Stdio reads `EDSTEM_TOKEN` from your environment (or a saved token file) and holds it only in the local process. A self-deployed Worker stores nothing permanently; it verifies whatever Bearer or `X-API-Key` token you configured against Ed's API on every request. The hosted OAuth service is the one place Ed credentials persist server-side: a separate service stores each user's Ed token encrypted, with a rotatable encryption key so a key change doesn't break existing accounts.
+  </Tab>
+</Tabs>
+
+## What is never logged
+
+Your Moodle session cookie and MCP access token are never logged or printed. Tool results only ever contain what a tool explicitly returns, error responses never echo back your request or a stack trace, and a status check reports only timestamps and a shortened, unusable fragment of your credential, never the credential itself. `moodle --verbose` prints sanitized request paths and timing, never a URL query or a credential.
+
+## Posting and write gates
+
+<Tabs>
+  <Tab title="Moodle">
+    `submit` only exists on the local server, because it uploads files from the machine the server runs on — the remote Worker has no filesystem to read them from. It defaults to `dry_run: true`, so a client has to show you the plan and call it again with `dry_run: false` before anything uploads, and `final: true` submits for grading, which can't be undone.
+  </Tab>
+  <Tab title="Ed Discussion">
+    Every Ed tool is always listed. A posting tool — `create_thread` or `reply_thread` — fails at call time with an `INSUFFICIENT_SCOPE` error unless posting is explicitly allowed: `EDSTEM_ALLOW_POSTING=1` for stdio, `MCP_ALLOW_POSTING=1` for a self-deployed Worker, or the write scope you grant on the hosted service's OAuth consent screen. Tools that only change your own progress (`mark_lessons_read`, `submit_slide`, `submit_slide_answer`) need write access too, but not the posting flag itself: stdio and a self-deployed Worker grant write access unconditionally to whoever holds the token, while the hosted service still requires the same OAuth write scope that gates posting.
+  </Tab>
+</Tabs>
+
+## Revocation
+
+```bash
+moodle mcp revoke CLIENT_ID
+moodle mcp revoke --all
+```
+
+Revoking a client (or all of them) deletes its OAuth access and refresh tokens, any pending authorization code, and closes any open pairing window — not only the token itself. A static-credential rotation (`--rotate-token`) invalidates every OAuth grant immediately, because the Worker checks the owner's credential identity on every OAuth request and wipes all clients the moment it changes.
+
+## Token and key rotation
+
+```bash
+moodle --yes mcp deploy --rotate-token
+moodle --yes mcp deploy --rotate-key
+moodle --yes mcp deploy --repair
+```
+
+Rotating the static token doesn't cut your existing bridge or header client off mid-request: the previous token stays valid for a ten-minute overlap window while the new one takes effect, and a local bridge configuration resolves the new token automatically from the keychain. A native remote-header client, which has the old token baked into its own config, has to be given the new one by hand. Rotating the encryption key re-encrypts your stored session under the new key and checks it decrypts correctly before the previous key is dropped. `--repair` repairs your stored session after an interrupted upload; a deploy itself updates the Worker's code and secrets together, so a failed deploy never leaves it half-updated.
+
+## Pairing window
+
+`moodle mcp pair` opens a ten-minute, single-use window: the code it prints allows five wrong guesses before the window closes, and a correct guess consumes it immediately. The Worker refuses every OAuth approval while no window is open, so an approval page you didn't ask for has nothing to approve.
+
+## Limits
+
+A Moodle Worker accepts at most 20 approved OAuth clients. If you hit that limit, revoke a client you no longer use (see Revocation, above) before pairing a new one.
+
+By default, a managed Moodle deployment doesn't turn on Cloudflare's request logging, so sign-in form data and query details are never retained in Cloudflare's own logs.
+
+## Hosted Ed Discussion: data retention
+
+The hosted OAuth service verifies a token against Ed's API before it ever stores it. OAuth authorization codes are deleted once used or expired; access and refresh tokens are kept until they expire, are revoked, or are cleaned up; your encrypted Ed credential is kept until you rotate it, delete your account, or the service removes it; a token that stops working is marked invalid rather than deleted outright, so a later valid token can replace it. Deleting your account removes your account, encrypted Ed credential, browser session, and OAuth records from the live database — backups follow the hosting provider's own retention and can outlast that. There is no uptime guarantee on the hosted service.
+
+## Practical advice
+
+- **One Worker per account.** A Moodle Worker is pinned to a single account and rejects a session upload for any other; treat Ed the same way rather than sharing one deployment's credential across accounts.
+- **Never put a token in a URL.** The Moodle Worker rejects a credential passed as a query parameter (`access_token`, `api_key`, `apikey`, `authorization`, `bearer`, or `token`) before it matches any route, precisely so a token doesn't end up in a server access log or browser history.
+- **Prefer the bridge over native headers.** `moodle mcp bridge` keeps your Bearer token out of every client's config file; a native remote-header connection puts it in plain text on disk, and you're the one who has to remember to update it after a rotation.

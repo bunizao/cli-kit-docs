@@ -1,0 +1,126 @@
+---
+title: "Ed Discussion CLI for scripts and agents"
+sidebarTitle: "Ed Discussion"
+icon: "code"
+description: "Exit codes, environment variables, retry behavior, and self-hosting details for scripting edstem-cli or building an agent integration."
+---
+
+This page covers what a script author, agent builder, or contributor needs from `edstem-cli` beyond the human-facing walkthroughs: exact exit codes, config keys and environment variables, non-interactive flags, retry behavior, and how to self-host the MCP (Model Context Protocol) server.
+
+## Error codes and exit codes
+
+Every error prints once to stderr and sets the process exit code. See [Errors and exit codes](/concepts/errors-and-exit-codes) for the shared model; the table below covers what actually produces each code in `edstem-cli`.
+
+| Exit code | Meaning | Typical cause |
+| --- | --- | --- |
+| `1` | Config, network, or unexpected error | A malformed config file, a DNS/connection failure reaching Ed, or an unhandled error. |
+| `2` | Usage error | A bad flag combination, an invalid filter value, or an unknown/ambiguous unit code. |
+| `3` | Authentication failure | No token, or Ed rejected the token. |
+| `4` | Not found | A numeric unit ID, thread, lesson, or slide Ed doesn't recognize. |
+| `5` | Upstream rejection | Ed returned an error status the CLI can't otherwise classify. |
+| `130` | Cancelled | You interrupted the command (Ctrl-C) or declined a mutation prompt. |
+
+An unrecognized or ambiguous unit **code** is a usage error (exit `2`) — the CLI is validating against enrolments it already has. A numeric unit **ID** that doesn't match any enrolment is a not-found error (exit `4`) instead, since that requires asking Ed.
+
+## Environment variables and config keys
+
+### Config file
+
+`edstem-cli` reads YAML from `~/.config/edstem-cli/config.yaml` by default. Override the path with `EDSTEM_CONFIG`. A missing file is not an error — every key falls back to its default.
+
+```yaml
+fetch:
+  count: 30
+
+rateLimit:
+  maxRetries: 3        # retry count for rate-limited or temporarily failing reads
+  retryBaseDelay: 1.0  # delay before the first retry, in seconds; each retry after that waits longer
+```
+
+| Key | Default | Effect |
+| --- | --- | --- |
+| `fetch.count` | `30` | Default page size used when a command's own `--max`/`-n` is not passed — for example, `activity` and every thread-listing command. |
+| `rateLimit.maxRetries` | `3` | How many times a rate-limited or temporarily failing **read** is retried. |
+| `rateLimit.retryBaseDelay` | `1.0` | Delay in seconds before the first retry; each retry after that waits longer. |
+
+A non-integer or non-positive `fetch.count`, a non-integer or negative `rateLimit.maxRetries` (`0` is valid and disables retries), or a non-positive `rateLimit.retryBaseDelay`, is ignored in favor of the default rather than rejected.
+
+### Environment variables
+
+| Variable | Effect |
+| --- | --- |
+| `EDSTEM_BASE_URL` | Override the Ed JSON API base URL. Defaults to `https://edstem.org/api/`. |
+| `EDSTEM_TOKEN` | Provide the Ed API token directly, skipping the saved token file. |
+| `EDSTEM_CONFIG` | Override the config file path. |
+| `EDSTEM_ALLOW_POSTING` | Set to `1` to enable the posting tools (`create_thread`, `reply_thread`) on the `edstem-mcp` server. |
+
+### Precedence
+
+- **Token:** `EDSTEM_TOKEN`, if set and non-empty, always wins over the saved token file — even right after `auth login` writes a new file. Running `auth login` while `EDSTEM_TOKEN` is set still verifies and saves the pasted token to the file, but the environment variable keeps winning at runtime until you unset it.
+- **API base URL:** `EDSTEM_BASE_URL`, if set, overrides the config file's value; there's no config-file key for it.
+- **Config path:** `EDSTEM_CONFIG`, if set, replaces the default `~/.config/edstem-cli/config.yaml` path outright, rather than merging with it.
+
+## Non-interactive use
+
+Pipe a token in instead of the interactive prompt:
+
+```bash
+printf '%s\n' "<your-token>" | edstem auth login --token-stdin
+```
+
+`auth login` does not require `--yes` or a saved token beforehand: passing a token, piped or typed, is already an explicit action.
+
+## Retries and rate limits
+
+A read request that comes back `429`, `502`, `503`, or `504` is retried automatically, up to `rateLimit.maxRetries` times, waiting longer between each attempt. If Ed asks the CLI to wait a specific amount of time first, the CLI waits at least that long instead, whichever is larger.
+
+Writes — `threads send`, `replies send`, `lessons mark-read`, `slides submit`, `auth logout` — are never retried automatically. Retrying a write that may have already succeeded risks duplicating it; see [Posting](/edstem/posting) and [Mutations](/concepts/mutations).
+
+## Self-deploying the Ed Worker
+
+This is the same source the hosted server at `https://edstem.tuuhub.com/mcp` runs. Deploying it yourself gives you your own endpoint, your own Worker variables, and the static-token mode below as an alternative to OAuth. See [MCP server](/edstem/mcp-server#hosted-server) for what the hosted service stores instead.
+
+```bash
+npm ci
+npx wrangler login
+npm run deploy:worker
+```
+
+A self-deployed Worker exposes two endpoints:
+
+```text
+https://<worker-host>/mcp
+https://<worker-host>/healthz
+```
+
+### Worker variables
+
+| Variable | Effect |
+| --- | --- |
+| `MCP_ALLOWED_HOSTNAMES` | Hostnames the Worker will accept `/mcp` requests for. |
+| `MCP_ALLOWED_ORIGIN_HOSTNAMES` | Browser `Origin` hostnames allowed to call the Worker, for example `chatgpt.com,claude.ai`. |
+| `MCP_TOKEN_CACHE_TTL_SECONDS` | How long a verified Ed token is cached before it's checked again. Defaults to `300` seconds; set to `0` to verify on every request. |
+| `MCP_ALLOW_POSTING` | Set to `1` to enable `create_thread` and `reply_thread` on this Worker. Unset or `0` disables them, matching `EDSTEM_ALLOW_POSTING` on the local server. |
+
+### Static token mode
+
+A self-deployed Worker also accepts a static Ed token directly, instead of OAuth:
+
+- The client sends the Ed token in `Authorization: Bearer <token>` or `X-API-Key: <token>` on every request, over HTTPS.
+- The Worker verifies that token against Ed and uses it for the duration of that request; verification results are cached per `MCP_TOKEN_CACHE_TTL_SECONDS` above.
+- The Worker doesn't store this token anywhere — it's used for that one request and then forgotten.
+- The Worker does not write the token header to logs.
+
+This mode is a convenience for clients that can send custom headers but can't do MCP OAuth; it's not part of the MCP OAuth flow itself.
+
+## MCP tools
+
+Every tool's name, arguments, and whether it writes are catalogued at [Ed Discussion MCP tools](/mcp/tools/edstem).
+
+The `list_activity` tool accepts the same values as `edstem activity`'s `--filter` flag (`all`, `thread`, `answer`, `comment`), in its `filterType` field.
+
+Posting tools (`create_thread`, `reply_thread`) are off by default; enable them with `EDSTEM_ALLOW_POSTING=1` locally or `MCP_ALLOW_POSTING=1` on a self-deployed Worker — see [Environment variables and config keys](#environment-variables-and-config-keys) and [Self-deploying the Ed Worker](#self-deploying-the-ed-worker) above.
+
+<Card title="Connect a client" icon="plug" href="/mcp/clients/codex">
+  Client-specific setup for Codex, Claude, ChatGPT, and others.
+</Card>

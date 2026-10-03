@@ -1,0 +1,84 @@
+---
+title: Quickstart
+description: Install one or all three CLIs, sign in, and run your first command.
+icon: rocket
+---
+
+Install only the tool for the platform you use, or all three — they don't depend on each other.
+
+## Prerequisites
+
+Each CLI states its own minimum Node.js version in `package.json`'s `engines` field:
+
+| Tool | Node.js | Bun |
+| --- | --- | --- |
+| `moodle-cli` | 22.13 or newer | Supported (its README ships a Bun badge and Bun install/build instructions) |
+| `edstem-cli` | 20 or newer | Not documented as supported |
+| `ontrack` | 22.5 or newer | Supported (`bun add -g ontrack`, `bunx --bun ontrack`) |
+
+<Steps>
+  <Step title="Install the CLI you need">
+    ```bash Moodle
+    npm install -g moodle-cli
+    # or: bun add --global moodle-cli
+    ```
+
+    ```bash Ed Discussion
+    npm install -g edstem-cli
+    ```
+
+    ```bash OnTrack
+    npm install -g ontrack
+    # or: bun add -g ontrack
+    ```
+  </Step>
+  <Step title="Sign in">
+    Each tool has one sign-in command. Moodle and OnTrack borrow a browser session; Ed Discussion uses a personal API token.
+
+    ```bash Moodle
+    moodle auth login
+    ```
+
+    ```bash Ed Discussion
+    edstem auth login
+    # Create the token first at edstem.org/settings/api-tokens
+    ```
+
+    ```bash OnTrack
+    export ONTRACK_BASE_URL="https://ontrack.example.edu"
+    ontrack auth login
+    ```
+
+    `ontrack` needs `ONTRACK_BASE_URL` before it can sign in at all — it has no default site to reach. `moodle` and `edstem` ask for what they need (a site origin, a token) the first time a command needs it.
+  </Step>
+  <Step title="Run one read command">
+    ```bash Moodle
+    moodle due
+    ```
+
+    ```bash Ed Discussion
+    edstem units
+    ```
+
+    ```bash OnTrack
+    ontrack units
+    ```
+
+    At a terminal, each of these prints a table.
+  </Step>
+</Steps>
+
+<Columns cols={3}>
+  <Card title="Moodle CLI" icon="graduation-cap" href="/moodle/index">
+    Full install, sign-in and daily-use guide.
+  </Card>
+  <Card title="Ed Discussion CLI" icon="message-square" href="/edstem/index">
+    Full install, sign-in and daily-use guide.
+  </Card>
+  <Card title="OnTrack CLI" icon="list-checks" href="/ontrack/index">
+    Full install, sign-in and daily-use guide.
+  </Card>
+  <Card title="Developers" icon="code" href="/developers/index">
+    Scripting these CLIs? JSON output, exit codes and env vars.
+  </Card>
+</Columns>

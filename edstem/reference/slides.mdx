@@ -1,0 +1,65 @@
+---
+title: "edstem slides"
+description: "Show, read, or submit lesson slides."
+sidebarTitle: "slides"
+---
+
+```bash
+edstem slides [options] [command]
+```
+
+## edstem slides show
+
+```bash
+edstem slides show [options] <slide>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `slide` | Yes | Slide ID |
+
+**Options**
+
+| Flags | Description | Choices |
+| --- | --- | --- |
+| `--section <section>` | Slide section | `slide`, `questions`, `responses`, `quiz` |
+
+## edstem slides read
+
+```bash
+edstem slides read [options] <slide>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `slide` | Yes | Slide ID |
+
+## edstem slides submit
+
+```bash
+edstem slides submit [options] <slide>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `slide` | Yes | Slide ID |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--question <question>` | Question ID to answer |
+| `--choice <number>` | One-based choice; repeat for multi-select |
+| `--amend` | Amend an existing response. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+Global options apply to every command. See [Global options](/edstem/reference/index#global-options).

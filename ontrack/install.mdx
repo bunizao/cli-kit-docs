@@ -1,0 +1,63 @@
+---
+title: Install the OnTrack CLI
+description: Install ontrack with npm or Bun, point it at your site, and run it for the first time.
+sidebarTitle: Install
+icon: download
+---
+
+`ontrack` needs Node.js 22.5 or later, or a recent Bun. It ships as a single binary named `ontrack`.
+
+## Install
+
+<CodeGroup>
+
+```bash npm
+npm install -g ontrack
+```
+
+```bash Bun
+bun add -g ontrack
+```
+
+```bash bunx (no install)
+bunx --bun ontrack --version
+```
+
+</CodeGroup>
+
+## Point it at your site
+
+Set the OnTrack site's root URL, either as an environment variable or in the config file:
+
+<CodeGroup>
+
+```bash Environment variable
+export ONTRACK_BASE_URL="https://ontrack.example.edu"
+```
+
+```yaml ~/.config/ontrack-cli/config.yaml
+base_url: https://ontrack.example.edu
+```
+
+</CodeGroup>
+
+The URL must be the site's root: no path, query string or credentials. See [Configuration](/ontrack/configuration) for the full key and file-path rules.
+
+## First run
+
+Run any command at a terminal without `ONTRACK_BASE_URL` set and neither in the config file, and `ontrack` asks for the site once and saves it:
+
+```text
+$ ontrack units
+? OnTrack URL: https://ontrack.example.edu
+```
+
+If it then finds no usable session, it offers to open your browser and sign in:
+
+```text
+No active OnTrack browser session was found. Run `ontrack auth login` to sign in.
+Sign in once in your browser; later commands reuse that session.
+? Sign in through the browser now? (Y/n)
+```
+
+This prompt only appears at an interactive terminal. A script or agent shell gets the underlying error instead — see [Sign in](/ontrack/sign-in) for what each path does, and [Errors and exit codes](/concepts/errors-and-exit-codes) for how failures surface in `--json`.

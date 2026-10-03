@@ -1,0 +1,46 @@
+---
+title: OnTrack CLI
+description: Terminal and scripting access to OnTrack for students, teaching staff, scripts and agents.
+icon: list-checks
+---
+
+`ontrack` is a terminal client for OnTrack. It works for students checking what is due, teaching staff triaging a cohort, scripts run on a schedule, and agents acting on a person's behalf.
+
+Scripting this or building an agent integration? See [OnTrack CLI for scripts and agents](/developers/ontrack).
+
+<Note>
+  There is no MCP (Model Context Protocol) server for OnTrack in this release. Every integration goes through the `ontrack` binary and its `--json` output. See [Choose a surface](/choose-a-surface) for how this compares to the Moodle and Ed Discussion MCP servers.
+</Note>
+
+## What it reads
+
+- Enrolled units (and, for teaching staff, unit roles) — `units`, `roles`
+- Tasks in a unit: status, due dates, target grade, submitted grade — `tasks`
+- A task sheet, converted from its source PDF to Markdown — `tasks read`
+- Task resources and whole-unit resource archives — `units get`, `tasks get`
+- Task chat history (tutor and student comments) — `chats`
+- The signed-in identity — `user`
+
+## What it writes
+
+- A task's self-reported workflow state (`not_started`, `working_on_it`, `need_help`) — `tasks set`
+- Task file submissions — `tasks submit`
+- Chat messages on a task — `chats send`
+- Chat read state — `chats mark-read`, and `chats read` as a side effect of fetching history
+
+Every write prints a plan first. See [Mutations](/concepts/mutations) for the `--yes` and `--dry-run` model every tool in this family shares.
+
+<CardGroup cols={2}>
+  <Card title="Install" icon="download" href="/ontrack/install">
+    Get `ontrack` on your machine and point it at your site.
+  </Card>
+  <Card title="Sign in" icon="key" href="/ontrack/sign-in">
+    Reuse a browser session or sign in through SAML.
+  </Card>
+  <Card title="Units and tasks" icon="list-checks" href="/ontrack/units-and-tasks">
+    List units, read task sheets, filter by status.
+  </Card>
+  <Card title="Chats" icon="message-circle" href="/ontrack/chats">
+    Read tutor feedback and send messages on a task.
+  </Card>
+</CardGroup>

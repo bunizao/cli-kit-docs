@@ -1,0 +1,39 @@
+---
+title: Choose a surface
+description: When to use the CLI yourself, or connect it to an AI app instead.
+icon: split
+---
+
+The same data is reachable a couple of ways: running the binary yourself at a terminal, or connecting an AI app you already use to a local or remote MCP (Model Context Protocol) server. Which one fits depends on where you're sitting, not on the product.
+
+## By situation
+
+| You are... | Use | Why |
+| --- | --- | --- |
+| A person at a terminal | The CLI directly | Tables, pickers and confirmation prompts are built for a human at a keyboard. |
+| Using an AI app (Claude, ChatGPT, Cursor, an IDE assistant) | A local or remote MCP server | Connect it once and ask in plain language instead of typing commands; see [MCP servers](/mcp/index) for exactly which one to pick and how. |
+
+Writing a script, or building an agent or integration that calls these CLIs itself? See [Developers](/developers/index).
+
+## Honest limits
+
+<Warning>
+  The remote Moodle MCP server is read-only. `submit` is only available from `moodle mcp serve`, the local stdio server, because uploading files needs them to already be on the machine the server runs on.
+</Warning>
+
+<Warning>
+  Ed Discussion's `create_thread` and `reply_thread` MCP tools are disabled by default on every Ed MCP surface. Enable them with `EDSTEM_ALLOW_POSTING=1` (stdio) or the Worker variable `MCP_ALLOW_POSTING=1` (a self-deployed Worker); the hosted server grants posting scope at OAuth consent instead. Posting request and response formats have been checked only against mocked Ed responses, not the live API.
+</Warning>
+
+<Warning>
+  OnTrack has no MCP server in this release. Every OnTrack integration goes through the `ontrack` binary directly — a hosted or local MCP client cannot reach OnTrack. If your AI app needs OnTrack data, it has to run the CLI itself, the same way a coding agent does.
+</Warning>
+
+<Columns cols={2}>
+  <Card title="MCP servers" icon="plug" href="/mcp/index">
+    Exact endpoints, auth methods and which one to connect for Moodle and Ed Discussion.
+  </Card>
+  <Card title="Developers" icon="code" href="/developers/index">
+    Scripting the CLIs, agent skills, and MCP internals.
+  </Card>
+</Columns>

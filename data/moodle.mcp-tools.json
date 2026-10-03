@@ -1,0 +1,485 @@
+[
+  {
+    "name": "home",
+    "description": "Today, timezone, due items and unread counts. Use when: dashboard. Not for: due for longer deadline lists. Refs: days defaults to 14. Then: unit or item. Cost: small dashboard.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "days": {
+          "default": 14,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 365
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "due",
+    "description": "Items due in a date window. Use when: deadlines. Not for: item for submission details. Refs: unit code, name, id or URL. Then: item with activity_id. Cost: up to 20 rows by default.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          ]
+        },
+        "days": {
+          "default": 14,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 365
+        },
+        "limit": {
+          "default": 20,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "units",
+    "description": "Enrolled units with ids, codes and names. Use when: unit names. Not for: unit for sections. Refs: none. Then: unit with a name or id. Cost: small list.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "default": 200,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "unit",
+    "description": "Section index and current section; section argument returns activities and files. Use when: a unit or section. Not for: find for a named item. Refs: unit code, name, id or URL; section number or name. Then: item or file with activity id. Cost: index about 4 KB; section about 0.5 KB.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          ]
+        },
+        "section": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          ]
+        }
+      },
+      "required": [
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "find",
+    "description": "Ranked sections, activities and discussion subjects. Use when: find slides or a task. Not for: search_forums for post text; due for deadlines. Refs: query and optional unit code, name, id or URL. Then: item or file with id. Cost: up to 20 rows by default.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          ]
+        },
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limit": {
+          "default": 20,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "item",
+    "description": "Activity due dates, status, grades, files, or latest forum threads. Use when: submission or item detail. Not for: file for binary content. Refs: id, same-site URL, or UNIT TASK phrase. Then: file with id or files URL. Cost: one item.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          ]
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "grades",
+    "description": "Grades across units or in one unit. Use when: my grades. Not for: item for submission status. Refs: optional unit code, name, id or URL. Then: item for an ungraded task. Cost: graded_only narrows output.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          ]
+        },
+        "graded_only": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "news",
+    "description": "Latest announcement threads with first-post text. Use when: announcements. Not for: search_forums for other discussions. Refs: optional unit code, name, id or URL. Then: thread with discussion id. Cost: up to 5 announcements by default.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          ]
+        },
+        "limit": {
+          "default": 5,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "thread",
+    "description": "A discussion and a page of compact posts, with attachment links. Use when: discussion posts. Not for: news for announcements. Refs: discussion_id; offset and limit. Then: increase offset while posts_total exceeds returned. Cost: up to 20 posts by default.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "discussion_id": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "limit": {
+          "default": 20,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "offset": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "discussion_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "search_forums",
+    "description": "Matching posts with unit and forum name maps. Use when: forum post text. Not for: find for activity names. Refs: query, optional unit or courseId and forumId. Then: thread with discussion_id. Cost: bounded forum scan; total covers scanned scope.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          ]
+        },
+        "courseId": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "forumId": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "limit": {
+          "default": 20,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "includePostText": {
+          "default": true,
+          "type": "boolean"
+        },
+        "titlesOnly": {
+          "default": false,
+          "type": "boolean"
+        },
+        "unreadOnly": {
+          "default": false,
+          "type": "boolean"
+        },
+        "sortBy": {
+          "default": "relevance",
+          "type": "string",
+          "enum": [
+            "relevance",
+            "recent"
+          ]
+        },
+        "maxForums": {
+          "default": 20,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "maxDiscussionsPerForum": {
+          "default": 50,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "submit",
+    "description": "Upload local files into an assignment; returns the receipt Moodle shows afterwards. Use when: upload assignment files. Not for: item for status only. Refs: assignment id, same-site URL or UNIT TASK phrase; local file paths. Then: dry_run (default) only plans; show the plan to the person, then rerun with dry_run false; final submits for grading and cannot be undone. Cost: writes to Moodle.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          ]
+        },
+        "files": {
+          "default": [],
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "final": {
+          "default": false,
+          "type": "boolean"
+        },
+        "replace": {
+          "default": false,
+          "type": "boolean"
+        },
+        "accept_statement": {
+          "default": false,
+          "type": "boolean"
+        },
+        "dry_run": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "file",
+    "description": "One authenticated file as embedded content, at most 16 MiB. Use when: download a file. Not for: item for file choices. Refs: resource id, same-site URL, or UNIT TASK phrase. Then: read the returned resource. Cost: binary content up to 16 MiB.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          ]
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  }
+]

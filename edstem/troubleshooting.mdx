@@ -1,0 +1,69 @@
+---
+title: "Troubleshooting"
+description: "What you'll see when something goes wrong in edstem-cli, and how to fix it."
+---
+
+Every error prints once to stderr. See [Errors and exit codes](/concepts/errors-and-exit-codes) for the shared model, or [Ed Discussion CLI for scripts and agents](/developers/edstem#error-codes-and-exit-codes) for the exact exit code `edstem-cli` sets for each failure.
+
+## Token invalid or expired
+
+**Symptom:** commands fail immediately with an authentication error, even though a token file exists.
+
+**Cause:** Ed rejected the token — it's missing, malformed, expired, or was revoked in Ed's settings.
+
+**Fix:**
+
+```bash
+edstem auth status   # confirms which source (env or file) is being used, and whether Ed still accepts it
+edstem auth login    # create a new token at Ed settings and save it
+```
+
+If `EDSTEM_TOKEN` is exported in your shell, `auth login` will save a new token to the file but `EDSTEM_TOKEN` still wins at runtime — update or unset the environment variable instead.
+
+## Rate limiting
+
+**Symptom:** a read command is slow to fail, or eventually fails with an upstream error.
+
+**Cause:** Ed responded with a rate limit or a temporary server error. Reads retry automatically with increasing delays, honoring Ed's own wait time when it sends one. Once the retry budget is exhausted, the CLI gives up and reports the failure.
+
+**Fix:** wait and retry, or raise the retry settings in `~/.config/edstem-cli/config.yaml` if you're running a bulk job — see [Ed Discussion CLI for scripts and agents](/developers/edstem#environment-variables-and-config-keys) for the exact keys. Writes are never retried, so a rate-limited `threads send` or `slides submit` fails immediately rather than silently repeating.
+
+## Empty lesson list
+
+**Symptom:** `edstem lessons UNIT` returns `[]` with no error.
+
+**Cause:** that's the correct answer when the unit has no Ed Lessons at all. It's not a sign of a wrong filter — an **unfiltered** empty list means the unit genuinely has none.
+
+**Fix:** nothing to fix. If you expected lessons and got none, confirm you resolved the right unit with `edstem units show UNIT`.
+
+## Invalid filter value
+
+**Symptom:** `lessons list --module`/`--type`/`--state`/`--status` fails with a usage error instead of returning results.
+
+**Cause:** the value you passed doesn't match anything in that unit's lessons. Ed's fields for these are free text, not a fixed list the CLI can validate ahead of time, so the CLI checks against the unit's actual lessons and reports what it found:
+
+```text
+Unknown lesson status "grade". Available values: attempted, completed, unattempted. Use "all" or omit the filter to include every value.
+```
+
+**Fix:** use one of the listed values, or pass `all` (or drop the flag) to remove the filter. See [Lessons and slides](/edstem/lessons-and-slides#list-lessons-in-a-unit).
+
+## Unknown or ambiguous unit code
+
+**Symptom:** a `<unit>` argument fails with a usage error rather than a not-found error.
+
+**Cause:** a unit **code** that doesn't match any of your enrolments, or matches more than one (the same code across two teaching periods), is a usage error — the CLI is validating your input against enrolments it already has. A numeric unit **ID** that doesn't match any enrolment is a not-found error instead, since that requires asking Ed.
+
+**Fix:** run `edstem units list --archived` and use the numeric ID Ed assigned to the enrolment you mean. See [Units](/edstem/units#duplicate-codes-across-years).
+
+## Posting disabled in MCP
+
+**Symptom:** an MCP (Model Context Protocol) client's `create_thread` or `reply_thread` call fails immediately.
+
+**Cause:** posting tools are disabled by default on both MCP surfaces.
+
+**Fix:** set `EDSTEM_ALLOW_POSTING=1` in the local `edstem-mcp` server's environment, or `MCP_ALLOW_POSTING=1` as a Worker variable on a self-deployed Worker. See [MCP server](/edstem/mcp-server).
+
+<Card title="Errors and exit codes" icon="octagon-alert" href="/concepts/errors-and-exit-codes">
+  The shared error model across all three tools.
+</Card>

@@ -1,0 +1,95 @@
+---
+title: "Connect Claude Code"
+description: "Add the Moodle and Ed Discussion MCP servers to Claude Code."
+---
+
+Claude Code runs local processes and can also reach a remote server directly, so it supports every Moodle and Ed Discussion Model Context Protocol (MCP) surface described in [MCP servers](/mcp/index).
+
+Official reference: [Connect Claude Code to tools via MCP](https://code.claude.com/docs/en/mcp), fetched 2026-09-21.
+
+## Prerequisites
+
+- moodle-cli and edstem-cli installed and signed in. See [Install](/moodle/install) and [Install](/edstem/install).
+- Claude Code installed and signed in.
+
+<Tabs>
+  <Tab title="Moodle">
+    ### Preferred: `moodle mcp connect`
+
+    ```bash
+    moodle mcp connect claude-code
+    ```
+
+    This writes a bridge entry to `~/.claude.json` at user scope:
+
+    ```json
+    {
+      "mcpServers": {
+        "moodle-<profile>": {
+          "command": "moodle",
+          "args": ["mcp", "bridge", "--profile", "<profile>"]
+        }
+      }
+    }
+    ```
+
+    The bridge keeps your MCP access token in the OS keychain instead of in this file. Restart Claude Code (or start a new session) to pick up the change.
+
+    ### Manual: project scope
+
+    To share the server with a team through source control instead, add a project-scoped `.mcp.json` at your repository root:
+
+    ```json
+    {
+      "mcpServers": {
+        "moodle": {
+          "type": "stdio",
+          "command": "moodle",
+          "args": ["mcp", "bridge"]
+        }
+      }
+    }
+    ```
+
+    ### Manual: remote, header auth
+
+    Clients that support custom headers can skip the bridge and connect to the Worker directly:
+
+    ```bash
+    claude mcp add --transport http moodle https://<worker-host>/mcp \
+      --header "Authorization: Bearer <your-token>"
+    ```
+
+    Get `<your-token>` with `moodle mcp connect claude-code --mode remote --show-token`, or use `moodle mcp pair` instead if you'd rather use OAuth — see `claude mcp login <name>`.
+  </Tab>
+  <Tab title="Ed Discussion">
+    ### Stdio, local
+
+    ```bash
+    claude mcp add --env EDSTEM_TOKEN=<your-token> --transport stdio edstem -- edstem-mcp
+    ```
+
+    ### Remote, hosted OAuth
+
+    ```bash
+    claude mcp add --transport http edstem https://edstem.tuuhub.com/mcp
+    ```
+
+    Then run `/mcp` inside Claude Code and select `edstem` to complete the OAuth sign-in.
+
+    ### Remote, self-deployed Worker
+
+    ```bash
+    claude mcp add --transport http edstem https://<your-worker>/mcp \
+      --header "Authorization: Bearer <your-token>"
+    ```
+  </Tab>
+</Tabs>
+
+## Verify the connection
+
+```bash
+claude mcp list
+```
+
+Each server shows a status: `✔ Connected`, `! Needs authentication`, or `✘ Failed to connect`. Inside a session, run `/mcp` for the same list plus each server's available tools, and to complete an OAuth sign-in if one is pending.

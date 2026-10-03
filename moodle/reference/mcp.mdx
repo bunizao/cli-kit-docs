@@ -1,0 +1,187 @@
+---
+title: "moodle mcp"
+description: "Deploy a private MCP Worker on Cloudflare; encrypted session storage and local renewal. Free-tier limits apply."
+sidebarTitle: "mcp"
+---
+
+```bash
+moodle mcp [options] [command]
+```
+
+## moodle mcp deploy
+
+```bash
+moodle mcp deploy [options]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--repair` | Repair authentication and managed deployment state. |
+| `--rotate-key` | Rotate the session encryption key and migrate the active session. |
+| `--rotate-token` | Rotate the MCP access token with an overlap window. |
+| `--rollback` | Restore the previous healthy Worker release. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## moodle mcp status
+
+```bash
+moodle mcp status [options]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--logs` | Include sanitized recent Worker logs. |
+
+## moodle mcp login
+
+```bash
+moodle mcp login [options]
+```
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## moodle mcp connect
+
+```bash
+moodle mcp connect [options] [client]
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `client` | No | Codex, Claude, VS Code, or Cursor |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--mode <mode>` | Use bridge or native remote mode. |
+| `--show-token` | Reveal the MCP token once after confirmation. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## moodle mcp clients
+
+```bash
+moodle mcp clients [options]
+```
+
+## moodle mcp revoke
+
+```bash
+moodle mcp revoke [options] [client-id]
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `client-id` | No | OAuth client id; omit with --all |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--all` | Revoke every client, token, pending authorization, and pairing window. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## moodle mcp pair
+
+```bash
+moodle mcp pair [options]
+```
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## moodle mcp remove
+
+```bash
+moodle mcp remove [options]
+```
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## moodle mcp serve
+
+```bash
+moodle mcp serve [options]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--stdio` | Use JSON messages over stdio (the default). |
+
+## moodle mcp bridge
+
+```bash
+moodle mcp bridge [options]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--profile <profile>` | Use a specific managed Moodle profile. |
+
+## moodle mcp renewal
+
+```bash
+moodle mcp renewal [options] [command]
+```
+
+## moodle mcp renewal run
+
+```bash
+moodle mcp renewal run [options]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--profile <profile>` | Use a specific managed Moodle profile. |
+
+## moodle mcp session
+
+```bash
+moodle mcp session [options] [command]
+```
+
+## moodle mcp session push
+
+```bash
+moodle mcp session push [options]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--stdin` | Read the cookie from standard input. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

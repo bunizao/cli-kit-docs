@@ -1,0 +1,56 @@
+---
+title: "ontrack units"
+description: "Enrolled units"
+sidebarTitle: "units"
+---
+
+```bash
+ontrack units [options] [command]
+```
+
+**Aliases:** `courses`, `projects`
+
+## ontrack units list
+
+```bash
+ontrack units list [options]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--include-inactive` | Include past units |
+
+## ontrack units show
+
+```bash
+ontrack units show [options] <unit>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit code, name or project id |
+
+## ontrack units get
+
+```bash
+ontrack units get [options] <unit>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit code, name or project id |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--dest <path>` | Destination ZIP |
+| `--force` | Replace an existing destination |
+
+Global options apply to every command. See [Global options](/ontrack/reference/index#global-options).

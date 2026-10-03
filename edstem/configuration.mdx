@@ -1,0 +1,12 @@
+---
+title: "Configuration"
+description: "Where edstem-cli stores its config file."
+---
+
+`edstem-cli` reads YAML from `~/.config/edstem-cli/config.yaml` by default. A missing file is not an error — every key falls back to its default.
+
+Scripting this or setting it up for CI? See [Ed Discussion CLI for scripts and agents](/developers/edstem#environment-variables-and-config-keys) for every config key, environment variable, precedence rule, and the retry settings for reads.
+
+<Card title="Configuration concepts" icon="settings" href="/concepts/configuration">
+  How configuration works across all three tools.
+</Card>

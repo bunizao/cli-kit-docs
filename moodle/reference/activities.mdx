@@ -1,0 +1,42 @@
+---
+title: "moodle activities"
+description: "Inspect activities."
+sidebarTitle: "activities"
+---
+
+```bash
+moodle activities [options] [command]
+```
+
+## moodle activities list
+
+```bash
+moodle activities list [options] <unit>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit code, name, id or URL |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--section <section>` | Section number or name. |
+| `--include-labels` | Include inline labels. |
+
+## moodle activities show
+
+```bash
+moodle activities show [options] <id>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Course-module ID |
+
+Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

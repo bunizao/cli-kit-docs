@@ -1,0 +1,1045 @@
+$ moodle --help
+moodle v0.9.2
+Read Moodle and submit work from the command line
+
+Usage
+  moodle [options] [command] [target...]
+
+Arguments
+  target  Unit name, section, item phrase, or Moodle URL
+
+Core commands
+  due [unit]               Items due in a date window
+  news [unit]              Latest announcement threads with first-post text
+  find <query> [unit]      Ranked sections, activities and discussion subjects
+  get <ref>                Download a resource by id, URL, or UNIT TASK phrase
+  open <ref>               Open a unit or activity reference in the browser
+  submit <ref> [files...]  Upload files into an assignment
+  units, courses           Inspect enrolled units
+  activities               Inspect activities
+  grades                   Inspect grades
+  threads                  Inspect forum discussion threads
+  forums                   Inspect forums
+
+Additional commands
+  user                     Show authenticated user info
+  todo                     List upcoming actionable timeline items
+  alerts                   List notifications and message counts
+  overview                 Show a compact multi-source overview
+  download, dl <source>    Download one authenticated Moodle file
+  auth                     Session and keepalive utilities
+  doctor                   Diagnose runtime, session and MCP setup
+  completion <shell>       Print shell completion for zsh, bash or fish
+  uninstall                Remove background jobs, Worker and config
+
+Agent commands
+  mcp                      Private MCP server on Cloudflare
+  commands                 Describe the complete command tree
+  skills                   Agent skill metadata
+
+Options
+  -V, --version        Show the version
+  --json               Emit JSON
+  --yaml               Emit YAML
+  --table              Emit a human-readable table
+  --fields <fields>    Select top-level fields
+  -o, --output <file>  Write output to a file
+  -v, --verbose        Enable debug logging
+  --no-color           Disable color output
+  -y, --yes            Confirm mutations non-interactively
+  --dry-run            Print the mutation plan without applying it
+  --no-cache           Bypass session cache reads and writes
+  --pretty             Indent JSON output
+  --limit <number>     Maximum returned rows
+  --days <number>      Deadline window in days
+  -h, --help           Show help
+
+Try
+  moodle  # today: due items, alerts and news
+  moodle UNIT grades
+  moodle submit UNIT "Assignment 2" report.pdf
+
+Run 'moodle <command> --help' for details on a command.
+
+
+$ moodle due --help
+moodle due
+Items due in a date window
+
+Usage
+  moodle due [options] [unit]
+
+Arguments
+  unit  Unit code, name, id or URL
+
+Options
+  --days <number>   Deadline window in days
+  --limit <number>  Maximum returned rows
+  -h, --help        Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle news --help
+moodle news
+Latest announcement threads with first-post text
+
+Usage
+  moodle news [options] [unit]
+
+Arguments
+  unit  Unit code, name, id or URL
+
+Options
+  --limit <number>  Maximum returned rows
+  -h, --help        Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle find --help
+moodle find
+Ranked sections, activities and discussion subjects
+
+Usage
+  moodle find [options] <query> [unit]
+
+Arguments
+  query  Words to look for
+  unit   Unit code, name, id or URL
+
+Options
+  --limit <number>  Maximum returned rows
+  --types <types>   Comma-separated activity types
+  -h, --help        Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle get --help
+moodle get
+Download a resource by id, URL, or UNIT TASK phrase
+
+Usage
+  moodle get [options] <ref>
+
+Arguments
+  ref  Resource id, URL, or UNIT TASK phrase
+
+Options
+  --to <directory>  Destination directory
+  --force           Replace an existing file atomically
+  -h, --help        Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle submit --help
+moodle submit
+Upload local files into an assignment; returns the receipt Moodle shows
+afterwards
+
+Usage
+  moodle submit [options] <ref> [files...]
+
+Arguments
+  ref    Assignment id, URL, or UNIT TASK phrase
+  files  Local files to upload
+
+Options
+  --final             Also submit for grading. Moodle does not allow undoing
+                      this.
+  --replace           Remove the files already in the submission first
+  --accept-statement  Agree to the site's submission statement when it requires
+                      one
+  -h, --help          Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle open --help
+moodle open
+Open a unit or activity reference in the browser
+
+Usage
+  moodle open [options] <ref>
+
+Arguments
+  ref  Unit or activity id, URL, or UNIT TASK phrase
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle user --help
+moodle user
+Show authenticated user info
+
+Usage
+  moodle user [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle units --help
+moodle units
+Inspect enrolled units
+
+Usage
+  moodle units [options] [command]
+
+Commands
+  list         List enrolled units
+  show <unit>  Show unit detail with sections
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle units <command> --help' for details on a command.
+
+
+$ moodle units list --help
+moodle units list
+List enrolled units
+
+Usage
+  moodle units list [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle units show --help
+moodle units show
+Show unit detail with sections
+
+Usage
+  moodle units show [options] <unit>
+
+Arguments
+  unit  Unit ID or unique name
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle todo --help
+moodle todo
+List upcoming actionable timeline items
+
+Usage
+  moodle todo [options]
+
+Options
+  --limit <number>  Maximum number of items (default: 20)
+  --days <number>   Only include items due within the next N days
+  -h, --help        Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle alerts --help
+moodle alerts
+List notifications and message counts
+
+Usage
+  moodle alerts [options]
+
+Options
+  --limit <number>  Maximum number of notifications (default: 20)
+  -h, --help        Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle overview --help
+moodle overview
+Show a compact multi-source overview
+
+Usage
+  moodle overview [options]
+
+Options
+  --todo-limit <number>    Maximum number of todo items (default: 5)
+  --todo-days <number>     Only include todo items due within the next N days
+  --alerts-limit <number>  Maximum number of notifications (default: 5)
+  -h, --help               Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle activities --help
+moodle activities
+Inspect activities
+
+Usage
+  moodle activities [options] [command]
+
+Commands
+  list <unit>  List activities in a unit; narrow by section
+  show <id>    Show activity details
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle activities <command> --help' for details on a command.
+
+
+$ moodle activities list --help
+moodle activities list
+List activities in a unit; narrow by section
+
+Usage
+  moodle activities list [options] <unit>
+
+Arguments
+  unit  Unit code, name, id or URL
+
+Options
+  --section <section>  Section number or name
+  --limit <number>     Maximum returned activities (default: 200)
+  --include-labels     Include inline labels
+  -h, --help           Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle activities show --help
+moodle activities show
+Show activity details; resource and folder files can be passed to moodle get or
+download
+
+Usage
+  moodle activities show [options] <id>
+
+Arguments
+  id  Course-module ID
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle download --help
+moodle download
+Download one authenticated Moodle file
+
+Usage
+  moodle download [options] <source>
+
+Arguments
+  source  Course-module ID or authenticated Moodle file URL
+
+Options
+  --dest <path>  Exact downloaded file path
+  --force        Atomically replace an existing destination
+  -h, --help     Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle grades --help
+moodle grades
+Inspect grades
+
+Usage
+  moodle grades [options] [command]
+
+Commands
+  list [unit]  Show grade details for a unit
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle grades <command> --help' for details on a command.
+
+
+$ moodle grades list --help
+moodle grades list
+Show grade details for a unit
+
+Usage
+  moodle grades list [options] [unit]
+
+Arguments
+  unit  Unit code, name, id or URL
+
+Options
+  --graded-only  Only return graded items
+  -h, --help     Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle threads --help
+moodle threads
+Inspect forum discussion threads
+
+Usage
+  moodle threads [options] [command]
+
+Commands
+  show <discussion>  Show posts in a forum discussion
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle threads <command> --help' for details on a command.
+
+
+$ moodle threads show --help
+moodle threads show
+Show posts in a forum discussion
+
+Usage
+  moodle threads show [options] <discussion>
+
+Arguments
+  discussion  Discussion ID or URL
+
+Options
+  --limit <number>   Maximum returned posts
+  --offset <number>  Skip this many posts (default: 0)
+  --post <id>        Show a specific post ID
+  --body             Show full post body
+  -h, --help         Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle forums --help
+moodle forums
+Inspect forums
+
+Usage
+  moodle forums [options] [command]
+
+Commands
+  show <forum>    List discussions from a forum
+  list <unit>     List forum activities in a unit
+  search <query>  Search forum discussion titles and post text
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle forums <command> --help' for details on a command.
+
+
+$ moodle forums show --help
+moodle forums show
+List discussions from a forum
+
+Usage
+  moodle forums show [options] <forum>
+
+Arguments
+  forum  Forum ID or URL
+
+Options
+  --limit <number>  Maximum number of discussions (default: 50)
+  --query <query>   Filter discussion titles by query
+  -h, --help        Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle forums list --help
+moodle forums list
+List forum activities in a unit
+
+Usage
+  moodle forums list [options] <unit>
+
+Arguments
+  unit  Unit ID or unique name
+
+Options
+  --limit <number>  Maximum number of forums (default: 50)
+  -h, --help        Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle forums search --help
+moodle forums search
+Search forum discussion titles and post text
+
+Usage
+  moodle forums search [options] <query>
+
+Arguments
+  query  Search query
+
+Options
+  --unit <unit>                 Restrict to a unit code, name, id or URL
+  --course <course>             Restrict to a course ID or unique course name
+                                match
+  --forum <forum>               Restrict to a forum ID or forum URL
+  --titles-only                 Only search discussion titles
+  --unread-only                 Only include unread matches
+  --recent                      Sort matches by newest activity
+  --limit-forums <number>       Maximum number of forums to scan
+  --limit-discussions <number>  Maximum number of discussions per forum
+  --limit <number>              Maximum number of matches (default: 20)
+  -h, --help                    Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle doctor --help
+moodle doctor
+Diagnose runtime, browser access, session, background jobs and MCP setup
+
+Usage
+  moodle doctor [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle completion --help
+moodle completion
+Print shell completion for zsh, bash or fish
+
+Usage
+  moodle completion [options] <shell>
+
+Arguments
+  shell  Shell to target (choices: "zsh", "bash", "fish")
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle uninstall --help
+moodle uninstall
+Remove local background jobs; optionally remove the selected Worker and
+configuration
+
+Usage
+  moodle uninstall [options]
+
+Options
+  --remote    Also remove the configured managed MCP deployment
+  --purge     Also delete local Moodle CLI configuration, receipts and cache
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle auth --help
+moodle auth
+Session and keepalive utilities
+
+Usage
+  moodle auth [options] [command]
+
+Commands
+  status     Show cached session freshness and keepalive state
+  login      Sign in through a browser the CLI controls, then capture the
+             session
+  keepalive  Renew the session once
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle auth <command> --help' for details on a command.
+
+
+$ moodle auth status --help
+moodle auth status
+Show cached session freshness and keepalive state
+
+Usage
+  moodle auth status [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle auth login --help
+moodle auth login
+Sign in through a browser the CLI controls, then capture the session
+
+Usage
+  moodle auth login [options]
+
+Options
+  --paste     Take the MoodleSession cookie from a prompt instead of the browser
+              store
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle auth keepalive --help
+moodle auth keepalive
+Renew the Moodle session once; used by the background keepalive agent
+
+Usage
+  moodle auth keepalive [options] [command]
+
+Commands
+  install    Install a macOS launch agent that renews the session periodically
+  uninstall  Remove the keepalive launch agent
+  status     Show whether the keepalive launch agent is installed
+
+Options
+  --no-renew  Only touch the session; skip re-login when it is expired
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle auth keepalive <command> --help' for details on a command.
+
+
+$ moodle auth keepalive install --help
+moodle auth keepalive install
+Install a macOS launch agent that renews the session periodically
+
+Usage
+  moodle auth keepalive install [options]
+
+Options
+  --interval <minutes>  Renewal interval in minutes
+  -h, --help            Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle auth keepalive uninstall --help
+moodle auth keepalive uninstall
+Remove the keepalive launch agent
+
+Usage
+  moodle auth keepalive uninstall [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle auth keepalive status --help
+moodle auth keepalive status
+Show whether the keepalive launch agent is installed
+
+Usage
+  moodle auth keepalive status [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle mcp --help
+moodle mcp
+Deploy a private MCP Worker on Cloudflare; encrypted session storage and local
+renewal. Free-tier limits apply.
+
+Usage
+  moodle mcp [options] [command]
+
+Commands
+  deploy              Deploy or update the managed Moodle MCP server
+  status              Show local and remote Moodle MCP readiness
+  login               Acquire and upload a fresh Moodle session
+  connect [client]    Connect a supported MCP client
+  clients             List pending and approved OAuth clients
+  revoke [client-id]  Revoke an OAuth client or all OAuth access
+  pair                Open a pairing window for Claude
+  remove              Remove one managed Moodle MCP deployment
+  serve               Run the local Moodle MCP server over stdio
+  bridge              Bridge a stdio MCP client to the managed remote server
+  renewal             Run the installed managed-session renewal job
+  session             Advanced managed-session operations
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle mcp <command> --help' for details on a command.
+
+
+$ moodle mcp deploy --help
+moodle mcp deploy
+Deploy or update the managed Moodle MCP server
+
+Usage
+  moodle mcp deploy [options]
+
+Options
+  --dry-run       Preview deployment changes without applying them
+  --repair        Repair authentication and managed deployment state
+  --rotate-key    Rotate the session encryption key and migrate the active
+                  session
+  --rotate-token  Rotate the MCP access token with an overlap window
+  --rollback      Restore the previous healthy Worker release
+  -h, --help      Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle mcp status --help
+moodle mcp status
+Show local and remote Moodle MCP readiness
+
+Usage
+  moodle mcp status [options]
+
+Options
+  --verbose   Include sanitized deployment diagnostics
+  --logs      Include sanitized recent Worker logs
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle mcp login --help
+moodle mcp login
+Acquire and upload a fresh Moodle session
+
+Usage
+  moodle mcp login [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle mcp connect --help
+moodle mcp connect
+Connect a supported MCP client
+
+Usage
+  moodle mcp connect [options] [client]
+
+Arguments
+  client  Codex, Claude, VS Code, or Cursor
+
+Options
+  --mode <mode>  Use bridge or native remote mode (default: "bridge")
+  --show-token   Reveal the MCP token once after confirmation
+  -h, --help     Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle mcp clients --help
+moodle mcp clients
+List pending and approved OAuth clients
+
+Usage
+  moodle mcp clients [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle mcp revoke --help
+moodle mcp revoke
+Revoke an OAuth client or all OAuth access
+
+Usage
+  moodle mcp revoke [options] [client-id]
+
+Arguments
+  client-id  OAuth client id; omit with --all
+
+Options
+  --all       Revoke every client, token, pending authorization, and pairing
+              window
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle mcp pair --help
+moodle mcp pair
+Open a pairing window so Claude can connect to the remote MCP server
+
+Usage
+  moodle mcp pair [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle mcp remove --help
+moodle mcp remove
+Remove one managed Moodle MCP deployment
+
+Usage
+  moodle mcp remove [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle mcp serve --help
+moodle mcp serve
+Run the local Moodle MCP server over stdio
+
+Usage
+  moodle mcp serve [options]
+
+Options
+  --stdio     Use JSON messages over stdio (the default)
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle mcp bridge --help
+moodle mcp bridge
+Bridge a stdio MCP client to the managed remote server
+
+Usage
+  moodle mcp bridge [options]
+
+Options
+  --profile <profile>  Use a specific managed Moodle profile
+  -h, --help           Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle mcp renewal --help
+moodle mcp renewal
+Run the installed managed-session renewal job
+
+Usage
+  moodle mcp renewal [options] [command]
+
+Commands
+  run  Check and renew one managed Moodle session
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle mcp renewal <command> --help' for details on a command.
+
+
+$ moodle mcp renewal run --help
+moodle mcp renewal run
+Check and renew one managed Moodle session
+
+Usage
+  moodle mcp renewal run [options]
+
+Options
+  --profile <profile>  Use a specific managed Moodle profile
+  -h, --help           Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle mcp session --help
+moodle mcp session
+Advanced managed-session operations
+
+Usage
+  moodle mcp session [options] [command]
+
+Commands
+  push  Upload a Moodle cookie from standard input
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle mcp session <command> --help' for details on a command.
+
+
+$ moodle mcp session push --help
+moodle mcp session push
+Upload a Moodle cookie from standard input
+
+Usage
+  moodle mcp session push [options]
+
+Options
+  --stdin     Read the cookie from standard input
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle commands --help
+moodle commands
+Describe the complete command tree
+
+Usage
+  moodle commands [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle skills --help
+moodle skills
+Show skill metadata or delegate to the shared skills CLI
+
+Usage
+  moodle skills [options] [command]
+
+Commands
+  generate  Regenerate the agent skill bundle from the CLI command tree
+  add       Install the published skill through npx skills add
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle skills <command> --help' for details on a command.
+
+
+$ moodle skills generate --help
+moodle skills generate
+Regenerate the agent skill bundle from the CLI command tree
+
+Usage
+  moodle skills generate [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle skills add --help
+moodle skills add
+Install the published skill through npx skills add
+
+Usage
+  moodle skills add [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+

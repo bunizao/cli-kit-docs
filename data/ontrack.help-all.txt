@@ -1,0 +1,476 @@
+$ ontrack --help
+ontrack v0.3.2
+Work with OnTrack tasks and chats from the command line
+
+Usage
+  ontrack [options] [command]
+
+Core commands
+  units, courses, projects  Enrolled units
+  tasks                     Tasks in a unit: list, read, submit, set state
+  chats                     Read and send task chat messages
+
+Additional commands
+  user                      Show the signed-in user
+  roles                     Teaching roles you hold
+  auth                      Manage authentication
+
+Agent commands
+  commands                  Describe the complete command tree
+  skills                    Generate the agent skill
+
+Options
+  -V, --version        Show the version
+  --json               Emit JSON
+  --yaml               Emit YAML
+  --table              Emit a human-readable table
+  --fields <fields>    Select top-level fields
+  -o, --output <file>  Write output to a file
+  --verbose            Enable debug logging
+  --no-color           Disable color output
+  -y, --yes            Confirm mutations non-interactively
+  --dry-run            Print the mutation plan without applying it
+  -h, --help           Show help
+
+Try
+  ontrack tasks UNIT  # every task with its status and due date
+  ontrack tasks read UNIT 1.1  # the task sheet as Markdown
+  ontrack tasks submit UNIT 1.1 report.pdf
+
+Run 'ontrack <command> --help' for details on a command.
+
+
+$ ontrack user --help
+ontrack user
+Show the signed-in user
+
+Usage
+  ontrack user [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack auth --help
+ontrack auth
+Manage authentication
+
+Usage
+  ontrack auth [options] [command]
+
+Commands
+  login   Sign in through OnTrack
+  status  Validate current credentials
+  logout  Remove the cached session
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'ontrack auth <command> --help' for details on a command.
+
+
+$ ontrack auth login --help
+ontrack auth login
+Sign in through OnTrack
+
+Usage
+  ontrack auth login [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack auth status --help
+ontrack auth status
+Validate current credentials
+
+Usage
+  ontrack auth status [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack auth logout --help
+ontrack auth logout
+Remove the cached session
+
+Usage
+  ontrack auth logout [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack units --help
+ontrack units
+Enrolled units
+
+Usage
+  ontrack units [options] [command]
+
+Commands
+  list         List units
+  show <unit>  Show one unit
+  get <unit>   Download unit resources
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'ontrack units <command> --help' for details on a command.
+
+
+$ ontrack units list --help
+ontrack units list
+List units
+
+Usage
+  ontrack units list [options]
+
+Options
+  --include-inactive  Include past units
+  -h, --help          Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack units show --help
+ontrack units show
+Show one unit
+
+Usage
+  ontrack units show [options] <unit>
+
+Arguments
+  unit  Unit code, name or project id
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack units get --help
+ontrack units get
+Download unit resources
+
+Usage
+  ontrack units get [options] <unit>
+
+Arguments
+  unit  Unit code, name or project id
+
+Options
+  --dest <path>  Destination ZIP
+  --force        Replace an existing destination
+  -h, --help     Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack tasks --help
+ontrack tasks
+Tasks in a unit: list, read, submit, set state
+
+Usage
+  ontrack tasks [options] [command]
+
+Commands
+  list <unit>                List tasks
+  show <unit> <task>         Show one task
+  read <unit> <task>         Print a task sheet as Markdown
+  get <unit> <task>          Download a task sheet or resources
+  set <unit> <task> <state>  Change task workflow state
+  submit <unit> <task>       Submit task files
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'ontrack tasks <command> --help' for details on a command.
+
+
+$ ontrack tasks list --help
+ontrack tasks list
+List tasks
+
+Usage
+  ontrack tasks list [options] <unit>
+
+Arguments
+  unit  Unit code, name or project id
+
+Options
+  --status <status...>  Filter by raw task status
+  -h, --help            Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack tasks show --help
+ontrack tasks show
+Show one task
+
+Usage
+  ontrack tasks show [options] <unit> <task>
+
+Arguments
+  unit  Unit code, name or project id
+  task  Task abbreviation, such as 1.1
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack tasks read --help
+ontrack tasks read
+Print a task sheet as Markdown
+
+Usage
+  ontrack tasks read [options] <unit> <task>
+
+Arguments
+  unit  Unit code, name or project id
+  task  Task abbreviation, such as 1.1
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack tasks get --help
+ontrack tasks get
+Download a task sheet or resources
+
+Usage
+  ontrack tasks get [options] <unit> <task>
+
+Arguments
+  unit  Unit code, name or project id
+  task  Task abbreviation, such as 1.1
+
+Options
+  --resources    Download linked task resources
+  --dest <path>  Destination path
+  --force        Replace an existing destination
+  -h, --help     Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack tasks set --help
+ontrack tasks set
+Change task workflow state
+
+Usage
+  ontrack tasks set [options] <unit> <task> <state>
+
+Arguments
+  unit   Unit code, name or project id
+  task   Task abbreviation, such as 1.1
+  state  Workflow state (choices: "not_started", "working_on_it", "need_help")
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack tasks submit --help
+ontrack tasks submit
+Submit task files
+
+Usage
+  ontrack tasks submit [options] <unit> <task>
+
+Arguments
+  unit  Unit code, name or project id
+  task  Task abbreviation, such as 1.1
+
+Options
+  --file <path...>   Files in upload-requirement order
+  --type <type>      Submission type (choices: "ready_for_feedback",
+                     "need_help", "assess_in_portfolio", default:
+                     "ready_for_feedback")
+  --comment <text>   Submission comment
+  --accept-tii-eula  Accept the Turnitin EULA
+  -h, --help         Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack chats --help
+ontrack chats
+Read and send task chat messages
+
+Usage
+  ontrack chats [options] [command]
+
+Commands
+  list <unit>              List unread chat counts
+  read <unit> <task>       Read task chat history and mark comments read
+  mark-read <unit> <task>  Mark task chat comments read
+  send <unit> <task>       Send a task chat message
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'ontrack chats <command> --help' for details on a command.
+
+
+$ ontrack chats list --help
+ontrack chats list
+List unread chat counts
+
+Usage
+  ontrack chats list [options] <unit>
+
+Arguments
+  unit  Unit code, name or project id
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack chats read --help
+ontrack chats read
+Read task chat history and mark comments read
+
+Usage
+  ontrack chats read [options] <unit> <task>
+
+Arguments
+  unit  Unit code, name or project id
+  task  Task abbreviation, such as 1.1
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack chats mark-read --help
+ontrack chats mark-read
+Mark task chat comments read
+
+Usage
+  ontrack chats mark-read [options] <unit> <task>
+
+Arguments
+  unit  Unit code, name or project id
+  task  Task abbreviation, such as 1.1
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack chats send --help
+ontrack chats send
+Send a task chat message
+
+Usage
+  ontrack chats send [options] <unit> <task>
+
+Arguments
+  unit  Unit code, name or project id
+  task  Task abbreviation, such as 1.1
+
+Options
+  --message <text>  Exact message to send
+  -h, --help        Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack roles --help
+ontrack roles
+Teaching roles you hold
+
+Usage
+  ontrack roles [options] [command]
+
+Commands
+  list  List teaching roles
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'ontrack roles <command> --help' for details on a command.
+
+
+$ ontrack roles list --help
+ontrack roles list
+List teaching roles
+
+Usage
+  ontrack roles list [options]
+
+Options
+  --all       Include inactive roles
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack commands --help
+ontrack commands
+Describe the complete command tree
+
+Usage
+  ontrack commands [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack skills --help
+ontrack skills
+Generate the agent skill
+
+Usage
+  ontrack skills [options] [command]
+
+Commands
+  generate  Generate SKILL.md from the command tree
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'ontrack skills <command> --help' for details on a command.
+
+
+$ ontrack skills generate --help
+ontrack skills generate
+Generate SKILL.md from the command tree
+
+Usage
+  ontrack skills generate [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+

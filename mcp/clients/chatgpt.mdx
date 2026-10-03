@@ -1,0 +1,38 @@
+---
+title: "Connect ChatGPT"
+description: "Add the Moodle and Ed Discussion MCP servers to ChatGPT as custom connectors."
+---
+
+ChatGPT connects to remote Model Context Protocol (MCP) servers only — there's no local stdio option — and the connection goes through OAuth, so this is the same shape of setup as [claude.ai](/mcp/clients/claude-ai).
+
+Official reference: [Model Context Protocol](https://developers.openai.com/api/docs/mcp), fetched 2026-09-21.
+
+## Prerequisites
+
+- A deployed Moodle Worker (`moodle mcp deploy`) for Moodle, or Ed's hosted endpoint for Ed Discussion. ChatGPT can't connect to a self-deployed Ed Worker's static token — see the Ed Discussion tab below.
+- Developer mode turned on: in ChatGPT, go to **Settings → Security and login** and turn on **Developer mode**.
+
+<Tabs>
+  <Tab title="Moodle">
+    Open a pairing window first:
+
+    ```bash
+    moodle mcp pair
+    ```
+
+    This prints your connector URL and a one-time pairing code, valid for ten minutes and one approval.
+
+    In ChatGPT, open the plugins/connectors panel, select the add control, and enter the connector URL in developer mode. ChatGPT starts an OAuth flow to the Worker; sign in and enter the pairing code when prompted.
+  </Tab>
+  <Tab title="Ed Discussion">
+    Add `https://edstem.tuuhub.com/mcp` as a custom connector and complete Ed's OAuth sign-in when ChatGPT prompts for it. Grant the write scope during consent only if you want posting and progress tools to work from ChatGPT.
+  </Tab>
+</Tabs>
+
+## Verify the connection
+
+The connector appears in your connectors list once authentication completes. Start a conversation, enable the connector for it, and ask a question that requires a tool call to confirm ChatGPT can reach it.
+
+<Note>
+OpenAI renames and moves these settings between releases. If a menu item on this page does not match what you see, follow the official page linked above; the connector URL and the OAuth flow do not change.
+</Note>

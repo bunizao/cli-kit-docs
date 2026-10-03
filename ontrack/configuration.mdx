@@ -1,0 +1,28 @@
+---
+title: Configuration
+description: Where ontrack looks for its config file, and the base_url key it needs.
+icon: settings
+---
+
+`ontrack` resolves the config file in this order:
+
+1. `ONTRACK_CONFIG`, if set — an absolute path, a path relative to the current directory, or `~`/`~/...` for your home directory.
+2. `./config.yaml` in the current directory, if it exists.
+3. Otherwise, a platform default:
+
+| Platform | Default path |
+| --- | --- |
+| macOS, Linux | `$XDG_CONFIG_HOME/ontrack-cli/config.yaml`, or `~/.config/ontrack-cli/config.yaml` |
+| Windows | `%APPDATA%\ontrack-cli\config.yaml` |
+
+The [session cache](/ontrack/sign-in#where-the-session-lives) lives alongside it, as `session.json` in the same directory.
+
+## The `base_url` key
+
+```yaml
+base_url: https://ontrack.example.edu
+```
+
+`base_url` is the OnTrack site's root URL — no path, query string or embedded credentials. See [Install](/ontrack/install#point-it-at-your-site) for setting it the first time.
+
+Scripting sign-in, or setting other keys and environment variables? See [OnTrack CLI for scripts and agents](/developers/ontrack#environment-variables-and-config-keys).

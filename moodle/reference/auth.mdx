@@ -1,0 +1,77 @@
+---
+title: "moodle auth"
+description: "Session and keepalive utilities."
+sidebarTitle: "auth"
+---
+
+```bash
+moodle auth [options] [command]
+```
+
+## moodle auth status
+
+```bash
+moodle auth status [options]
+```
+
+## moodle auth login
+
+```bash
+moodle auth login [options]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--paste` | Take the MoodleSession cookie from a prompt instead of the browser store. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## moodle auth keepalive
+
+```bash
+moodle auth keepalive [options] [command]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--no-renew` | Only touch the session; skip re-login when it is expired. |
+
+## moodle auth keepalive install
+
+```bash
+moodle auth keepalive install [options]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--interval <minutes>` | Renewal interval in minutes. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## moodle auth keepalive uninstall
+
+```bash
+moodle auth keepalive uninstall [options]
+```
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## moodle auth keepalive status
+
+```bash
+moodle auth keepalive status [options]
+```
+
+Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

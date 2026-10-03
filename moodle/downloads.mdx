@@ -1,0 +1,74 @@
+---
+title: Downloads
+description: Download an authenticated Moodle file with download/dl, and how that differs from get.
+sidebarTitle: Downloads
+icon: download
+---
+
+moodle-cli has two ways to pull a file to disk. [`moodle get`](/moodle/daily-use#downloading-by-reference) resolves a resource id, a Moodle URL, or a `UNIT TASK` phrase the same way the bare-target syntax does, then downloads it — see [Daily use](/moodle/daily-use) and [`moodle get`](/moodle/reference/get) for that phrase-resolution path. This page covers `download` (alias `dl`), which takes a course-module ID or an authenticated Moodle file URL directly, with no phrase resolution.
+
+## Downloading a file
+
+```bash
+moodle download 91234
+moodle dl 91234
+```
+
+`dl` is a real alias for `download`, not a separate command — both run the same code. The source is either a resource activity's course-module ID, or an authenticated Moodle file URL on your configured site: a `/mod/resource/view.php?id=` URL or a `/pluginfile.php/...` URL. A URL on any other host is rejected.
+
+```bash
+moodle download 'https://moodle.example.edu/pluginfile.php/12345/mod_resource/content/1/handout.pdf'
+```
+
+By numeric ID, moodle-cli looks up the activity first and refuses anything that isn't a `resource` activity — a folder, page, or assignment ID will not download this way (see [Folder activities](#folder-activities-and-their-files) below).
+
+### `--dest` and `--force`
+
+`--dest <path>` sets the exact downloaded file path, including its filename. Without it, moodle-cli picks a filename Moodle reports for the download, the resource's own file entry, or the URL, in that order, and writes it into the current directory. `--force` replaces an existing destination file cleanly; without it, moodle-cli refuses to overwrite a file that's already there.
+
+```bash
+moodle download 91234 --dest ./handouts/week3.pdf --force
+```
+
+<Note>
+  `get` uses `--to <directory>` (a destination *directory*, keeping Moodle's own filename) and `--force`, not `--dest`. The two commands don't share flag names for this. See [`moodle get`](/moodle/reference/get).
+</Note>
+
+### `-o`/`--output` is not `--dest`
+
+`-o, --output <file>` is a global flag on every moodle-cli command: it writes the command's *rendered response* (the JSON, YAML or table output) to a file instead of stdout. `--dest` controls where the *downloaded file itself* lands. They answer different questions and can both be passed at once — one redirects the summary of what happened, the other redirects the file it describes.
+
+```bash
+moodle download 91234 --dest ./handouts/week3.pdf --json -o ./out/week3.json
+```
+
+## Folder activities and their files
+
+A folder activity holds more than one file, so neither `get` nor `download` resolves a folder by its course-module ID directly — there's no single file to pick. Instead, inspect the folder first:
+
+```bash
+moodle activities show FOLDER_ID
+```
+
+The response lists the folder's files, each with its own authenticated `pluginfile.php` URL. Pass one of those URLs to `download`/`dl` (or `get`) to fetch that file:
+
+```bash
+moodle download 'https://moodle.example.edu/pluginfile.php/12345/mod_folder/content/0/dataset.csv'
+```
+
+There's no bulk "download the whole folder" — each file is a separate download.
+
+## What the command reports
+
+Every successful download prints a summary confirming what was written: where the file landed, its name, and how many bytes came through.
+
+Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#download) for the exact JSON shape.
+
+## Failure modes
+
+- A URL your site doesn't recognize as a resource or pluginfile path fails with a usage error before any request is made. A numeric ID that isn't a `resource` activity fails the same way, right after moodle-cli looks up the activity to check its type.
+- A resource that resolves to more than one file refuses to guess which one you want.
+- Moodle returning a login page instead of a file means the session expired — run `moodle auth login`.
+- An existing destination file without `--force` fails rather than silently overwriting it.
+
+See [Errors and exit codes](/concepts/errors-and-exit-codes) for exit codes and the JSON error shape.

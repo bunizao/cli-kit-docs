@@ -1,0 +1,96 @@
+---
+title: Troubleshooting
+description: Every error code moodle-cli can exit with, what triggers it, and the fix.
+sidebarTitle: Troubleshooting
+icon: stethoscope
+---
+
+When something goes wrong, moodle-cli prints an error name (like `auth`) and a hint telling you what to do. This page lists what you might see and how to fix it.
+
+Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#error-codes-and-exit-codes) for the full error and exit-code reference.
+
+## Error codes
+
+| Error | What triggers it | Fix |
+| --- | --- | --- |
+| `auth` | No usable Moodle session could be found: an env-set token that didn't authenticate, a pasted cookie that didn't authenticate, or Moodle rejecting the session outright. | Run [`moodle auth login`](/moodle/sign-in#how-the-cli-finds-a-session), or `moodle auth login --paste` if the cookie store can't be read. Run `moodle doctor` first if you're not sure why. |
+| `config` | No Moodle site URL is configured, or the configured value fails validation (missing scheme, no hostname, includes a query string, and so on). | Run `moodle` once in an interactive shell to set it, or set `MOODLE_BASE_URL`. See [Configuration](/moodle/configuration). |
+| `usage` | A malformed invocation: a missing required argument, a flag the command doesn't have, an invalid `completion` shell choice. | Run `moodle <command> --help`. |
+| `not_found` | A reference (unit, section, activity) resolved to nothing on Moodle. | Run `moodle units` or `moodle find <query>` to confirm the reference exists and how the CLI spells it. |
+| `upstream` | Moodle returned an error that isn't a login or not-found problem — a site-side failure. | Run `moodle doctor`, then retry. If it persists, the site itself is likely degraded. |
+| `network` | The request never reached Moodle: connection refused or reset, DNS failure, timeout. | Check the connection or VPN, then retry. |
+| `cancelled` | You declined a confirmation prompt or pressed Ctrl-C mid-command. | Retry when ready; nothing was changed. |
+| `unexpected` | Anything not covered above — treat it as a bug. | Run `moodle doctor`; rerun with `--verbose` for request timings, and report it if it repeats. |
+
+`submit`, `uninstall`, `auth login`, `auth keepalive install`/`auth keepalive uninstall`, and the `mcp` deployment commands all mutate state and go through the same plan-confirm flow; see [Mutations](/concepts/mutations) for the full list.
+
+### `ambiguous` — a reference matched more than one thing
+
+A `UNIT`, section or item phrase that matches more than one record fails and lists every match, instead of guessing. See [How ambiguity resolves](/moodle/daily-use#how-ambiguity-resolves) for the interactive picker moodle-cli shows at a terminal.
+
+Fix: use one of the listed candidates, or narrow the phrase until only one thing matches.
+
+## macOS: browser cookie store unreadable
+
+**Symptom:** `moodle doctor`'s `browser` check reports `fail`, or an `auth` error's hint mentions Full Disk Access.
+
+**Cause:** Full Disk Access is granted to your terminal application, never to the CLI process itself, and a sandboxed terminal (an IDE's integrated terminal, an agent runner) usually can't be granted it at all. See [macOS Full Disk Access and cookie stores](/moodle/sign-in#macos-full-disk-access-and-cookie-stores) for which cookie stores this affects and why.
+
+**Fix:** grant Full Disk Access to the terminal app named in the hint, then fully restart that app — not just the tab:
+
+```text
+System Settings > Privacy & Security > Full Disk Access
+```
+
+Or skip the store entirely:
+
+```bash
+moodle auth login --paste
+```
+
+## Expired session
+
+**Symptom:** a command that worked yesterday now fails with `auth`, or `moodle auth status` reports `session_alive: false`.
+
+**Fix:** re-authenticate:
+
+```bash
+moodle auth login
+```
+
+If you rely on a deployed MCP (Model Context Protocol) server rather than the local CLI, its session expires independently of your terminal's saved one; `moodle mcp login` sends it a fresh session. See [Connect an agent](/moodle/mcp-server) for that flow.
+
+## Keepalive not running
+
+**Symptom:** sessions keep expiring even though you installed keepalive.
+
+**Check:**
+
+```bash
+moodle auth keepalive status
+moodle doctor
+```
+
+A `job` check failing in `moodle doctor` means the background job can no longer read browser cookies (for example, after switching Node versions) or its runtime no longer exists. Reinstall it:
+
+```bash
+moodle auth keepalive install
+```
+
+On Linux there's no job to check — keepalive only runs if you scheduled the cron line yourself; see [Keepalive](/moodle/sign-in#keepalive).
+
+## Cloudflare deployment problems
+
+Deployment and remote-session issues for the managed MCP server (Cloudflare sign-in, Worker deploy failures, OAuth pairing) are specific to that surface and covered in [Connect an agent](/moodle/mcp-server) and [MCP troubleshooting](/mcp/troubleshooting). `moodle mcp status --verbose` and `moodle doctor`'s `mcp` check are the starting points; `moodle mcp deploy --repair` is the general-purpose fix for a deployment stuck in a bad state.
+
+## What `moodle doctor` checks mean
+
+`moodle doctor` runs the checks documented in [Sign in](/moodle/sign-in#moodle-doctor): `sqlite`, `config`, `session`, `browser`, one `job` per background job you have running, and `mcp`. Only `sqlite`, `config` and `browser` can report `fail`; `session`, `job` and `mcp` only ever report `pass` or `warn`.
+
+| Check | Status when triggered | Meaning | Fix |
+| --- | --- | --- | --- |
+| `sqlite` | fail | The runtime can't read Chromium cookie databases. | Install Node 22.13+ or Bun. |
+| `config` | fail | No Moodle URL configured. | Run `moodle` once interactively, or set `MOODLE_BASE_URL`. |
+| `session` | warn | No saved session, or it's no longer alive. | Run `moodle auth login`. |
+| `browser` | fail | Every cookie store on the machine is unreadable. | See [macOS: browser cookie store unreadable](#macos-browser-cookie-store-unreadable) above. |
+| `job` | warn | A keepalive or MCP renewal job can't read cookies, or its runtime is missing. | Run `moodle auth keepalive install`, or `moodle mcp deploy` to repair renewal. |

@@ -1,0 +1,107 @@
+---
+title: Web coverage
+description: What each platform's web UI offers, and how much of it the CLI reaches today.
+sidebarTitle: Web coverage
+icon: globe
+---
+
+This page lists what each platform's web UI offers, split into what its CLI covers, partially covers, and doesn't cover at all — use it to decide whether a task still needs a browser.
+
+<Note>
+  Coverage below is as of the versions this site documents: `moodle-cli` 0.9.2, `edstem-cli` 0.7.0, `ontrack` 0.3.2. A platform's web UI moves independently of these CLIs; recheck this page against a new release before relying on a gap being closed.
+</Note>
+
+## Moodle
+
+<Tabs>
+  <Tab title="Covered">
+    - Enrolled units, with section browsing — `units`, `activities`
+    - Deadlines and the calendar's actionable timeline — `due`, `todo`
+    - Grades and feedback — `grades`
+    - Announcements (forum-type posts) — `news`
+    - Forum discussion reading and search — `threads`, `forums`
+    - Resource, folder and assignment file download — `download`, `get`
+    - Assignment file submission, draft or final — `submit`
+    - Notification and unread message counts — `alerts`
+    - Opening a unit or activity in the browser from a reference — `open`
+  </Tab>
+  <Tab title="Partially covered">
+    - **Search:** `find` ranks sections, activities and discussion subjects against a query, but it's a heuristic match over what the CLI has already fetched, not Moodle's own global search index — it won't find text inside a page's body the way Moodle's site-wide search can.
+    - **Forums:** reading and searching discussions is covered; there's no way to reply, edit, or delete a post from the CLI.
+    - **Folder downloads:** a folder activity exposes its individual files so you can choose which to save, but there's no single "download everything in this unit" command.
+  </Tab>
+  <Tab title="Not covered">
+    - Taking a quiz or reviewing quiz attempts
+    - Private messaging between users
+    - Calendar export or subscription (iCal feed)
+    - Wiki, glossary and database activities
+    - Badges and competencies
+    - Group choice or choice-activity voting
+    - Gradebook editing (the staff side of grading)
+    - Editing your Moodle profile or notification preferences
+  </Tab>
+</Tabs>
+
+Write side: only `submit` changes anything on Moodle. Everything else in this CLI is read-only.
+
+## Ed Discussion
+
+<Tabs>
+  <Tab title="Covered">
+    - Enrolled units — `units`
+    - Thread listing, search, and reading — `threads`
+    - Posting a new thread or a reply — `threads send`, `replies send`
+    - Lesson content, including slides — `lessons`, `slides show`, `slides read`
+    - Quiz slide answers — `slides submit`
+    - Marking lessons and slides read — `lessons mark-read`
+    - Ed-hosted file listing and download, from lessons or threads — `files`
+    - Your own recent activity — `activity`
+  </Tab>
+  <Tab title="Partially covered">
+    - **Posting:** creating threads and replies is covered, with `--private` and `--anonymous` flags; editing or deleting a post you already sent is not — Ed's own editing window has no CLI equivalent.
+    - **Thread categorization:** you can set `--category`/`--type` when posting, but there's no way to move, pin, or lock an existing thread.
+  </Tab>
+  <Tab title="Not covered">
+    - Ed Workspaces and code runners
+    - Ed's real-time chat (separate from discussion threads)
+    - Polls
+    - Endorsing an answer or voting on a post
+    - Merging or splitting mega-threads
+    - Authoring or editing lesson content (only reading is covered)
+  </Tab>
+</Tabs>
+
+Write side: `threads send`, `replies send`, `lessons mark-read`, `slides submit`. Posting is additionally gated behind `EDSTEM_ALLOW_POSTING`/`MCP_ALLOW_POSTING` on the MCP (Model Context Protocol) surfaces — see [Mutations](/concepts/mutations).
+
+## OnTrack
+
+<Tabs>
+  <Tab title="Covered">
+    - Enrolled units — `units`
+    - Tasks, their status and due dates — `tasks list`
+    - A task sheet, converted to Markdown from its source PDF — `tasks read`
+    - Task and whole-unit resource downloads — `tasks get`, `units get`
+    - Task workflow state (self-reported: not started, working on it, need help) — `tasks set`
+    - Task file submission — `tasks submit`
+    - Task chat history and sending a message — `chats read`, `chats send`
+    - Teaching roles you hold — `roles`
+  </Tab>
+  <Tab title="Partially covered">
+    - **Task chat:** you can read history and send a plain-text message with `chats send --message`; there's no way to attach a file to a chat message the way the OnTrack web UI allows.
+    - **Task submission:** uploading files for a task is covered; requesting or granting an extension is not.
+  </Tab>
+  <Tab title="Not covered">
+    - Portfolio compilation
+    - Group-based tasks and group submission management
+    - Tutorial or practical enrolment/selection
+    - Staff-side PDF submission review and annotation
+    - Extension requests
+    - The learning-summary report OnTrack generates per student
+  </Tab>
+</Tabs>
+
+Write side: `tasks set`, `tasks submit`, `chats send`, `chats mark-read`, and `chats read` as a side effect of fetching history — see [Mutations](/concepts/mutations) for why reading chat history counts as a write here.
+
+<Card title="Feature matrix" icon="table" href="/compare/features">
+  The same information as a side-by-side table across all three CLIs.
+</Card>

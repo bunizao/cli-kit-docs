@@ -1,0 +1,47 @@
+---
+title: Moodle CLI
+description: Read Moodle from the terminal or an agent, using the browser session you already have.
+sidebarTitle: Overview
+icon: graduation-cap
+---
+
+`moodle` shows your deadlines, grades, announcements, forum threads and unit files in the terminal, and can upload files to an assignment. It uses the Moodle login you already have in your browser, so there is nothing to request from your university and nothing to set up on Moodle's side.
+
+Because it reuses your own login, the CLI can only see what you can see, and it needs you to be signed in to Moodle in a browser at least once. `moodle auth login` picks up that sign-in; on macOS, `moodle auth keepalive` keeps it fresh in the background. See [Sign in](/moodle/sign-in).
+
+## Who it's for
+
+- Students who want deadlines, grades, announcements and files without opening a browser tab.
+- Teaching staff who want the same read access to units they're enrolled in or teach.
+- Script and agent authors — see [Moodle CLI for scripts and agents](/developers/moodle).
+
+## What it does
+
+Every command that reads Moodle unit data only reads: units, deadlines, grades, announcements, forum threads and files. [`submit`](/moodle/submit) is the one command that changes anything on Moodle: it uploads local files into an assignment and shows you what Moodle recorded. A few others (`auth login`, `uninstall`, the `mcp` setup commands) change things on your machine or your own hosted server; see [Mutations](/concepts/mutations).
+
+<Info>
+  See [The command model](/concepts/command-model) for how commands, references and output formats fit together, and [Mutations](/concepts/mutations) for how mutating commands ask for confirmation before they change anything.
+</Info>
+
+## What it doesn't do
+
+- It doesn't replace the Moodle web UI for everything — there's no quiz-taking, no forum posting, and no gradebook editing.
+- It never gets its own Moodle account or special permissions; it can only reach what your account can already see.
+- It doesn't submit or delete anything without an explicit command and, outside scripts, a confirmation prompt.
+
+Connect an AI agent to the same data over MCP (Model Context Protocol) instead of the terminal, either locally or through a private hosted server: see [Connect an agent](/moodle/mcp-server).
+
+<Columns cols={4}>
+  <Card title="Install" icon="download" href="/moodle/install">
+    Get the CLI on your machine.
+  </Card>
+  <Card title="Sign in" icon="key" href="/moodle/sign-in">
+    Authenticate with your university's Moodle.
+  </Card>
+  <Card title="Daily use" icon="terminal" href="/moodle/daily-use">
+    Check deadlines, grades and news.
+  </Card>
+  <Card title="Connect an agent" icon="plug" href="/moodle/mcp-server">
+    Give an AI agent the same access over MCP.
+  </Card>
+</Columns>

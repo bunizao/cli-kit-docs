@@ -1,0 +1,43 @@
+---
+title: "edstem files"
+description: "List or download Ed-hosted lesson and thread files."
+sidebarTitle: "files"
+---
+
+```bash
+edstem files [options] [command]
+```
+
+## edstem files list
+
+```bash
+edstem files list [options] <target>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `target` | Yes | Lesson ID, or a thread as thread:`<id>` or thread:`<unit>`#`<number>` |
+
+## edstem files get
+
+```bash
+edstem files get [options] <target>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `target` | Yes | Lesson ID, or a thread as thread:`<id>` or thread:`<unit>`#`<number>` |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--dest <directory>` | Destination directory |
+| `--slide <slide>` | Download only one slide file |
+| `--force` | Replace existing files. |
+
+Global options apply to every command. See [Global options](/edstem/reference/index#global-options).

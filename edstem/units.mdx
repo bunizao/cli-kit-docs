@@ -1,0 +1,70 @@
+---
+title: "Units"
+description: "List enrolled units, resolve unit references, and read the unit#number thread syntax."
+---
+
+Ed calls your enrolments courses; this site calls them units to match every other command here. `edstem units` and its aliases `edstem courses` and `edstem projects` are the same command.
+
+## List your units
+
+```bash
+edstem units
+edstem units list --archived
+```
+
+`edstem units` defaults to the `list` verb. `--archived` includes units Ed has marked archived; without it, only active enrolments are returned.
+
+## Show one unit
+
+```bash
+edstem units show UNIT
+```
+
+## Your identity
+
+```bash
+edstem user
+```
+
+Returns your Ed identity plus every enrolled unit, active and archived, in one call.
+
+## How `<unit>` resolves
+
+Every command that takes a `<unit>` argument accepts either:
+
+- the numeric Ed unit ID, or
+- the exact unit code, matched case-insensitively against your enrolments.
+
+```bash
+edstem threads UNIT
+edstem threads 38435
+```
+
+A unit code is not required to have any particular shape — the CLI resolves it against your own enrolment list, not a pattern.
+
+### Duplicate codes across years
+
+If the same unit code appears in more than one of your enrolments (a unit you've taken in more than one teaching period, for example), a code lookup is ambiguous and the CLI reports every matching unit ID so you can pick one:
+
+```text
+Course code "UNIT" is ambiguous. Matching courses: 38435 (2026, S1, active), 41210 (2026, S2, active). Use a numeric course ID.
+```
+
+Run `edstem units list --archived` to see the full list with IDs, then pass the numeric ID instead of the code.
+
+An unrecognized code is a usage error, not a not-found error, because the CLI is validating your input against enrolments it already has, not asking Ed for a resource. See [Errors and exit codes](/concepts/errors-and-exit-codes).
+
+## The `unit#number` thread reference
+
+Threads are addressed two ways: a global thread ID, or a unit plus its per-unit thread number, joined with `#`:
+
+```bash
+edstem threads show 12345
+edstem threads show UNIT#42
+```
+
+`UNIT#42` resolves `UNIT` the same way any other `<unit>` argument does, then asks Ed for thread number 42 within that unit. This reference form is used by `threads show`, `threads read`, `replies send`, and the `files` commands' `thread:` targets — see [Threads](/edstem/threads), [Posting](/edstem/posting), and [Files](/edstem/files).
+
+<Card title="Command reference: units" icon="terminal" href="/edstem/reference/units">
+  Full syntax for `units list` and `units show`.
+</Card>

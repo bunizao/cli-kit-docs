@@ -1,0 +1,44 @@
+---
+title: Grades and deadlines
+description: Check items due in a date window and grades across your units, and how moodle-cli resolves the timezone it reports dates in.
+sidebarTitle: Grades and deadlines
+icon: calendar-check
+---
+
+## Due items
+
+```bash
+moodle due [unit] --days 14 --limit 20
+```
+
+`unit` is optional — omit it to see deadlines across every unit you're enrolled in, or pass a unit code, name, id or URL to scope the window to one. `--days` sets how far ahead to look (default 14) and `--limit` caps how many rows come back (default 20). Each row names the activity, the unit it belongs to, and its due date, shown in your [site's timezone](#timezones).
+
+`moodle todo` runs the same lookup without unit scoping and its own flag defaults; see [Units and activities](/moodle/units-and-activities#todo). Full flag reference: [`moodle due`](/moodle/reference/due).
+
+Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#due-and-todo) for the field-by-field JSON shape.
+
+## Grades
+
+```bash
+moodle grades list [unit] --graded-only
+```
+
+`unit` optional, same resolution as everywhere else; omitted, you get every unit's grades. `--graded-only` drops items without a real grade yet (a blank or dash-only value doesn't count as graded).
+
+Each unit's result shows how many items are graded out of the total, the unit's own overall grade, and a breakdown per item — name, grade, percentage, weight, and feedback where Moodle has any. An item still shows its due date if it isn't graded yet; once it's graded, the due date drops off, since it's no longer relevant to check.
+
+Full flag reference: [`moodle grades`](/moodle/reference/grades).
+
+Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#grades) for the exact field names.
+
+## Timezones
+
+Every date moodle-cli shows uses your Moodle site's own timezone when it has one set. If the site doesn't report a usable timezone, moodle-cli falls back to your computer's own local timezone instead, so dates stay readable either way.
+
+`moodle user` shows the raw, unresolved site timezone value on its own; see [Units and activities](/moodle/units-and-activities#user).
+
+Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#timezones-in-json) for the exact resolution order and the epoch-seconds form every date also carries.
+
+<Note>
+  Moodle's `99` timezone value means "follow the server's configured default," not a literal timezone. moodle-cli doesn't query the Moodle server for its actual default — a `99` value is treated the same as no value at all, and falls through to the host machine's zone.
+</Note>

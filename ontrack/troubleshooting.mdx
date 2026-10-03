@@ -1,0 +1,62 @@
+---
+title: Troubleshooting
+description: What you saw, why, and how to fix it — sign-in and configuration failures in ontrack.
+icon: wrench
+---
+
+Every error goes to stderr; `--json` prints it in the same shape described in [Errors and exit codes](/concepts/errors-and-exit-codes). This page covers what you'll actually see and how to fix it. For the exact exit code and `error.code` behind each one, see [OnTrack CLI for scripts and agents](/developers/ontrack#error-codes-and-exit-codes).
+
+## Browser-cookie extraction failing
+
+**Permission denied (`EPERM`/`EACCES`) reading a browser's cookies**
+
+```text
+Permission denied while reading Chrome cookies (EACCES). In System Settings > Privacy & Security >
+Files & Folders, enable Chrome for the terminal or app that launched ontrack, then retry.
+```
+
+Grant the listed permission (macOS) or rerun the terminal with access to the browser's profile directory (Linux/Windows), then retry.
+
+**macOS Keychain prompt not approved**
+
+```text
+macOS Keychain did not authorize Chrome cookie decryption. Approve the Touch ID prompt for
+ontrack, then retry.
+```
+
+Approve the Keychain prompt when it appears — it can be easy to miss behind the terminal window — then retry.
+
+**No cookies found at all**
+
+If every browser comes back empty (none installed, none signed in, or a cookie database that doesn't exist), `ontrack` doesn't error — it falls straight through to the SAML sign-in flow described in [Sign in](/ontrack/sign-in#the-saml-fallback-and-its-console-snippet).
+
+## SAML snippet flow problems
+
+- **Waited too long.** The local callback server times out after 5 minutes. Rerun `ontrack auth login` and paste the snippet promptly after signing in.
+- **Pasted the snippet, nothing happened.** Confirm you pasted it into the OnTrack tab that finished signing in, not a different tab — the snippet reads that tab's own session.
+- **"Sign-in could not be completed."** The snippet's request didn't return a valid token, or the token was already expired by the time it arrived. Rerun `ontrack auth login`.
+
+## Wrong base URL
+
+```text
+No base_url configured.
+Set ONTRACK_BASE_URL or add base_url to ~/.config/ontrack-cli/config.yaml.
+```
+
+```text
+Base URL must be the site root.
+```
+
+The first means nothing is configured yet — see [Install](/ontrack/install#point-it-at-your-site). The second means `base_url` has a path, query string or credentials in it; it must be exactly the site's origin, for example `https://ontrack.example.edu` with nothing after it.
+
+## Expired session
+
+A cached session past its expiry is treated as absent, not as an error on its own — `ontrack` retries the browser-cookie exchange automatically before falling back to `auth login`. If sign-in still fails right after a session should have been valid, the automatic retry also failed; run `ontrack auth login` directly.
+
+## Ambiguous UNIT
+
+```text
+Unit UNIT matches multiple projects: 1041, 1187. Use a project ID.
+```
+
+This is a usage error, not a not-found error — the reference matched more than once. Rerun with one of the listed project IDs. See [Resolving UNIT](/ontrack/units-and-tasks#resolving-unit) for the matching order that produced the list.

@@ -1,0 +1,53 @@
+---
+title: "Files"
+description: "List and download Ed-hosted files attached to a lesson or a thread."
+---
+
+`edstem files` lists and downloads files Ed hosts itself — PDF lesson slides and files embedded in lesson or thread content. It does not follow external links.
+
+## Targets
+
+Both `files list` and `files get` take one `<target>`:
+
+```bash
+edstem files list 67890                     # a lesson ID
+edstem files get thread:5001                 # a thread by global ID
+edstem files get thread:UNIT#42 --dest ./attachments
+```
+
+A bare number is a lesson ID. Prefix a thread reference with `thread:` — it accepts the same forms as everywhere else in the CLI: a global thread ID, or `<unit>#<number>`. See [Units](/edstem/units) for how that reference resolves.
+
+## List files
+
+```bash
+edstem files list 67890
+edstem files list thread:UNIT#42
+```
+
+For a lesson target, this collects the lesson's outline content, every slide's PDF (`file_url`), and every file embedded in a slide's content. For a thread target, it collects files from the thread body, every answer, and every comment, walking nested comment replies recursively.
+
+## Download files
+
+```bash
+edstem files get 67890 --dest ./slides
+edstem files get 67890 --slide 4401 --dest ./slides
+edstem files get thread:5001 --dest ./attachments
+```
+
+| Flag | Effect |
+| --- | --- |
+| `--dest <directory>` | Destination directory. Defaults to `.`. |
+| `--slide <slide>` | Download only the files attached to this slide. Lesson targets only. |
+| `--force` | Replace files that already exist at the destination. |
+
+`--slide` on a thread target is a usage error — slides belong to lessons.
+
+Existing files are protected by default: a name collision with `--force` unset fails with a usage error naming the file, instead of silently overwriting your copy. Each file downloads to a temporary path first and is only linked into place once the download completes, so a failed or interrupted download never leaves a truncated file at the final name. The saved filename comes from what Ed reports for the file where available, falling back to the name recorded in Ed's content; a second file with the same name in one run gets a `-2`, `-3`, and so on, suffix instead of overwriting the first.
+
+## What counts as downloadable
+
+Only HTTPS files hosted on `edusercontent.com` (or a subdomain of it) are treated as downloadable Ed files. Any other URL in lesson or thread content — a link to an external site, a YouTube embed, a Google Doc — stays visible wherever you're reading the content, but `files list`/`files get` don't surface or fetch it. This isn't a filter you can loosen: `files get` refuses to fetch any URL outside `edusercontent.com`, even if you construct one by hand.
+
+<Card title="Command reference: files" icon="terminal" href="/edstem/reference/files">
+  Full syntax for `files list` and `files get`.
+</Card>

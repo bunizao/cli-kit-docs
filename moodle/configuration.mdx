@@ -1,0 +1,62 @@
+---
+title: Configuration
+description: Config file location, session cache and global flags for moodle-cli.
+sidebarTitle: Configuration
+icon: sliders
+---
+
+This page covers moodle-cli's own config file, session cache and global flags. For the general shape these ideas take across all three CLIs, see [Configuration](/concepts/configuration).
+
+## Config file
+
+moodle-cli stores `base_url` in a YAML file at `~/.config/moodle-cli/config.yaml`. The first run that needs a base URL and finds none prompts for it (in an interactive terminal only) and writes it there.
+
+```yaml config.yaml
+base_url: https://moodle.example.edu
+```
+
+moodle-cli looks for a config file in this order, and reads the first one it finds:
+
+1. The path in `MOODLE_CONFIG`, if that variable is set.
+2. `./config.yaml` in the current directory.
+3. `~/.config/moodle-cli/config.yaml`.
+
+Only the first file found is read — settings from other locations are not merged in.
+
+Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#environment-variables) for the full environment variable table, including how to point the CLI at a session without a browser.
+
+## Session cache
+
+A validated session — a few profile fields alongside what's needed to sign you back in — is cached at `~/.cache/moodle-cli/session.json`, encrypted at rest, with the file and its containing directory restricted to your user. The cache expires after 24 hours; an expired or missing cache triggers a fresh sign-in.
+
+Pass `--no-cache` to skip the cache for a single command: it neither reads a cached session nor writes the one it obtains.
+
+```bash
+moodle due --no-cache
+```
+
+## Global flags
+
+These flags work on every command. See [Output formats](/concepts/output-formats) for `--json`/`--yaml`/`--table`/`--fields`, and [Mutations](/concepts/mutations) for `--yes` and `--dry-run`.
+
+| Flag | Effect |
+| --- | --- |
+| `--json` / `--yaml` / `--table` | Force an output format. |
+| `--fields <fields>` | Select top-level output fields. |
+| `-o, --output <file>` | Write output to a file. |
+| `-v, --verbose` | Log sanitized request info to stderr. |
+| `--no-color` | Disable color output. |
+| `-y, --yes` | Confirm mutations non-interactively. |
+| `--dry-run` | Print a mutation's plan without applying it. |
+| `--no-cache` | Bypass session cache reads and writes. |
+| `--pretty` | Indent JSON output. |
+| `--limit <number>` | Maximum returned rows. |
+| `--days <number>` | Deadline window in days. |
+
+`--limit` and `--days` are declared once on the program itself. A value you pass wins over the command's own default, wherever you put it on the command line; leave it out and the command falls back to its own default: `moodle due`, for example, defaults `--days` to 14 and `--limit` to 20.
+
+### `--verbose`
+
+`-v` / `--verbose` writes one line per request to stderr, naming what was requested and how long it took. It never logs your session cookie or an MCP (Model Context Protocol) access token.
+
+Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#output-formats-and-fields) for `--fields` and `--pretty`.

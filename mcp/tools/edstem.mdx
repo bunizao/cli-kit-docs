@@ -1,0 +1,415 @@
+---
+title: "Ed Discussion MCP tool catalog"
+description: "Every tool the Ed Discussion MCP servers expose, with its parameters, gating, and whether it writes to Ed."
+---
+
+This catalog lists the 23 tools the Ed Discussion Model Context Protocol (MCP) server provides, in the order it lists them. Descriptions are the exact text the server ships for each tool.
+
+Every tool is listed on every surface — stdio (`edstem-mcp`), a self-deployed Worker, and the hosted `https://edstem.tuuhub.com/mcp` service. Gating happens when a tool is called, not when it is listed:
+
+- `create_thread` and `reply_thread` post publicly to a course. They fail with `INSUFFICIENT_SCOPE` unless posting is allowed: `EDSTEM_ALLOW_POSTING=1` for stdio, `MCP_ALLOW_POSTING=1` for a self-deployed Worker, or the write scope granted during the hosted service's OAuth consent.
+- `mark_lessons_read`, `submit_slide_answer` and `submit_slide` write too, but only require write access, not the posting flag. stdio and a self-deployed Worker grant write access to the token holder unconditionally; the hosted service still requires the same OAuth write scope that gates posting.
+
+See [Security](/mcp/security) for the full gating model. For the CLI equivalents, see [`/edstem/reference`](/edstem/reference/index).
+
+### get_user
+
+Get the current Ed identity and enrolled courses.
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### list_courses
+
+List enrolled courses; archived courses are omitted by default.
+
+<ParamField path="includeArchived" type="boolean" default="false">
+  Also return courses Ed marks as archived; defaults to false.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### list_lessons
+
+List compact lesson summaries for one course. courseId accepts a numeric ID or course code. Call without filters first: an empty list means the course has no Ed Lessons. Filters are case-insensitive; use all or omit a filter to include every value.
+
+<ParamField path="courseId" type="integer | string" required>
+  Ed course ID or exact course code.
+</ParamField>
+
+<ParamField path="lessonType" type="string">
+  Exact lesson type, for example `"general"`. Use `"all"` or omit to include every type.
+</ParamField>
+
+<ParamField path="module" type="string">
+  Module ID or case-insensitive text from the module name. Use `"all"` or omit to include every module.
+</ParamField>
+
+<ParamField path="state" type="string">
+  Exact availability state, for example `"active"` or `"scheduled"`. Use `"all"` or omit to include every state.
+</ParamField>
+
+<ParamField path="status" type="string">
+  Exact progress status: `"unattempted"`, `"attempted"`, or `"completed"`. Use `"all"` or omit to include every status.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### get_lesson
+
+Get one lesson with slide content.
+
+<ParamField path="lessonId" type="integer" required>
+  Ed lesson ID as returned by `list_lessons`.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### list_lesson_files
+
+List Ed-hosted downloadable files and direct resource links for one lesson.
+
+<ParamField path="lessonId" type="integer" required>
+  Ed lesson ID as returned by `list_lessons`.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only. Returns a JSON block plus one `resource_link` content item per file.
+
+### list_thread_files
+
+List Ed-hosted downloadable files and direct resource links attached to one thread, including its answers and comments.
+
+<ParamField path="threadId" type="integer" required>
+  Global thread ID as returned by `list_threads`.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only. Returns a JSON block plus one `resource_link` content item per file.
+
+### list_slide_questions
+
+List quiz questions for one lesson slide.
+
+<ParamField path="slideId" type="integer" required>
+  Ed slide ID as returned by `get_lesson`.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### list_slide_responses
+
+List saved quiz responses for one lesson slide.
+
+<ParamField path="slideId" type="integer" required>
+  Ed slide ID as returned by `get_lesson`.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### get_slide
+
+Get one lesson slide with its content.
+
+<ParamField path="slideId" type="integer" required>
+  Ed slide ID as returned by `get_lesson`.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### list_threads
+
+List compact thread summaries for one course. courseId accepts a numeric ID or course code. Categories are hierarchical: category is top-level and subcategory is second-level. Sort defaults to new; Ed may keep pinned threads first.
+
+<ParamField path="courseId" type="integer | string" required>
+  Ed course ID or exact course code.
+</ParamField>
+
+<ParamField path="answered" type="boolean">
+  Keep answered threads when true, unanswered when false; omit for both.
+</ParamField>
+
+<ParamField path="category" type="string">
+  Exact top-level category.
+</ParamField>
+
+<ParamField path="subcategory" type="string">
+  Exact second-level subcategory.
+</ParamField>
+
+<ParamField path="threadType" type="string">
+  Exact thread type, for example `"question"` or `"post"`.
+</ParamField>
+
+<ParamField path="sort" type="string" default="new">
+  `new`, `old`, `top`, or `hot`. Ed may keep pinned threads ahead of this order.
+</ParamField>
+
+<ParamField path="since" type="string">
+  Only threads created at or after this time: an ISO date, an ISO datetime, or a relative offset such as `"7d"`, `"12h"`, or `"2w"`.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="30">
+  Maximum threads to return, capped at 100.
+</ParamField>
+
+<ParamField path="offset" type="integer" default="0">
+  Threads to skip in the unfiltered Ed stream before filtering.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### search_threads
+
+Search threads in one course. Every query word must appear, case-insensitively, in the thread title or body; Ed is paged client-side until limit threads match. Accepts the same filters as list_threads.
+
+<ParamField path="courseId" type="integer | string" required>
+  Ed course ID or exact course code.
+</ParamField>
+
+<ParamField path="query" type="string" required>
+  Words that must all appear, case-insensitively, in the thread title or body.
+</ParamField>
+
+<ParamField path="answered" type="boolean">
+  Keep answered threads when true, unanswered when false; omit for both.
+</ParamField>
+
+<ParamField path="category" type="string">
+  Exact top-level category.
+</ParamField>
+
+<ParamField path="subcategory" type="string">
+  Exact second-level subcategory.
+</ParamField>
+
+<ParamField path="threadType" type="string">
+  Exact thread type.
+</ParamField>
+
+<ParamField path="sort" type="string" default="new">
+  `new`, `old`, `top`, or `hot`.
+</ParamField>
+
+<ParamField path="since" type="string">
+  Only threads created at or after this time.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="30">
+  Maximum threads to return, capped at 100.
+</ParamField>
+
+<ParamField path="offset" type="integer" default="0">
+  Threads to skip in the unfiltered Ed stream before filtering.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### get_thread
+
+Get a compact thread detail by global thread ID.
+
+<ParamField path="threadId" type="integer" required>
+  Global Ed thread ID as returned by `list_threads`; for the number shown inside a course use `get_course_thread`.
+</ParamField>
+
+<ParamField path="includeHtml" type="boolean" default="false">
+  Also return Ed's XML content; the plain-text document is always returned.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### get_course_thread
+
+Get a compact thread detail by course ID or code and course-local number.
+
+<ParamField path="courseId" type="integer | string" required>
+  Ed course ID or exact course code.
+</ParamField>
+
+<ParamField path="number" type="integer" required>
+  One-based thread number as shown inside the course, the #N in the Ed thread list.
+</ParamField>
+
+<ParamField path="includeHtml" type="boolean" default="false">
+  Also return Ed's XML content; the plain-text document is always returned.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### list_activity
+
+List compact current-user activity, optionally filtered by course ID or code.
+
+<ParamField path="courseId" type="integer | string">
+  Ed course ID or exact course code to filter by. Omit for every course.
+</ParamField>
+
+<ParamField path="filterType" type="string" default="all">
+  `all`, `thread`, `answer`, or `comment`.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="30">
+  Maximum items, capped at 50.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### read_thread
+
+Read one thread as Markdown. Pass either threadId, or courseId plus the course-local number.
+
+<ParamField path="threadId" type="integer">
+  Global Ed thread ID; use instead of `courseId` and `number`.
+</ParamField>
+
+<ParamField path="courseId" type="integer | string">
+  Ed course ID or exact course code.
+</ParamField>
+
+<ParamField path="number" type="integer">
+  Course-local thread number; requires `courseId`.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### read_lesson
+
+Read one lesson and its slides as Markdown.
+
+<ParamField path="lessonId" type="integer" required>
+  Ed lesson ID.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### read_slide
+
+Read one lesson slide as Markdown.
+
+<ParamField path="slideId" type="integer" required>
+  Ed lesson slide ID.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### mark_lessons_read
+
+Mark matching lessons and slides as read using a course ID or code.
+
+<ParamField path="courseId" type="integer | string" required>
+  Ed course ID or exact course code.
+</ParamField>
+
+<ParamField path="all" type="boolean" default="false">
+  Mark every lesson in the course; required when `queries` is empty.
+</ParamField>
+
+<ParamField path="queries" type="string[]" default="[]">
+  Case-insensitive substrings that must all appear in the lesson title or module name; at most 10. When `queries` is empty, `all` must be true to mark every lesson of the course.
+</ParamField>
+
+<ParamField path="delaySeconds" type="number" default="0">
+  Seconds to pause after each slide, 0 to 10. Raise it to go easy on Ed.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Writes to Ed (marks progress). Requires write access, not the posting flag: unconditional on stdio and a self-deployed Worker, the OAuth write scope on hosted.
+
+### submit_slide_answer
+
+Submit one-based quiz choices for one question.
+
+<ParamField path="questionId" type="integer" required>
+  Ed question ID as returned by `list_slide_questions`.
+</ParamField>
+
+<ParamField path="choices" type="integer[]" required>
+  One-based answer indexes as shown by `list_slide_questions`; pass several for multiple-selection questions.
+</ParamField>
+
+<ParamField path="amend" type="boolean" default="false">
+  Overwrite an answer already saved for this question.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Writes to Ed. Requires write access, not the posting flag: unconditional on stdio and a self-deployed Worker, the OAuth write scope on hosted.
+
+### submit_slide
+
+Submit all saved answers for one quiz slide.
+
+<ParamField path="slideId" type="integer" required>
+  Ed slide ID whose saved answers are submitted, as returned by `get_lesson`.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Writes to Ed. Requires write access, not the posting flag: unconditional on stdio and a self-deployed Worker, the OAuth write scope on hosted.
+
+### create_thread
+
+Create a thread in one course. body is Markdown and is converted to Ed's document format. The thread is posted publicly to the course as the token owner and cannot be removed from here; ask the user before calling it.
+
+<ParamField path="courseId" type="integer | string" required>
+  Ed course ID or exact course code.
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  Thread title shown in the course thread list.
+</ParamField>
+
+<ParamField path="body" type="string" required>
+  Post body in Markdown. It is converted to Ed's document format before posting.
+</ParamField>
+
+<ParamField path="type" type="string" required>
+  `question` to ask, `post` to discuss; `announcement` needs staff rights.
+</ParamField>
+
+<ParamField path="category" type="string">
+  Exact top-level category for the course.
+</ParamField>
+
+<ParamField path="anonymous" type="boolean" default="false">
+  Hide the author name from other students. Staff can still see it.
+</ParamField>
+
+<ParamField path="private" type="boolean" default="false">
+  Post privately to course staff instead of the whole course.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Writes to Ed, publicly by default. Gated by the posting flag: `EDSTEM_ALLOW_POSTING=1`, `MCP_ALLOW_POSTING=1`, or the hosted service's write scope.
+
+### reply_thread
+
+Reply to one thread, or to one comment inside it. body is Markdown and is converted to Ed's document format. The reply is posted publicly as the token owner and cannot be removed from here; ask the user before calling it.
+
+<ParamField path="threadId" type="integer" required>
+  Global Ed thread ID to reply to.
+</ParamField>
+
+<ParamField path="body" type="string" required>
+  Reply body in Markdown. It is converted to Ed's document format before posting.
+</ParamField>
+
+<ParamField path="toCommentId" type="integer">
+  Reply under this comment of the thread instead of at the top level. The comment must belong to `threadId`.
+</ParamField>
+
+<ParamField path="as" type="string">
+  `answer` or `comment`. Defaults to `answer` on question threads and `comment` elsewhere.
+</ParamField>
+
+<ParamField path="anonymous" type="boolean" default="false">
+  Hide the author name from other students. Staff can still see it.
+</ParamField>
+
+<ParamField path="private" type="boolean" default="false">
+  Post privately to course staff instead of the whole course.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Writes to Ed, publicly by default. Gated by the posting flag: `EDSTEM_ALLOW_POSTING=1`, `MCP_ALLOW_POSTING=1`, or the hosted service's write scope.
+
+### list_modules
+
+List the lesson modules of one course with the number of lessons in each. courseId accepts a numeric ID or course code. Use it to pick a module value for list_lessons.
+
+<ParamField path="courseId" type="integer | string" required>
+  Ed course ID or exact course code.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only.

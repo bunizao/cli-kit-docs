@@ -1,0 +1,86 @@
+---
+title: Mutations
+description: Which commands write, the plan-then-confirm flow, and the per-product exceptions.
+sidebarTitle: Mutations
+icon: pencil
+---
+
+Most commands across the three CLIs only read. The ones that write are marked `mutating: true` in `commands --json`, listed in `SKILL.md`, and shown as such in `--help` — an agent or a person can tell before running one that it changes something upstream. That marker does not by itself mean the command shows a confirmation prompt; see the note below for which Moodle commands actually do.
+
+## Every mutating command
+
+<Tabs>
+  <Tab title="Moodle">
+    - `submit` — upload local files into an assignment
+    - `uninstall` — remove local background jobs, optionally the deployed Worker and configuration
+    - `auth login` — sign in through a CLI-controlled browser and capture the session
+    - `auth keepalive install` / `auth keepalive uninstall` — install or remove the macOS keepalive launch agent
+    - `mcp deploy`, `mcp login`, `mcp connect`, `mcp revoke`, `mcp pair`, `mcp remove`, `mcp session push` — managed MCP (Model Context Protocol) server lifecycle
+  </Tab>
+  <Tab title="Ed Discussion">
+    - `auth logout` — remove the saved token file
+    - `threads send` — post a new thread
+    - `replies send` — post a reply to a thread or comment
+    - `lessons mark-read` — mark matching lessons and slides as read
+    - `slides submit` — save or submit quiz answers
+    - `update` — install the latest `edstem-cli` release
+  </Tab>
+  <Tab title="OnTrack">
+    - `tasks set` — change a task's workflow state
+    - `tasks submit` — submit task files
+    - `chats read` — read task chat history (marks it read as a side effect)
+    - `chats mark-read` — mark task chat comments read
+    - `chats send` — send a task chat message
+  </Tab>
+</Tabs>
+
+Most of these are the write actions you'd expect (posting, submitting, sending). A few aren't obviously "writes" — `auth login`, `uninstall`, and the `mcp` lifecycle commands change local or deployed state rather than unit content, but they're still marked `mutating: true` the same way.
+
+<Note>
+  `mutating: true` labels a command as a write; it doesn't by itself add a prompt. In moodle-cli 0.9.2, only `submit`, `uninstall`, `auth keepalive install`, `auth keepalive uninstall`, `mcp deploy`, and `mcp connect --show-token` (only when revealing the token) show the plan-then-confirm flow below. `mcp remove` asks you to type the deployment's name instead of a `y/N` prompt, and `--yes` skips that too. `auth login`, `mcp login`, `mcp revoke`, `mcp pair` and `mcp session push` run immediately with no prompt at all — `mcp session push` requires `--stdin` instead, and the others take no `--yes` or `--dry-run` because there's nothing to confirm.
+</Note>
+
+## The plan → confirm → apply flow
+
+Each of the prompting commands listed above follows the same shape:
+
+1. It prints a one-line plan to stderr — the subject in **bold**, the target in **bold cyan**, matching the [shared theme](/concepts/humans-and-agents).
+2. `--dry-run` stops there: the plan is printed, nothing is sent, and the command returns as if it declined.
+3. `--yes` (`-y`) skips the question and proceeds.
+4. Without `--yes`, at an interactive terminal, you're asked `Continue?` — answering no stops the same way `--dry-run` does.
+5. Without `--yes`, without a terminal (a script, a pipe, an agent shell), the command throws a `usage` error (exit `2`) instead of hanging on a prompt nothing will answer.
+
+```bash
+moodle submit "UNIT TASK" essay.pdf --dry-run    # plan only, nothing uploaded
+moodle submit "UNIT TASK" essay.pdf --yes        # uploads without asking
+```
+
+## Per-product exceptions
+
+### OnTrack: `chats read` needs `--yes` even to read
+
+OnTrack marks non-discussion comments as read as a side effect of fetching a task's chat history — there's no way to read the chat without also changing its read state upstream. Because looking is itself a write here, `chats read` is `mutating: true` and requires `--yes` even though nothing you'd normally call "a write" is being sent; the CLI prints a warning before it fetches.
+
+```bash
+ontrack chats read UNIT TASK --yes
+```
+
+`chats mark-read` exists separately for marking things read without printing the history.
+
+### Moodle: `submit --final` cannot be undone
+
+`moodle submit` uploads files and, by default, leaves them in a draft state where the site allows drafts — you can run it again to replace them. Adding `--final --accept-statement` submits that draft for grading, which Moodle does not let you retract through this tool. The plan step exists specifically so this is visible before it happens; `--dry-run` on a `--final` submission shows exactly what would be sent without sending it.
+
+### Ed Discussion: posting is gated, and never retried
+
+`threads send` and `replies send` publish to the unit forum under your own name and, like `submit --final`, can't be undone from the tool. The CLI itself asks for confirmation the same as any mutation; the MCP tools `create_thread` and `reply_thread` additionally require `EDSTEM_ALLOW_POSTING=1` (stdio) or `MCP_ALLOW_POSTING=1` (a self-deployed Worker) to be enabled at all, and the hosted MCP server grants posting scope only at OAuth consent. Posting has been checked against mocked Ed responses only, not the live API — `--dry-run` shows the plan but doesn't guarantee Ed will accept it.
+
+Writes are also never retried automatically. Ed's read requests get automatic retry with backoff on `429`/`502`/`503`/`504`; a write that fails partway through is not retried, because retrying a post or a mark-read that may have already succeeded risks duplicating it.
+
+## Non-interactive without `--yes`
+
+This is deliberate, not a gap: a mutation prompt has nowhere to go in a pipe or an agent shell, so the command fails fast with a `usage` error rather than hanging until something times out. See [Errors and exit codes](/concepts/errors-and-exit-codes) for the JSON shape, and [Humans and agents](/concepts/humans-and-agents) for how the CLI decides whether it's talking to a person at all.
+
+<Card title="Command model" icon="terminal" href="/concepts/command-model">
+  How mutating commands fit the shared `<noun> <verb>` shape.
+</Card>

@@ -1,0 +1,54 @@
+---
+title: Sign in
+description: How ontrack authenticates through your browser or SAML, and what it stores.
+icon: key
+---
+
+`auth login` tries two paths, in order: reusing a browser session you already have, then an interactive SAML (Security Assertion Markup Language) sign-in with a one-time snippet. Most people never see the second path.
+
+```bash
+ontrack auth login
+```
+
+## Reusing a browser session
+
+`ontrack` looks for a session cookie set for your OnTrack site by a browser you're already signed in with. On macOS it checks Chrome, Edge, Firefox and Safari; on Linux and Windows it checks Chrome, Edge and Firefox. It reads each browser's saved cookies directly, using your OS keychain to decrypt them where needed; it does not need the browser open.
+
+If it finds a usable session, it exchanges it for an OnTrack access token, then discards the cookies — the long-lived credential it keeps is the access token, not your browser session.
+
+If no browser yields a usable session — nothing signed in, a locked cookie database, no keychain access — `auth login` falls through to the SAML flow below without asking you to grant extra file permissions first.
+
+## The SAML fallback and its console snippet
+
+When browser-cookie reuse fails, `ontrack auth login`:
+
+1. Asks OnTrack for its sign-in method and opens that URL in your system browser.
+2. Starts a short-lived server on your own machine to receive the result.
+3. Prints a JavaScript snippet and asks you to sign in, then paste the snippet into that OnTrack tab's DevTools console.
+
+The snippet does exactly one thing: it reads your already-signed-in tab's session and sends the resulting access token, its expiry, and your username to that local server — it never reads or sends your OnTrack session cookie itself, only the short-lived access token it requests on the spot. The local server accepts exactly one reply and then shuts down, or gives up after five minutes if nothing arrives.
+
+<Note>
+  This snippet is generated fresh per login attempt and is only ever valid for that attempt. Don't reuse one from an old terminal session or share it — treat it like a password-reset link.
+</Note>
+
+## Where the session lives
+
+A successful browser or SAML sign-in is cached at `~/.config/ontrack-cli/session.json`, readable only by you, keyed to the site's base URL. Later commands reuse it until the token expires, then repeat the browser-cookie exchange automatically before falling back to the interactive flow.
+
+Credentials supplied through environment variables or the config file are never written to this file — they're read fresh on every run instead. See [OnTrack CLI for scripts and agents](/developers/ontrack#automating-sign-in-without-a-browser) for that route.
+
+## Checking and clearing a session
+
+```bash
+ontrack auth status
+ontrack auth logout
+```
+
+`auth status` proves the session is live by checking it against OnTrack, and reports your username, the site's auth method and how many units and teaching roles you have. `auth logout` deletes the cached session file; it does not revoke the token on OnTrack's side.
+
+For scripts and CI, skip both browser paths entirely — see [OnTrack CLI for scripts and agents](/developers/ontrack#automating-sign-in-without-a-browser) for supplying a username and access token directly.
+
+## First run at a terminal
+
+The first time you run any command with no site configured, `ontrack` asks for your OnTrack URL once and saves it to the config file before doing anything else. If it then finds no session, it offers to run `auth login` for you interactively. Both prompts are skipped for a non-interactive caller — see [Install](/ontrack/install#first-run) and [Humans and agents](/concepts/humans-and-agents).

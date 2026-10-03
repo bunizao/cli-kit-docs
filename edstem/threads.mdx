@@ -1,0 +1,75 @@
+---
+title: "Threads"
+description: "List, search, show, and read Ed threads, and every filter that narrows them."
+---
+
+`edstem threads` lists, searches, shows, and reads threads in a unit. Posting a new thread is a mutation, covered separately in [Posting](/edstem/posting).
+
+## List threads in a unit
+
+```bash
+edstem threads UNIT
+edstem threads list UNIT --max 20
+```
+
+`edstem threads UNIT` and `edstem threads list UNIT` are the same command — `list` is the default verb for one argument.
+
+## Search threads
+
+```bash
+edstem threads search UNIT assignment deadline
+```
+
+`search` matches every query word, case-insensitively, against the thread title and body. All words must appear; there's no OR or phrase search. It accepts every filter `threads list` accepts.
+
+## Show and read a thread
+
+```bash
+edstem threads show UNIT#42
+edstem threads read UNIT#42
+```
+
+`show` returns the thread as structured data — metadata, metrics, flags, and (with `--include-html`) the raw Ed document — for `--json`/`--yaml`/`--table` output. `read` renders the same thread as Markdown, meant for a human or an agent to read as prose rather than parse as fields; it never changes anything on Ed. See [Output formats](/concepts/output-formats) for the difference between structured and text output.
+
+`--include-html` on `show` adds the raw Ed XML content alongside the parsed fields; leave it off unless you need the original markup.
+
+## Filters
+
+All of these apply to both `threads list` and `threads search`.
+
+| Flag | Effect |
+| --- | --- |
+| `-n, --max <count>` | Maximum threads to return. |
+| `-s, --sort <order>` | `new`, `old`, `top`, or `hot`. Defaults to `new`. |
+| `-c, --category <category>` | Exact match on the top-level category. |
+| `--subcategory <subcategory>` | Exact match on the second-level subcategory. |
+| `-t, --type <type>` | Exact match on thread type. |
+| `--answered` | Only threads Ed has marked answered. |
+| `--unanswered` | Only threads Ed has not marked answered. |
+| `--offset <count>` | Skip this many threads from the start of Ed's own ordering before filtering. Default `0`. |
+| `--since <when>` | Only threads created at or after a time. |
+
+`--answered` and `--unanswered` are mutually exclusive; passing both is a usage error.
+
+Ed keeps pinned threads first in a unit's thread list regardless of the selected `--sort` order.
+
+### `--since`
+
+Accepts an ISO date (`2026-09-01`), an ISO datetime (`2026-09-01T10:00:00Z`), or a relative offset: a number followed by `d`, `h`, or `w` — `7d`, `12h`, `2w`.
+
+```bash
+edstem threads UNIT --since 7d
+edstem threads UNIT --since 2026-09-01
+```
+
+## How filtering works
+
+Ed itself only understands `--sort`; everything else (`--category`, `--type`, `--answered`, `--since`, and search words) is applied by the CLI after Ed returns results.
+
+That means `--max 20 --unanswered` can't stop as soon as Ed's first batch of threads comes back, if fewer than 20 unanswered ones are in it. The CLI keeps asking Ed for more until it has enough matches or runs out of threads. If you ask for `--sort new` (the default) with `--since`, it also stops early once the threads coming back are older than the cutoff, since everything after that will be older still.
+
+A narrow filter on a large, old unit can therefore make `threads list` slower than an unfiltered call, and can still return fewer than `--max` results if the unit genuinely doesn't have that many matches.
+
+<Card title="Post a thread or reply" icon="pencil" href="/edstem/posting">
+  `threads send` and `replies send`.
+</Card>

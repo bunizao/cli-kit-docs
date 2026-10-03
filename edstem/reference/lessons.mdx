@@ -1,0 +1,80 @@
+---
+title: "edstem lessons"
+description: "List, show, read, or mark lessons as read."
+sidebarTitle: "lessons"
+---
+
+```bash
+edstem lessons [options] [command]
+```
+
+## edstem lessons list
+
+```bash
+edstem lessons list [options] <unit>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit ID or code |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--module <module>` | Module ID or name text; use all to disable. |
+| `--type <type>` | Exact lesson type, such as general; use all to disable. |
+| `--state <state>` | Exact state, such as active or scheduled; use all to disable. |
+| `--status <status>` | Progress: unattempted, attempted, completed, or all. |
+
+## edstem lessons show
+
+```bash
+edstem lessons show [options] <lesson>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `lesson` | Yes | Lesson ID |
+
+## edstem lessons read
+
+```bash
+edstem lessons read [options] <lesson>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `lesson` | Yes | Lesson ID |
+
+## edstem lessons mark-read
+
+```bash
+edstem lessons mark-read [options] <unit> [queries...]
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit ID or code |
+| `queries...` | No | Words required in lesson or module names |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--all` | Mark every lesson in the unit; required when no queries are given |
+| `--delay <seconds>` | Delay between slide updates |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+Global options apply to every command. See [Global options](/edstem/reference/index#global-options).

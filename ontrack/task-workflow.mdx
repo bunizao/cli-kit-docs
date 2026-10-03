@@ -1,0 +1,75 @@
+---
+title: Task workflow
+description: Set a task's self-reported state and submit files for review, both with a plan-then-confirm step.
+icon: check-check
+---
+
+Set a task's self-reported state and submit files for review — both mutations, and both plan-then-confirm.
+
+## Setting a task's state
+
+```bash
+ontrack tasks set UNIT TASK working_on_it
+```
+
+`tasks set` writes one of three self-reported states:
+
+| State | Meaning in OnTrack |
+| --- | --- |
+| `not_started` | You haven't begun the task |
+| `working_on_it` | You're in progress |
+| `need_help` | You want tutor help before continuing |
+
+These are the only states you set directly. Every other status a task can have — `ready_for_feedback`, `redo`, `complete`, `discuss`, and the rest listed in [Units and tasks](/ontrack/units-and-tasks#filtering-by-status) — is set by OnTrack itself, in response to a submission or a tutor's decision.
+
+Full syntax: [`ontrack tasks set`](/ontrack/reference/tasks).
+
+## Submitting files
+
+```bash
+ontrack tasks submit UNIT TASK --file report.pdf --yes
+```
+
+`--file` takes one path per upload requirement the task defines, **in the order the task lists them** — not alphabetical, not the order you type them if it differs from the task's own order. Passing the wrong count fails immediately:
+
+```text
+Task requires 2 files, but received 1. Files must follow the requirement order.
+```
+
+Each file must be a real, non-empty, non-symlinked file no larger than 100 MiB, and the total across all files must stay under 100 MiB too. `ontrack` re-checks each file's size and modification time right after reading it and rejects the submission if anything changed mid-read.
+
+Other options:
+
+- `--type <type>` — `ready_for_feedback` (default), `need_help`, or `assess_in_portfolio`.
+- `--comment <text>` — up to 4095 characters, attached to the submission.
+- `--accept-tii-eula` — accept the Turnitin end-user agreement where the task requires it.
+
+Full syntax: [`ontrack tasks submit`](/ontrack/reference/tasks).
+
+## The plan, then the confirmation
+
+Both commands are mutations: they print what they're about to do, then wait for you to say yes. See [Mutations](/concepts/mutations) for the shared model; here's what it looks like for each.
+
+`tasks set` shows a one-line summary:
+
+```text
+Set task 1.1 in UNIT to working_on_it.
+Continue? (y/N)
+```
+
+`tasks submit` shows every file with its requirement, type and size, and whether the Turnitin EULA was accepted:
+
+```text
+Submit  report.pdf  Report, document, 88213 bytes
+    to  task 1.1 in project 1041  as ready_for_feedback
+Turnitin EULA accepted: no
+Continue? (y/N)
+```
+
+At an interactive terminal, answering `y` runs the mutation; anything else cancels it. Skip the prompt with `--yes`, or preview without sending anything with `--dry-run`:
+
+```bash
+ontrack tasks set UNIT TASK working_on_it --dry-run
+```
+
+Running this from a script or CI job? See [OnTrack CLI for scripts and agents](/developers/ontrack#non-interactive-use) for how `--yes`/`--dry-run` behave with no terminal attached.

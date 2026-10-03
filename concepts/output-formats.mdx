@@ -1,0 +1,65 @@
+---
+title: Output formats
+description: Table versus JSON, the flags that control it, and what each product's JSON output looks like.
+sidebarTitle: Output formats
+icon: brackets-curly
+---
+
+This page covers how each command picks between a table and JSON, and what each product wraps its data in.
+
+## Table or JSON, chosen for you
+
+Every command decides its output format the same way: an explicit `--json`, `--yaml` or `--table` flag wins; otherwise stdout being a terminal means a table, and stdout being a pipe or a file means JSON. You never have to remember to add `--json` in a script — redirecting or piping the output already gets it.
+
+```bash
+moodle due              # table, at a terminal
+moodle due | cat         # JSON, once stdout isn't a terminal
+moodle due --json        # JSON, even at a terminal
+```
+
+## Flags
+
+These flags exist on every command in all three CLIs:
+
+| Flag | Effect |
+| --- | --- |
+| `--json` | Force JSON output. |
+| `--yaml` | Force YAML output. |
+| `--table` | Force a table, even when stdout is piped. |
+| `--fields a,b` | Keep only the named top-level fields (nested paths like `unit.code` also work). |
+| `-o, --output FILE` | Write the rendered output to a file instead of stdout. |
+
+`--json`, `--yaml` and `--table` are mutually exclusive; passing more than one is a usage error.
+
+Moodle adds one flag the other two don't have: `--pretty`, which indents JSON with two spaces. Without it, moodle's JSON is compact (no indentation), on the assumption that most JSON consumers are scripts, not readers. `edstem` and `ontrack` JSON is pretty-printed by default, without needing a flag for it.
+
+## Output shape differs by product
+
+<Tabs>
+  <Tab title="Moodle">
+    Moodle wraps list results in a named object plus a `total` count: `{ "units": [...], "total": 3 }`, `{ "activities": [...], "total": 12 }`, `{ "threads": [...], "total": 5 }`. A single-item result nests under its own name too, such as `{ "thread": { "id": ..., "posts": [...], "posts_total": 4 } }`.
+
+    Empty strings, empty arrays and empty objects are stripped from the output entirely — a field that would be `""` or `[]` is absent rather than present and empty. `total: 0` is how you tell "nothing matched" from "the field wasn't populated."
+
+    Dates carry both a human ISO-8601 string with a UTC offset and the raw epoch seconds, as a pair of fields: `due` (`"2026-09-28T23:59:00+10:00"`) alongside `due_at` (the epoch integer); `created` alongside `time_created`; `start`/`start_at`, `end`/`end_at`. Use the `_at` field for arithmetic and the plain-named field for display.
+  </Tab>
+  <Tab title="Ed Discussion and OnTrack">
+    Neither wraps its output in a named object or adds a `total` field. A list command returns a bare array: `edstem units list --json` is a JSON array of unit objects, not `{ "units": [...] }`. A show command returns a bare object the same way. If you need a count, take the array's length yourself.
+  </Tab>
+</Tabs>
+
+<Tip>
+  This is a real difference between the products, not an inconsistency to work around — when you write a script that reads more than one of these CLIs, check whether you're parsing an object with a named key or a bare array.
+</Tip>
+
+## Tables fit the terminal
+
+A table's column widths start at whatever the widest cell needs. When a `width` is passed in (the terminal's column count), the widest column is shaved a character at a time — with truncated cells ending in `…` — until the table fits, down to a floor of 8 characters per column; no column is ever dropped outright, because a missing column is a silent hole in the data where a truncated one is at least visible as truncated.
+
+## Color
+
+Color follows the output stream, not a flag you have to remember: a pipe never gets ANSI escape codes (the control sequences a terminal reads as color), matching the text a person would see if they ran the same command through `--no-color`. `NO_COLOR` (any non-empty value) and `FORCE_COLOR=0`/`FORCE_COLOR=false` disable color outright; `FORCE_COLOR` (any other value) or `CLICOLOR_FORCE` forces it on even when the stream isn't a detected terminal. `--no-color` on the command line does the same as `NO_COLOR`. Table cells and status words are colored by the shared theme when color is on — see [Humans and agents](/concepts/humans-and-agents) for what each color means.
+
+<Card title="Errors and exit codes" icon="octagon-alert" href="/concepts/errors-and-exit-codes">
+  How a failed command's JSON differs from a successful one.
+</Card>

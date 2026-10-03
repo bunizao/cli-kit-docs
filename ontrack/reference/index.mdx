@@ -1,0 +1,54 @@
+---
+title: "ontrack command reference"
+description: "Every ontrack command, its arguments, options and defaults, generated from ontrack commands --json."
+sidebarTitle: "Reference"
+---
+
+`ontrack` v0.3.2 — Work with OnTrack tasks and chats from the command line.
+
+## Global options
+
+These options work on every command; command pages only list the options specific to that command.
+
+| Flags | Description |
+| --- | --- |
+| `-V, --version` | Show the version |
+| `--json` | Emit JSON |
+| `--yaml` | Emit YAML |
+| `--table` | Emit a human-readable table |
+| `--fields <fields>` | Select top-level fields |
+| `-o, --output <file>` | Write output to a file |
+| `--verbose` | Enable debug logging |
+| `--no-color` | Disable color output |
+| `-y, --yes` | Confirm mutations non-interactively |
+| `--dry-run` | Print the mutation plan without applying it |
+| `-h, --help` | Show help |
+
+For what each exit code means, see [Errors and exit codes](/concepts/errors-and-exit-codes).
+
+## Core commands
+
+| Command | Aliases | Description |
+| --- | --- | --- |
+| [`units`](/ontrack/reference/units) | `courses`, `projects` | Enrolled units |
+| [`tasks`](/ontrack/reference/tasks) | — | Tasks in a unit: list, read, submit, set state |
+| [`chats`](/ontrack/reference/chats) | — | Read and send task chat messages |
+
+## Additional commands
+
+| Command | Aliases | Description |
+| --- | --- | --- |
+| [`user`](/ontrack/reference/user) | — | Show the signed-in user |
+| [`roles`](/ontrack/reference/roles) | — | Teaching roles you hold |
+| [`auth`](/ontrack/reference/auth) | — | Manage authentication |
+
+## Agent commands
+
+| Command | Aliases | Description |
+| --- | --- | --- |
+| [`commands`](/ontrack/reference/commands) | — | Describe the complete command tree |
+| [`skills`](/ontrack/reference/skills) | — | Generate the agent skill |
+
+<Note>
+This page and the pages under `ontrack/reference` are generated from `ontrack commands --json`. Run `npm run generate` to rebuild them after the CLI changes, and `npm run check` to confirm the checked-in pages still match the captured command tree.
+</Note>

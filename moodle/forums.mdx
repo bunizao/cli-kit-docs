@@ -1,0 +1,82 @@
+---
+title: Forums
+description: Recent announcements, one discussion's posts, and forum search from the terminal.
+sidebarTitle: Forums
+icon: messages-square
+---
+
+moodle-cli reads forums four ways: `news` for recent announcement threads, `threads show` for one discussion's posts, `forums list`/`forums show` to browse a unit's forums and their discussions, and `forums search` to search post text across forums. See [`moodle news`](/moodle/reference/news), [`moodle threads`](/moodle/reference/threads) and [`moodle forums`](/moodle/reference/forums) for exact flag syntax.
+
+## Recent announcements
+
+```bash
+moodle news UNIT
+```
+
+`news` returns the latest announcement threads with each thread's first post included. Each unit's announcement forum is read separately, so this only surfaces threads from that forum, not general discussion forums. Omit `UNIT` and moodle-cli merges announcement threads across every enrolled unit, newest first. `--limit` caps the row count; it defaults to 5.
+
+```bash
+moodle news --limit 10
+```
+
+## One discussion's posts
+
+```bash
+moodle threads show DISCUSSION_ID
+```
+
+`threads show` takes a discussion ID or a `/mod/forum/discuss.php?d=` URL and returns its posts. `--limit` and `--offset` (default `0`) page through a long discussion; `--post <id>` narrows the result to a single post; `--body` includes the full post body instead of a preview.
+
+```bash
+moodle threads show 91234 --limit 20 --offset 20
+```
+
+## A unit's forums
+
+```bash
+moodle forums list UNIT
+```
+
+Lists forum activities in a unit. `--limit` caps the row count, default 50.
+
+```bash
+moodle forums show FORUM_ID
+```
+
+Lists the discussions in one forum, newest first. `FORUM_ID` is the forum's own ID or its `/mod/forum/view.php?id=` URL. `--limit` caps the row count, default 50. `--query <query>` filters discussion titles by a substring.
+
+## Searching forum content
+
+```bash
+moodle forums search "QUERY"
+```
+
+`forums search` matches against **post subject text and post body text**, across every forum in every unit you're enrolled in, by default. It reads each forum's discussion list and posts to search them, so results reflect what's actually in the posts, not a stale index.
+
+Narrow the scope before it searches:
+
+| Flag | Restricts to |
+| --- | --- |
+| `--unit <unit>` | One unit, by code, name, id or URL |
+| `--course <course>` | One unit, by course ID or unique course name |
+| `--forum <forum>` | One forum, by forum ID or forum URL |
+
+`--unit` and `--course` both resolve to the same unit restriction; pick whichever reference you have on hand. Without any of the three, the search scans every forum across your enrolled units.
+
+Other flags change what counts as a match or how results are ordered:
+
+- `--titles-only` matches discussion titles only, skipping post bodies entirely.
+- `--unread-only` keeps only matches from posts (or discussions) with unread content.
+- `--recent` sorts results by newest post activity instead of relevance.
+- `--limit-forums <number>` and `--limit-discussions <number>` bound how much moodle-cli scans (forums visited, discussions read per forum) — this controls scan cost, not the number of results returned.
+- `--limit <number>` caps the number of matches returned, default 20.
+
+Each result includes the discussion's subject and a snippet of the matched text, so you can tell what matched without opening the discussion.
+
+```bash
+moodle forums search "extension" --unit UNIT --recent
+```
+
+Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#forums-search) for the JSON shape.
+
+See [Errors and exit codes](/concepts/errors-and-exit-codes) for what happens when a reference in `--unit`, `--course` or `--forum` doesn't resolve.

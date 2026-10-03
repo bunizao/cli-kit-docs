@@ -1,0 +1,48 @@
+---
+title: "Ed Discussion CLI"
+description: "Read and post on Ed Discussion from the terminal, a local MCP server, or a hosted MCP endpoint."
+icon: "message-square"
+---
+
+`edstem-cli` reads and posts on [Ed Discussion](https://edstem.org) using your personal Ed API token. It covers threads, lesson content, quiz slides, and Ed-hosted files, and it never touches your Ed password or browser session.
+
+## Who it's for
+
+- Students who want unit threads, lesson content, and grading responses without opening a browser tab per unit.
+- Teaching staff scripting attendance or content checks across units.
+- Scripts, CI jobs, and AI agents — see [Ed Discussion CLI for scripts and agents](/developers/edstem) for `--json` output, exit codes, and MCP tools.
+
+## Three surfaces, one Ed identity
+
+<CardGroup cols={2}>
+  <Card title="edstem" icon="terminal">
+    The command-line tool. Every command supports `--json`, `--yaml`, `--table`, and `--fields`.
+  </Card>
+  <Card title="edstem-mcp" icon="plug">
+    An MCP server that runs on your machine, using the same `EDSTEM_TOKEN`.
+  </Card>
+  <Card title="Remote MCP" icon="cloud">
+    Hosted, for apps that can't run a local program — or a version you host yourself on Cloudflare.
+  </Card>
+</CardGroup>
+
+All three surfaces authenticate the same way: a personal Ed API token, created at Ed's settings page and never a scraped browser cookie.
+
+## Start here
+
+<CardGroup cols={2}>
+  <Card title="Install and sign in" icon="download" href="/edstem/install">
+    Install the CLI, create an Ed API token, and save it.
+  </Card>
+  <Card title="Threads" icon="messages-square" href="/edstem/threads">
+    List, search, show, and read threads in a unit.
+  </Card>
+  <Card title="Lessons and slides" icon="graduation-cap" href="/edstem/lessons-and-slides">
+    Read lesson content, mark lessons read, and submit quiz answers.
+  </Card>
+  <Card title="MCP server" icon="server" href="/edstem/mcp-server">
+    Connect an MCP client, running locally or hosted.
+  </Card>
+</CardGroup>
+
+See [Command model](/concepts/command-model) for how nouns, verbs, and flags fit together, and the [command reference](/edstem/reference/index) for exact syntax.
