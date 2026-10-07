@@ -1,0 +1,176 @@
+---
+title: "Sources"
+description: "What unicorn reads from Ed, Moodle, Canvas, Gmail and feeds, what each one needs, and how to add one after you deploy."
+icon: database
+---
+
+A source is a system unicorn reads every hour. Each one is read-only: unicorn uses the credential you give it to read, and nothing in unicorn can post, submit, reply or send.
+
+You can set up any source during [deploy](/unicorn/deploy), or later from the settings page without redeploying. Use only the sources you have. A deployment with just Ed works.
+
+| Source | What you provide | What unicorn reads |
+| --- | --- | --- |
+| [Ed Discussion](#ed-discussion) | An API token | Your active courses and the 30 most recent threads in each |
+| [Moodle](#moodle) | Your site address and a session | Your courses and your next 50 calendar events, with submission status and grade when Moodle shows them |
+| [Canvas](#canvas) | Your site address and a personal access token | Courses with their term, assignments with your own submission, announcements from the last 60 days, and up to 30 discussion topics per course |
+| [Gmail](#gmail) | A Google Cloud OAuth client you create | Mail from the last 14 days, limited to your university, your course codes and senders you list |
+| [Feeds and manifests](#feeds-and-manifests) | A URL, plus a secret if the feed needs one | Whatever the feed publishes |
+
+## Add a source later
+
+<Steps>
+  <Step title="Open the settings page">
+    Go to `https://<your-worker>.workers.dev/settings`. Sign in with user name `unicorn` and your admin token.
+  </Step>
+  <Step title="Fill in the source card">
+    Each source has a card under **Sources**. Paste the credential and click **Save**. Pasted credentials are stored encrypted.
+  </Step>
+  <Step title="Test it">
+    Click **Test connection** on the card, then **Sync now** under **Maintenance** to pull immediately instead of waiting for the next hourly run.
+  </Step>
+</Steps>
+
+A card's **Disconnect** button deletes the saved credential.
+
+<Note>
+  A secret set with `wrangler secret put` always wins over a value pasted in the settings page. If you set a credential both ways, the settings page value is ignored. The installer sets credentials as secrets, so a later change to the same source may need `npx wrangler secret put` instead.
+</Note>
+
+## Ed Discussion
+
+You need an Ed API token. Create one on Ed's [API tokens page](https://edstem.org/us/settings/api-tokens). The page is the same one the [Ed Discussion CLI](/edstem/install#create-an-ed-api-token) uses.
+
+- **Installer or agent:** set `ED_API_TOKEN`.
+- **Settings page:** the **Ed Discussion** card has an **API token** field and a **Region** list.
+
+Choose the region (`us`, `au` or `eu`) that matches where your courses live. It only controls the links unicorn stores, so a wrong region gives links that do not open. It does not change what is read.
+
+unicorn reads each active course and its 30 most recent threads. Archived courses are skipped. It records who posted, whether a thread is answered, locked or pinned, and the thread's category, which is how threads are matched to assignments.
+
+## Moodle
+
+Moodle has no token you create. unicorn needs your site address and a signed-in session.
+
+- **Site address:** set it in the **Base URL** field on the **Moodle** card, for example `https://moodle.example.edu`. Set it explicitly. The default that ships with unicorn points at one institution and is probably not yours.
+- **Session:** push one from your computer, or paste one.
+
+{/* TODO: verify — npm run moodle:push shells out to an `okta` command-line tool that is not part of unicorn and is not documented upstream. Confirm where readers get it before publishing without a caveat. */}
+
+To push a session, sign in to Moodle first so the `okta` tool has one, then run this from the unicorn folder:
+
+```bash
+okta login https://moodle.example.edu
+npm run moodle:push https://moodle.example.edu
+```
+
+This reads your saved session and stores it as the `MOODLE_SESSION` secret on your Worker. It needs the `okta` command-line tool on your path. If you do not have it, use the second route.
+
+To paste a session, open your signed-in Moodle site in a browser, copy the value of the `MoodleSession` cookie from the developer tools, and paste it into **Session cookie (advanced)** on the card. Paste the value only, without the name.
+
+Moodle sessions expire. When one does, the card shows an error and the source stops updating until you push or paste a new session. See [Troubleshooting](/unicorn/troubleshooting#moodle-says-the-session-is-invalid). {/* TODO: verify — the session lifetime is not documented and depends on your institution's setup. */}
+
+unicorn reads your courses and the next 50 events on your Moodle timeline. When Moodle shows a submission status or a grade for an event, unicorn records it, and a later change becomes a change event.
+
+## Canvas
+
+Create a personal access token in Canvas under **Account → Settings → New access token**. Copy it when Canvas shows it, because Canvas shows it once.
+
+- **Installer or agent:** set `CANVAS_BASE_URL` and `PLUGIN_SECRET_CANVAS_TOKEN`.
+- **Settings page:** the **Canvas** card has a **Base URL** field, for example `https://canvas.example.edu`, and a **Personal access token** field.
+
+unicorn reads your courses together with their term, your assignments with your own submission, announcements from the last 60 days, and up to 30 discussion topics in each course.
+
+## Gmail
+
+Gmail is the only source that takes a few minutes of setup in Google's console, because unicorn uses your own Google Cloud project. That keeps your mail connection yours, with no shared app in between. It reads only. The sign-in asks for read-only access to Gmail.
+
+<Warning>
+  Gmail support has not been verified against a real account yet. Treat your first sync as the test, and check the Gmail card on the settings page afterwards.
+</Warning>
+
+{/* TODO: verify — docs/GMAIL.md in the unicorn repo says the Gmail path is unverified against a real account. Remove this warning only after a real sync has worked. */}
+
+<Steps>
+  <Step title="Create or reuse a Google Cloud project">
+    Open [Google Cloud](https://console.cloud.google.com/projectcreate) and create a project, or pick one you already have.
+  </Step>
+  <Step title="Turn on two APIs">
+    Under **APIs & Services → Library**, enable **Gmail API** and **Gmail MCP API**. You need both.
+  </Step>
+  <Step title="Set up the consent screen">
+    Under **APIs & Services → OAuth consent screen**, choose user type **External** and leave the publishing status on **Testing**. Add your own address as a test user. Under **Data access**, add the scope `https://www.googleapis.com/auth/gmail.readonly`.
+  </Step>
+  <Step title="Create the OAuth client">
+    Under **APIs & Services → Credentials → Create credentials → OAuth client ID**, choose **Web application**. Add this authorized redirect URI exactly:
+
+    ```text
+    https://<your-worker>.workers.dev/settings/oauth/callback
+    ```
+
+    Copy the client ID and client secret.
+  </Step>
+  <Step title="Give them to your Worker">
+    Set them as secrets. The installer asks for them, or you can run these two commands and paste each value when prompted:
+
+    ```bash
+    npx wrangler secret put PLUGIN_SECRET_GOOGLE_CLIENT_ID
+    npx wrangler secret put PLUGIN_SECRET_GOOGLE_CLIENT_SECRET
+    ```
+  </Step>
+  <Step title="Connect">
+    Reload the settings page. The **Gmail** card now shows **Connect Gmail**. Click it, approve access with your test-user account, and the card reads **Connected**.
+  </Step>
+</Steps>
+
+### Limit what unicorn reads
+
+unicorn never reads your whole inbox. It reads only mail from the last 14 days that matches at least one of:
+
+- a sender at one of your university domains,
+- a sender you list,
+- a message that mentions one of your course codes.
+
+Set the first two in the **Gmail scope** card on the settings page, one entry per line.
+
+| Field | Example | Notes |
+| --- | --- | --- |
+| University domains | `example.edu` | Leave blank and unicorn guesses from your Moodle or Canvas address. |
+| Allowlisted senders | `convenor@example.edu` | Mail that mentions a course code is included whether or not the sender is listed. |
+
+Google keeps an app in **Testing** status limited to your test users, and expires its sign-in after seven days. If Gmail stops syncing after a week, click **Connect Gmail** again. {/* TODO: verify — the seven-day expiry is Google's published policy for Testing apps, not something unicorn's source states. */}
+
+## Feeds and manifests
+
+A manifest tells unicorn how to read one more source: a JSON or RSS or Atom address, or a single call to a remote MCP server. Use one for a unit's announcement feed or any other address that publishes records.
+
+Your agent writes and installs the manifest for you. Ask it to add the feed, give it the address, and it uses unicorn's admin tool to save one. That tool is on the separate admin connection, which you mount only while you set things up. See [Custom tools](/unicorn/custom-tools#mount-the-admin-connection) for how.
+
+A manifest for a plain RSS feed looks like this:
+
+```json
+{
+  "version": 1,
+  "id": "unit-news",
+  "name": "Unit news",
+  "format": "rss",
+  "url": "https://feeds.example.edu/unit-news.xml",
+  "mapping": {
+    "id": { "path": "guid" },
+    "kind": { "value": "article" },
+    "title": { "path": "title" },
+    "timestamp": { "path": "publishedAt" },
+    "url": { "path": "link" },
+    "body": { "path": "description" }
+  }
+}
+```
+
+{/* TODO: verify — this example is taken from unicorn's test suite, not from a reader-facing page. Confirm put_plugin_manifest accepts it as written, including whether `enabled` is required. */}
+
+Some rules apply to every manifest:
+
+- A feed that needs a key or token reads it only from a Worker secret whose name starts with `PLUGIN_SECRET_`. A manifest cannot reach any other secret, and the secret itself is never written into the manifest.
+- A JSON source can follow up to five pages by default and never more than ten. It can also read one list first and then fetch one page per entry, up to 20 entries.
+- A response over 5 MB is rejected.
+
+Once saved, a feed syncs on the same hourly cycle as the built-in sources. Its items carry the manifest's `id` as their source.

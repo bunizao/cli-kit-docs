@@ -1,0 +1,75 @@
+---
+title: "unicorn"
+description: "A memory layer for your own AI agent: one Worker on your free Cloudflare account that remembers Ed, Moodle, Canvas, Gmail and feeds, and hands the result to your agent."
+icon: sparkles
+---
+
+unicorn remembers your courses so your AI agent doesn't have to start from nothing every session. You deploy it once, to your own free Cloudflare account. Every hour it reads your sources, records what changed, groups what belongs to the same course, and writes a short daily digest. Your agent (Claude Code, claude.ai, Claude desktop, Claude on your phone, Cowork or ChatGPT) then reads that memory through one connection.
+
+unicorn runs no AI model of its own. Your agent does all the reasoning, with the model you already use. unicorn only reads from your sources and never writes to them: it cannot post to Ed, submit to Moodle or Canvas, or send email.
+
+## Who it is for
+
+unicorn is for a student who already uses an AI agent and wants it to know what happened since yesterday. It is single-user: one deployment holds one person's courses, and nobody else can read it. You deploy it yourself, and you stay in control of the credentials it holds.
+
+It is not a replacement for the [Moodle](/moodle/index), [Ed Discussion](/edstem/index) or [OnTrack](/ontrack/index) tools on this site. Those give your agent live access. unicorn adds the part they don't have, which is memory.
+
+## Live and memory
+
+The same source can reach your agent two ways, and the best setup uses both.
+
+| | Live | Memory |
+| --- | --- | --- |
+| How it is connected | Your client mounts the source directly, for example the Ed or Moodle MCP server | unicorn ingests the source every hour |
+| What it answers | What is on the page right now | What changed since you last looked, and how this course looks across every system |
+| Strength | Fresh, real-time, can read full detail | Remembers a baseline, notices changes, joins Ed, Moodle, Canvas and Gmail into one course view |
+| Weakness | Forgets between sessions and sees each source on its own | Up to an hour behind, and holds a summary rather than every page |
+
+Ask your agent "what changed in UNIT since Monday" and it uses memory. Ask it to read a specific thread in full and it uses the live source. Use memory for changes and cross-course questions, and live access for detail.
+
+## What you get
+
+- A daily digest, written each morning when something happened: deadlines in the next seven days, new notices, and what changed.
+- A change feed with typed events, such as a deadline that moved or a grade that was released.
+- A single view of a course across Ed, Moodle, Canvas and email, filed into buckets per assignment.
+- Upcoming deadlines across every source.
+- Plans that you save from one device and read from another.
+- Four playbooks your agent runs on a schedule: weekly plan, assignment breakdown, forum brief and triage.
+- Six small interactive widgets in clients that can show them.
+- Your own read-only tools, defined in plain language.
+
+<Columns cols={2}>
+  <Card title="Deploy" icon="rocket" href="/unicorn/deploy">
+    Set up unicorn on your Cloudflare account with one command.
+  </Card>
+  <Card title="Sources" icon="database" href="/unicorn/sources">
+    Connect Ed, Moodle, Canvas, Gmail, and feeds, now or later.
+  </Card>
+  <Card title="Connect your agent" icon="plug" href="/unicorn/connect">
+    Claude Code, claude.ai, Claude desktop, mobile, Cowork and ChatGPT.
+  </Card>
+  <Card title="Daily use" icon="calendar-check" href="/unicorn/daily-use">
+    Briefs, changes, deadlines, plans and corrections, with example prompts.
+  </Card>
+  <Card title="Playbooks" icon="list-checks" href="/unicorn/playbooks">
+    Run the four built-in procedures on demand or on a schedule.
+  </Card>
+  <Card title="Widgets" icon="layout-dashboard" href="/unicorn/widgets">
+    The six interactive views and where they appear.
+  </Card>
+  <Card title="Custom tools" icon="wrench" href="/unicorn/custom-tools">
+    Add your own read-only questions, or install shared ones.
+  </Card>
+  <Card title="Upgrade" icon="refresh-cw" href="/unicorn/upgrade">
+    Move to a newer release without losing history.
+  </Card>
+  <Card title="Security" icon="shield-check" href="/unicorn/security">
+    What is stored, how it is protected, and how to revoke access.
+  </Card>
+  <Card title="Troubleshooting" icon="life-buoy" href="/unicorn/troubleshooting">
+    Exact fixes for sync errors, sign-in problems and a stopped scheduler.
+  </Card>
+  <Card title="Tool reference" icon="book-open" href="/unicorn/reference/tools">
+    Every tool your agent sees, the change events and the five buckets.
+  </Card>
+</Columns>

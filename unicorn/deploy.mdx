@@ -1,0 +1,125 @@
+---
+title: "Deploy unicorn"
+description: "Install unicorn on your own free Cloudflare account with one command, then check that it is running."
+icon: rocket
+---
+
+You deploy unicorn once, from your own computer, to your own Cloudflare account. The installer asks for a few things, sets everything up and starts the hourly sync. Collect a credential for each source you want first, or add them afterwards.
+
+## Prerequisites
+
+- Node.js 22.19 or newer. Check with `node --version`.
+- A free [Cloudflare](https://dash.cloudflare.com/sign-up) account. The free plan is enough for one student.
+- `git` and `curl`.
+- A credential for each source you want now. You can add any of them later, so none is required to deploy. See [Sources](/unicorn/sources) for what each one needs.
+
+## Install
+
+<Steps>
+  <Step title="Get the code">
+    ```bash
+    git clone https://github.com/TuuHub/unicorn.git
+    cd unicorn
+    ```
+  </Step>
+  <Step title="Run the installer">
+    ```bash
+    npm run setup
+    ```
+
+    The installer runs these steps in order and prints each one as it goes:
+
+    1. Checks your Node.js version and installs dependencies.
+    2. Opens your browser so you can sign in to Cloudflare.
+    3. Creates a database named `unicorn`, or reuses one that already exists, and records its ID in `wrangler.jsonc`.
+    4. Applies the database migrations.
+    5. Sets your timezone. It uses the one your computer reports, for example `Australia/Melbourne`. The daily digest is written at 07:00 in this timezone.
+    6. Generates two random secrets, an admin token and an MCP token, and stores them as Worker secrets.
+    7. Asks which sources you want and prompts for each credential.
+    8. Deploys the Worker.
+    9. Asks for your Worker URL, then starts the hourly scheduler.
+    10. Prints the commands that connect your agent.
+  </Step>
+  <Step title="Give the installer your Worker URL">
+    When it asks, paste the address of your Worker, for example `https://<your-worker>.workers.dev`. Cloudflare prints it at the end of the deploy step. The installer needs it to start the scheduler and to build the connect commands. If you leave it blank, start the scheduler from the settings page afterwards.
+  </Step>
+</Steps>
+
+The installer is safe to run again, but it generates new tokens each time. After a second run, any client that used the old MCP token needs the new one.
+
+## Save your admin token
+
+<Warning>
+  The installer stores your admin token but does not print it. You need it to open the settings page, to approve a claude.ai or ChatGPT connection, and to start the scheduler by hand. Cloudflare does not let you read a Worker secret back.
+</Warning>
+
+{/* TODO: verify — setup.mjs generates ADMIN_TOKEN and stores it without printing it, then says to "retrieve them from the Cloudflare dashboard", which is not possible for a Worker secret. The fix below replaces the token with one you choose. It is not in upstream docs. */}
+
+Right after the installer finishes, replace the admin token with one you choose and keep it in a password manager:
+
+```bash
+npx wrangler secret put ADMIN_TOKEN
+```
+
+Paste a long random value when prompted. Do this before you paste any credential into the settings page. Credentials saved there are encrypted with a key derived from the admin token, so changing the token later makes them unreadable and you have to enter them again. Credentials you set during install are stored as Worker secrets, so they are not affected.
+
+## Check that it is running
+
+Open `https://<your-worker>.workers.dev/health` in a browser, or run:
+
+```bash
+curl https://<your-worker>.workers.dev/health
+```
+
+A healthy deployment answers with `"status":"ready"`, `"database":true` and `"scheduler":"running"`. The page needs no sign-in and contains no personal data.
+
+<Check>
+  Open `https://<your-worker>.workers.dev/settings`. Your browser asks for a user name and password. The user name is `unicorn`. The password is your admin token. The first sync runs about five seconds after the scheduler starts, and the Sources card then shows when each source last synced.
+</Check>
+
+If `scheduler` says `stopped`, open the settings page and click **Start scheduler**. See [Troubleshooting](/unicorn/troubleshooting) for other states.
+
+## Deploy with a coding agent
+
+An agent can run the installer without prompts. Pass `--yes` and give it everything it would otherwise ask for.
+
+```bash
+npm run setup -- --yes \
+  --sources ed,canvas \
+  --worker-url https://<your-worker>.workers.dev \
+  --timezone Australia/Melbourne
+```
+
+| Flag | Environment variable | Meaning |
+| --- | --- | --- |
+| `--yes`, `-y` | `SETUP_YES` | Never prompt. Skip anything that needs input. |
+| `--sources <list>` | `SETUP_SOURCES` | Comma or space separated: `ed`, `moodle`, `canvas`, `gmail`. |
+| `--worker-url <url>` | `SETUP_WORKER_URL` | Your Worker address. Needed to start the scheduler and print connect commands. |
+| `--timezone <zone>` | `SETUP_TIMEZONE` | An IANA zone such as `Australia/Melbourne`. Defaults to your computer's zone. |
+
+A flag overrides its environment variable. The installer ignores flags it does not recognize.
+
+Source credentials come from the environment when you use `--yes`:
+
+| Source | Environment variables |
+| --- | --- |
+| Ed | `ED_API_TOKEN` |
+| Canvas | `CANVAS_BASE_URL` and `PLUGIN_SECRET_CANVAS_TOKEN` |
+| Gmail | `PLUGIN_SECRET_GOOGLE_CLIENT_ID` and `PLUGIN_SECRET_GOOGLE_CLIENT_SECRET` |
+| Moodle | None. The installer only prints a reminder to run `npm run moodle:push`. See [Sources](/unicorn/sources#moodle). |
+
+What an agent should expect:
+
+- A source listed in `--sources` whose variables are missing is skipped with a note to paste the credential in the settings page.
+- Without `--sources`, no source is configured.
+- Without `--worker-url`, the installer does not start the scheduler and does not print the connect commands. You can read the Worker address from the deploy output, then start the scheduler from the settings page.
+- Cloudflare sign-in still opens a browser the first time. Sign in before handing the run to an agent, or have the person at the keyboard complete it.
+- The installer prints your MCP token inside the connect command. Treat the terminal output as secret and do not paste it into a shared chat.
+
+## What gets created
+
+Everything lives in your Cloudflare account: one Worker named `unicorn`, one database and one small key-value store for connected apps. Nothing is created anywhere else. To remove unicorn, delete the Worker and the database in the Cloudflare dashboard.
+
+<Card title="Connect your agent" icon="plug" href="/unicorn/connect">
+  Add the connection to Claude Code, claude.ai, Claude desktop, mobile, Cowork or ChatGPT.
+</Card>
