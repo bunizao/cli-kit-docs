@@ -3,13 +3,14 @@
 [![CI](https://github.com/bunizao/cli-kit-docs/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/bunizao/cli-kit-docs/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Guides, command references and MCP setup instructions for three command-line tools, built with [Mintlify](https://www.mintlify.com):
+Guides, command references and MCP setup instructions for three command-line tools, plus a guide to unicorn, built with [Mintlify](https://www.mintlify.com):
 
 | Tool | Source repository | Documented version |
 | --- | --- | --- |
 | Moodle CLI | [moodle-cli](https://github.com/bunizao/moodle-cli) | 0.9.2 |
 | Ed Discussion CLI | [edstem-cli](https://github.com/bunizao/edstem-cli) | 0.7.0 |
 | OnTrack CLI | [ontrack-cli](https://github.com/bunizao/ontrack-cli) | 0.3.2 |
+| unicorn | [unicorn](https://github.com/TuuHub/unicorn) | commit e8a3559 (database migrations through 0016) |
 
 The site covers installation, sign-in, everyday tasks, scripting and connecting AI clients. Command references describe the captured releases above; they may differ from newer releases. This repository contains the documentation, not the CLI implementations.
 
@@ -37,6 +38,7 @@ npm test
 | `docs.json` | Site configuration and navigation |
 | `moodle/`, `edstem/`, `ontrack/` | Product guides and generated command references |
 | `mcp/` | Client setup, tool catalogs and security guidance |
+| `unicorn/` | The unicorn memory layer: deploy, sources, connect, daily use, operate and a hand-written tool reference |
 | `developers/`, `concepts/`, `agents/` | Scripting and agent guidance |
 | `compare/` | Feature and web coverage comparisons |
 | `data/` | Captured command trees, help output and MCP tool catalogs |
