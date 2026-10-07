@@ -1,0 +1,94 @@
+---
+title: "Custom tools"
+description: "Add your own read-only questions to unicorn, or install ones other students have shared."
+icon: wrench
+---
+
+unicorn's built-in tools cover the common questions. A custom tool is a question of your own, saved under a name, that your agent can then call like any other. Examples are "what labs are next in UNIT" or "what slipped in the last week".
+
+A custom tool is not code. It is a name, a short description, a list of inputs, and one read-only database query over your unicorn data. unicorn checks the query before it saves it and refuses anything that could change data.
+
+## What a tool can read
+
+A tool reads five views of what unicorn holds: items, upcoming deadlines, changes, courses and buckets. It cannot read credentials or settings, and it cannot write. Your agent can list the views and their columns with the admin tool `describe_schema`.
+
+## Rules
+
+| Rule | Limit |
+| --- | --- |
+| Number of tools | 20 |
+| Name | 3 to 40 characters, lowercase letters, digits and underscores, starting with a letter |
+| Description | Up to 500 characters |
+| Query | One `SELECT` or `WITH` statement, up to 4000 characters |
+| Inputs | Up to 10, each a string, number, integer or true/false, with an optional list of allowed values and a default |
+| Result | Up to 200 rows or about 50 KB, whichever comes first. A note says when a result was cut. |
+
+You cannot reuse the name of a built-in tool. Statements that insert, update, delete, drop or change database settings are rejected, and the message quotes the part that failed so your agent can fix it and try again.
+
+## Mount the admin connection
+
+Defining tools uses unicorn's admin connection. It is a separate address from the one your agent normally uses, and it takes the admin token only. A browser approval cannot reach it, which means you cannot add it to claude.ai or ChatGPT. Use a terminal client such as Claude Code.
+
+<Warning>
+  The admin connection can define tools, link items and list your saved corrections. Add it only while you need it, and remove it afterwards.
+</Warning>
+
+```bash
+claude mcp add --transport http unicorn-admin https://<your-worker>.workers.dev/mcp/admin --header "Authorization: Bearer <your-admin-token>"
+```
+
+When you are done:
+
+```bash
+claude mcp remove unicorn-admin
+```
+
+## Define a tool
+
+With the admin connection mounted, describe the question to your agent. It writes the query and saves it.
+
+```text
+Using unicorn-admin, define a tool called next_lab. It takes a course code and a limit
+(default 5) and returns the next upcoming items for that course, soonest first.
+```
+
+The tool is then available on your normal unicorn connection. Ask for it by name or by what it does:
+
+```text
+What's next in UNIT? Use next_lab.
+```
+
+A new tool may need a new session before your agent sees it. {/* TODO: verify — unicorn builds a fresh server per request and sends no "tool list changed" notice, so a client that caches its tool list will not see the new tool until it reconnects. */}
+
+To change a tool, ask your agent to define it again under the same name. To remove one, ask it to delete the tool. `list_tools` shows what you have.
+
+## Install a shared tool
+
+A shared library holds tools other people wrote. It lives in the `TuuHub/unicorn-tools` repository on GitHub.
+
+```text
+Using unicorn-admin, browse the shared tool library.
+```
+
+```text
+Install the overdue tool from the shared library.
+```
+
+Installing runs the same checks as defining, so a shared tool cannot do more than one you wrote yourself. The library list is cached for ten minutes.
+
+The library starts with four tools:
+
+| Tool | What it returns |
+| --- | --- |
+| `next_lab` | The next few upcoming items for one course, soonest first |
+| `overdue` | Items with a missed deadline in the last seven days, across every course |
+| `week_ahead` | Items due in the next seven days, or the number of days you give |
+| `course_activity` | The most recent changes recorded for one course |
+
+## Share a tool
+
+Ask your agent to publish one of yours. It prepares the file, the library entry and the `gh` commands to open a pull request. unicorn never writes to GitHub: your agent runs the commands from your machine, with your GitHub login, and you review the pull request.
+
+```text
+Using unicorn-admin, publish next_lab to the shared library.
+```

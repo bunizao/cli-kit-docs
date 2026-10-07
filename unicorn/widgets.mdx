@@ -1,0 +1,48 @@
+---
+title: "Widgets"
+description: "The six interactive views unicorn can show in your agent's chat, which apps display them, and what you see elsewhere."
+icon: layout-dashboard
+---
+
+A widget is a small interactive card that appears inside the chat, in place of a block of text. unicorn has six. Each one shows the same information your agent would otherwise write out, and adds buttons for the obvious next step.
+
+## The six widgets
+
+| Widget | Appears when you ask for | What it shows | Buttons |
+| --- | --- | --- | --- |
+| Briefs | Your unread briefs | Each brief, read or unread | **Mark read**, **Mark all read**, **Discuss this** |
+| Course | One course | Its buckets and the items in each, with staff posts marked | **Open**, **Break this down**, **What do staff say about this?** |
+| Changes | What changed | Recent change events, newest first | **What matters here?** |
+| Plan | A weekly or assignment plan | The checklist, with tickable items | Ticking an item saves the plan. **Replan the rest** |
+| Deadlines | Upcoming deadlines, or a search for items | Items on a timeline by due date | **Plan around this** |
+| Connections | unicorn's status | Each source, its last sync and any error | **Help me fix** a source |
+
+A button that says "Discuss this" or "Break this down" does not run anything by itself. It sends a message to your agent, as if you had typed it, and your agent then replies.
+
+## Where they appear
+
+| Client | Widgets |
+| --- | --- |
+| claude.ai (web) | Yes |
+| Claude desktop | Yes |
+| Claude on mobile | Yes |
+| ChatGPT | Yes |
+| Claude Code | No. You get the text version. |
+| Cowork | Not confirmed. If you see plain text, that is the fallback. |
+| Other MCP clients | Only if the client supports MCP Apps. Otherwise you get the text version. |
+
+{/* TODO: verify — Cowork widget rendering is not confirmed in unicorn's docs. */}
+
+## The text fallback
+
+Every tool result also comes as plain text, and the text has the full content. A client that cannot show a widget shows the text, so nothing is missing. Buttons that need your agent, such as **Discuss this**, are hidden in a client that cannot send messages from a widget.
+
+## What widgets can and cannot do
+
+- They change unicorn's own state only: marking a brief read, or saving a plan when you tick an item.
+- They never write to Ed, Moodle, Canvas or Gmail.
+- They load nothing from the internet. Everything a widget shows came from your unicorn.
+
+## When a widget does not show
+
+Ask your agent for the same thing in words, for example "show my unread briefs", and check that the client is one from the table above. If the plain text shows instead of a card, the client does not support widgets. That is expected and not a fault in unicorn.
