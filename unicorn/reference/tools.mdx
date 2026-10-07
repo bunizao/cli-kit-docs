@@ -1,0 +1,282 @@
+---
+title: "Tool reference"
+description: "The tools your agent sees on unicorn, with their inputs and results, plus the change events and the five buckets."
+sidebarTitle: "Tools"
+icon: book-open
+---
+
+This page lists what your agent can call on unicorn. You do not call these yourself. You ask in plain language and your agent picks the tool, as in [Daily use](/unicorn/daily-use).
+
+{/* This page is written by hand. Unlike the command references for the other tools, it is not generated, because unicorn publishes no captured tool catalog. Every name and input here was checked against unicorn's source. */}
+
+unicorn exposes two separate connections:
+
+- The **door**, at `https://<your-worker>.workers.dev/mcp`. It has 14 built-in tools, up to 20 tools you define, four playbook prompts and six widgets. Your agent uses this one every day.
+- The **admin connection**, at `https://<your-worker>.workers.dev/mcp/admin`. It takes the admin token only. You mount it briefly to manage feeds and custom tools. See [Custom tools](/unicorn/custom-tools#mount-the-admin-connection).
+
+Every result is text first. Each one ends with a `Next:` line that suggests what to call next, computed from the data. A failure reads `Error (code): message` and includes a hint for fixing it.
+
+None of the door tools writes to Ed, Moodle, Canvas or Gmail. The tools marked **Writes unicorn state** change only briefs, plans, labels or corrections inside your deployment.
+
+## Door tools
+
+### get_briefs
+
+List briefs, which are the notes unicorn and your playbooks leave in your inbox. Call it at the start of a session. Shows the briefs widget.
+
+<ParamField path="unreadOnly" type="boolean" default="true">
+  Set to `false` to include briefs you have already read.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="20">
+  How many to return, from 1 to 100.
+</ParamField>
+
+Returns the briefs and the total number that are unread. Read-only.
+
+### ack_briefs
+
+Mark briefs as read so `get_briefs` stops returning them by default. It never deletes anything. Writes unicorn state.
+
+<ParamField path="ids" type="string[]" required>
+  Brief ids from `get_briefs`. Between 1 and 100.
+</ParamField>
+
+Returns how many were marked.
+
+### write_brief
+
+File a finished playbook result as a brief. A repeat call with the same key does nothing, so a retried call never makes a duplicate. Writes unicorn state.
+
+<ParamField path="kind" type="string" required>
+  A short label in lowercase words joined by hyphens, up to 40 characters, such as `weekly-plan`.
+</ParamField>
+
+<ParamField path="subject" type="string" required>
+  What the brief is about, such as an ISO week or a unit code. Up to 200 characters.
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  Up to 200 characters.
+</ParamField>
+
+<ParamField path="body" type="string" required>
+  Markdown, up to 20,000 characters.
+</ParamField>
+
+<ParamField path="idempotencyKey" type="string" required>
+  A value that stays the same across retries of one run, such as the ISO week. Up to 200 characters.
+</ParamField>
+
+Returns the brief's id and creation time.
+
+### changes_since
+
+Page through what changed after a position. Shows the changes widget.
+
+<ParamField path="cursor" type="string">
+  The `nextCursor` from a previous call, digits only. Leave it out to get the latest 20 changes.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="100">
+  From 1 to 500.
+</ParamField>
+
+<ParamField path="course" type="string">
+  A unit code, to see only that course's changes.
+</ParamField>
+
+<ParamField path="types" type="string[]">
+  Only these [change types](#change-types). The older type names also work.
+</ParamField>
+
+Returns `events`, `nextCursor`, `hasMore` and `counts` per type. Read-only.
+
+### course
+
+Get one course from every source, grouped into assignment buckets with due dates, submission state and staff answers, plus general notices. Shows the course widget.
+
+<ParamField path="code" type="string" required>
+  A unit code, up to 20 characters.
+</ParamField>
+
+Returns the buckets and any `unlabeled` items. When more than one offering matches, it returns `ambiguous` with every match instead of guessing. Read-only.
+
+### life
+
+Get items that are not tied to a course, grouped into `life/events`, `life/admin` and `life/other`, plus anything not yet labeled. Takes no inputs. Read-only.
+
+### search_items
+
+Search item titles and text across every source. Shows the deadlines widget.
+
+<ParamField path="query" type="string" required>
+  Up to 200 characters.
+</ParamField>
+
+<ParamField path="kind" type="string">
+  One kind of item, such as `assessment` or `thread`.
+</ParamField>
+
+<ParamField path="course" type="string">
+  A unit code.
+</ParamField>
+
+<ParamField path="since" type="string">
+  An ISO timestamp. Only items at or after it.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="20">
+  From 1 to 100.
+</ParamField>
+
+Returns matching items with their source, id, title, due date, state and bucket. Read-only.
+
+### upcoming
+
+List items with a deadline in the next days, across every course, ordered by due date. Shows the deadlines widget.
+
+<ParamField path="days" type="integer" default="14">
+  From 1 to 180.
+</ParamField>
+
+<ParamField path="course" type="string">
+  A unit code.
+</ParamField>
+
+<ParamField path="includeOverdue" type="boolean" default="false">
+  Also return missed deadlines from the last 90 days.
+</ParamField>
+
+Read-only.
+
+### get_plan
+
+Read a saved plan. A plan that does not exist yet comes back as empty, not as an error. Shows the plan widget.
+
+<ParamField path="kind" type="string" required>
+  `weekly` or `assignment`.
+</ParamField>
+
+<ParamField path="subject" type="string" required>
+  For `weekly`, an ISO week such as `2026-W39`. For `assignment`, the item as `<source>:<itemId>`, exactly as `upcoming` or `search_items` returned it. Up to 200 characters.
+</ParamField>
+
+Read-only.
+
+### save_plan
+
+Save a plan, replacing the whole content. Read the plan first to edit rather than replace. Shows the plan widget. Writes unicorn state.
+
+<ParamField path="kind" type="string" required>
+  `weekly` or `assignment`.
+</ParamField>
+
+<ParamField path="subject" type="string" required>
+  As in `get_plan`.
+</ParamField>
+
+<ParamField path="content" type="string" required>
+  Markdown, up to 20,000 characters. Use `- [ ]` for open tasks.
+</ParamField>
+
+### remember
+
+Save a standing correction exactly as you wrote it. Only durable rules belong here. Playbooks read corrections back when they run. Writes unicorn state.
+
+<ParamField path="text" type="string" required>
+  Up to 500 characters.
+</ParamField>
+
+Returns `saved`, `duplicate` or `empty`. When the notes are full, the oldest is dropped to make room.
+
+### label_items
+
+File items into buckets. Use it for items that `course` or `life` returned as unlabeled. Leave out anything ambiguous instead of guessing. Writes unicorn state.
+
+<ParamField path="items" type="object[]" required>
+  Between 1 and 200. Each has `source`, `itemId`, `bucket`, and an optional `topic` of up to 40 characters.
+</ParamField>
+
+<ParamField path="by" type="string" default="client">
+  `client` or `triage`. Records who filed the item.
+</ParamField>
+
+Returns how many were updated, the items it could not find, and any bucket names that were invalid.
+
+### status
+
+Report each source's last sync and error, whether the scheduler is running, the latest change position and your timezone. Use it to explain stale or missing data. Shows the connections widget. Takes no inputs. Read-only.
+
+### run_playbook
+
+Fetch a playbook's steps and the data it needs, already gathered, plus your saved corrections. Your agent then follows the steps. unicorn takes no further action. See [Playbooks](/unicorn/playbooks).
+
+<ParamField path="name" type="string" required>
+  `weekly-plan`, `decompose-assignment`, `forum-brief` or `triage`.
+</ParamField>
+
+Read-only.
+
+### Your own tools
+
+Tools you define appear on the door beside these, up to 20. See [Custom tools](/unicorn/custom-tools).
+
+## Prompts
+
+The door also offers four prompts with the playbook names. Clients that support prompts list them. Clients that do not, such as ChatGPT, use `run_playbook`.
+
+## Admin tools
+
+These are on the admin connection only.
+
+| Tool | What it does |
+| --- | --- |
+| `list_items` | Lists items from every source, newest first, without the raw payload. Filter by `source` or `kind`. |
+| `get_item` | Returns one item with its full detail. Takes `source` and `itemId`. |
+| `list_upcoming` | Lists items with due dates. Overdue items go back 30 days here, not 90 as on the door. |
+| `list_changes` | Lists change events, newest first. `since` must be an ISO 8601 UTC timestamp such as `2026-07-01T00:00:00Z`. |
+| `list_relations` | Lists links you confirmed between items. |
+| `link_items` | Confirms that two items belong together, such as the same course in two systems. Writes unicorn state. |
+| `list_plugin_manifests` | Lists the feeds you installed. |
+| `put_plugin_manifest` | Validates and installs or updates a feed. Takes `manifest` and `enabled`, which defaults to `true`. |
+| `get_sync_status` | Summarises the latest sync, per source. Use it first when data looks stale. |
+| `list_corrections` | Reads your saved corrections, newest last. |
+| `describe_schema` | Shows the five views a custom tool can read, with their columns. |
+| `define_tool` | Creates or updates a custom tool. Takes `name`, `description`, `inputSchema` and `sql`. |
+| `list_tools` | Lists your custom tools. |
+| `delete_tool` | Deletes one by name. |
+| `browse_tools` | Lists tools in the shared library, optionally filtered by a text query. |
+| `install_tool` | Installs a shared tool by name. |
+| `publish_tool` | Prepares the file and `gh` commands to share a tool. It never writes to GitHub. |
+
+## Change types
+
+Each change event has one of these types.
+
+| Type | Meaning |
+| --- | --- |
+| `item.added` | A new item appeared. |
+| `item.archived` | An item moved to the archive. |
+| `item.restored` | An archived item came back. |
+| `deadline.changed` | A due date moved. |
+| `state.changed` | A status changed, such as a submission state or an answered thread. |
+| `grade.changed` | A grade was released or changed. |
+| `content.changed` | The text of an item changed. |
+| `notice.posted` | A staff notice or announcement was posted. |
+
+Older history may carry the earlier names `item.created`, `item.updated` and `capability.changed`. They are kept as they were and still work as filters.
+
+## Buckets
+
+Every item is filed in one of five kinds of bucket.
+
+| Bucket | What goes in it |
+| --- | --- |
+| `course/<CODE>/<assignment-slug>` | An assessment and everything about it: its description, staff answers, related threads. One per assignment. |
+| `course/<CODE>/general` | Course items that are not about one assignment, such as lectures and exam logistics. |
+| `life/events` | Clubs, seminars and career events. |
+| `life/admin` | Enrolment, fees, timetables and official notices. |
+| `life/other` | Anything else. |
+
+An assessment owns its bucket, and a forum thread joins an assignment when its category matches the assessment's title. Both are decided as unicorn reads them, with no AI model. Free text is filed by the triage playbook, or by your agent on the spot. An item that cannot be placed is returned marked `unlabeled`. unicorn never guesses a course.
