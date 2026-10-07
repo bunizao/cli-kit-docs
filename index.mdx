@@ -12,6 +12,8 @@ cli-kit is three command-line tools — `moodle`, `edstem`, and `ontrack` — th
 | [Ed Discussion CLI](/edstem/index) | `edstem-cli` | `edstem`, `edstem-mcp` | Ed Discussion | API token | Yes: local + hosted |
 | [OnTrack CLI](/ontrack/index) | `ontrack` | `ontrack` | OnTrack | Browser session or SAML snippet | No |
 
+All three are written and maintained by [bunizao](https://github.com/bunizao) and released under MIT. For a side-by-side look, with demos of each, see [the live CLIs](https://unicorn.tuuhub.com/cli).
+
 A fourth project, [unicorn](/unicorn/index), is not a CLI. It is a Worker you deploy to your own free Cloudflare account that remembers your Ed, Moodle, Canvas and Gmail content between sessions and gives your AI agent one place to read it.
 
 Each tool only reaches what your own account can already see: `moodle` borrows the browser session you signed in with, `edstem` uses a personal API token you create yourself, and `ontrack` reuses a browser session or falls back to a SAML (Security Assertion Markup Language) sign-in. None of them create a service account or a new set of upstream permissions.

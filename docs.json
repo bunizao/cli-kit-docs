@@ -1,12 +1,12 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "cli-kit",
-  "description": "Terminal and MCP access to Moodle, Ed Discussion and OnTrack for students, staff, scripts and AI agents, plus unicorn, a memory layer for your own AI agent.",
+  "name": "unicorn",
+  "description": "The unicorn family: moodle-cli, edstem-cli and ontrack for live access to Moodle, Ed Discussion and OnTrack from your terminal and AI agent, and unicorn, a memory layer for your own AI agent.",
   "colors": {
-    "primary": "#0B7285",
-    "light": "#5AC8D8",
-    "dark": "#0B7285"
+    "primary": "#121212",
+    "light": "#F5F4EF",
+    "dark": "#121212"
   },
   "logo": {
     "light": "/logo/light.svg",
@@ -18,10 +18,11 @@
   },
   "fonts": {
     "heading": {
-      "family": "IBM Plex Sans"
+      "family": "Geist",
+      "weight": 600
     },
     "body": {
-      "family": "IBM Plex Sans"
+      "family": "Geist"
     }
   },
   "appearance": {
@@ -31,7 +32,11 @@
     "links": [
       {
         "label": "unicorn",
-        "href": "https://unicorn-site.bunizao.workers.dev"
+        "href": "https://unicorn.tuuhub.com"
+      },
+      {
+        "label": "CLIs",
+        "href": "https://unicorn.tuuhub.com/cli"
       },
       {
         "label": "GitHub",
@@ -311,5 +316,11 @@
         ]
       }
     ]
+  },
+  "background": {
+    "color": {
+      "light": "#F5F4EF",
+      "dark": "#08080A"
+    }
   }
 }
