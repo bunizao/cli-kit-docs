@@ -1,0 +1,172 @@
+---
+title: "Troubleshooting"
+description: "Exact causes and fixes for installer errors, sync errors, sign-in problems, a stopped scheduler and clients that cannot connect."
+icon: life-buoy
+---
+
+Start with two checks. They answer most questions.
+
+1. Open `https://<your-worker>.workers.dev/health`. It should show `"status":"ready"`, `"database":true` and `"scheduler":"running"`.
+2. Open the settings page and look at the **Sources** cards, or ask your agent to check unicorn's status. Each source shows when it last synced and its last error.
+
+A source error has this form:
+
+```text
+pull:unauthorized
+pull:http_503
+pull:network
+pull:timeout
+ingest:<code>
+```
+
+`pull:` means unicorn could not read the source. `ingest:` means it read the source but could not store what came back. The part after the colon says why. The sections below cover each one.
+
+## The installer stops
+
+**`Node 22.19+ is required`.** Your Node.js is older than the minimum. Install Node.js 22.19 or newer and run `npm run setup` again. The same message also names the version it found. {/* TODO: verify — the installer's message also says "required by the Pi runtime", which is out of date. */}
+
+**Cloudflare sign-in does not complete.** Run `npx wrangler login` on its own, finish the browser sign-in, then run `npm run setup` again.
+
+**You ran setup twice and the tokens changed.** Each run generates new tokens. Update any client that used the old MCP token. See [Deploy](/unicorn/deploy#save-your-admin-token).
+
+## The scheduler is stopped
+
+`/health` shows `"scheduler":"stopped"`, and nothing syncs. Open the settings page and click **Start scheduler**. The first sync runs about five seconds later.
+
+From a terminal:
+
+```bash
+curl -X POST https://<your-worker>.workers.dev/schedule -H "Authorization: Bearer <your-admin-token>"
+```
+
+If the status looks fine but nothing has synced for hours, check **Source synchronization** under **Maintenance** on the settings page. If it is switched off, unicorn does not pull any source. Switch it on and click **Sync now**.
+
+## A source shows `pull:unauthorized`
+
+The source rejected the credential, with a 401 or 403. The credential may be wrong, expired or revoked.
+
+| Source | Fix |
+| --- | --- |
+| Ed | Create a new API token on Ed's API tokens page and paste it on the **Ed Discussion** card. |
+| Canvas | Create a new personal access token under **Account → Settings → New access token** and paste it on the **Canvas** card. Check that the **Base URL** is your Canvas site. |
+| Moodle | See the next section. |
+
+If you saved a new credential and the error stays, a secret set with `wrangler secret put` may be overriding it. See [A saved value is ignored](#a-saved-value-is-ignored).
+
+Click **Test connection** on the card after you save. It tells you how many items it pulled, or why it failed.
+
+## Moodle says the session is invalid
+
+Moodle sessions expire. When yours has, the card shows an error such as one of these:
+
+```text
+pull:http_303
+pull:sesskey_missing
+```
+
+{/* TODO: verify — an expired Moodle session probably appears as a redirect status such as pull:http_303 or pull:http_302, because the request does not follow redirects. Confirm which status your Moodle returns. */}
+
+Both mean Moodle did not accept your session. Push a fresh one:
+
+```bash
+okta login https://moodle.example.edu
+npm run moodle:push https://moodle.example.edu
+```
+
+Or paste a new `MoodleSession` cookie value into **Session cookie (advanced)** on the **Moodle** card. See [Sources](/unicorn/sources#moodle).
+
+If you ran `npm run moodle:push` once and later pasted a cookie on the card, the pushed one still wins. See [A saved value is ignored](#a-saved-value-is-ignored).
+
+If Moodle shows no items at all, check **Base URL** on the card. The default that ships with unicorn belongs to one institution and is probably not yours.
+
+## `pull:network`, `pull:timeout` and `pull:http_<status>`
+
+| Error | Meaning | What to do |
+| --- | --- | --- |
+| `pull:network` | unicorn could not reach the address. | Check the **Base URL** for typos, including `https://`. |
+| `pull:timeout` | The source took too long to answer. | Wait for the next hour. If it keeps happening, the source may be down. |
+| `pull:http_404` | The address exists but the page does not. | The **Base URL** is probably wrong. |
+| `pull:http_429` | The source is rate limiting you. | Wait. unicorn tries again next hour. |
+| `pull:http_500` and above | The source has a fault. | Wait for the source to recover. |
+
+A single failure does not lose anything. Items already collected stay, and the next hourly sync tries again.
+
+## `ingest:<code>` errors
+
+unicorn read the source but rejected the items. For a built-in source this is rare and means a change in what the source sends. For a feed you added, the mapping probably points at a field the feed does not have. Ask your agent to check the manifest against a sample of the feed, using the admin connection described in [Custom tools](/unicorn/custom-tools#mount-the-admin-connection).
+
+## A saved credential needs re-entry
+
+A card shows this notice:
+
+```text
+Saved credential no longer decrypts (ADMIN_TOKEN may have rotated) — re-enter it below.
+```
+
+Credentials you paste in the settings page are encrypted with a key that comes from the admin token. After you change the admin token, the old ones cannot be opened. Paste each affected credential again. Credentials set as Worker secrets are not affected.
+
+## A saved value is ignored
+
+A secret set with `wrangler secret put` always wins over a value you paste in the settings page. If you set a credential both ways, unicorn uses the secret. To change it, set the secret again:
+
+```bash
+npx wrangler secret put ED_API_TOKEN
+```
+
+The names are `ED_API_TOKEN`, `MOODLE_SESSION`, `MOODLE_BASE_URL`, `CANVAS_BASE_URL` and `PLUGIN_SECRET_CANVAS_TOKEN`. Or delete the secret and use the settings page:
+
+```bash
+npx wrangler secret delete ED_API_TOKEN
+```
+
+## Gmail
+
+| What you see | Cause and fix |
+| --- | --- |
+| The **Gmail** card says to set the Google client values | The two `PLUGIN_SECRET_GOOGLE_...` secrets are not set. Set both, then reload the page. See [Sources](/unicorn/sources#gmail). |
+| `pull:mcp_unauthorized` | Google rejected unicorn's sign-in. Click **Connect Gmail** again. In a Google project in **Testing** status, sign-in expires after seven days. |
+| `oauth_missing_refresh_token` after you click Connect | Google did not issue a renewal token. Remove unicorn at `myaccount.google.com/permissions`, then click **Connect Gmail** again. |
+| `oauth_state_invalid` | unicorn could not match the sign-in to your request. Start again from the settings page and finish in the same browser. |
+| `oauth_denied` | Google reported that access was denied. Approve access with an account that is listed as a test user. |
+| `oauth_exchange_failed` | Google refused the code. Check that the redirect address in your OAuth client matches `https://<your-worker>.workers.dev/settings/oauth/callback` exactly. |
+| `oauth_not_configured` | The Google client ID or secret is missing on the Worker. |
+
+The `oauth_` codes appear on a plain page in your browser after you return from Google, not on the settings page.
+
+If Gmail connects but no mail appears, check the **Gmail scope** card. unicorn reads only recent mail from your university domains, from listed senders, or that mentions a course code. {/* TODO: verify — the Gmail source has not been checked against a real account. */}
+
+## A client cannot connect
+
+| Symptom | Fix |
+| --- | --- |
+| The address is rejected | Use the full address, ending `/mcp`: `https://<your-worker>.workers.dev/mcp`. |
+| `401` or "unauthorized" with a token | The MCP token is wrong or was replaced. Copy it from the **Connect your agent** card on the settings page. |
+| The Claude Code plugin shows nothing | In the plugin settings, give the base address without `/mcp` and without a trailing slash. Start a new session after you change it. |
+| The browser approval page rejects your password | The user name is `unicorn`. The password is your admin token. |
+| `unicorn allows at most 20 registered OAuth clients` | Old registrations are full. Remove unused ones under **Connected apps** on the settings page, then connect again. |
+| ChatGPT will not accept a token | ChatGPT accepts browser approval only. See [Connect your agent](/unicorn/connect#chatgpt). |
+| A routine fails every time | Routines run in the cloud and need unicorn added as a claude.ai connection. See [Playbooks](/unicorn/playbooks#schedule-them). |
+
+## Nothing shows up in my digest
+
+- The digest is written at or after 07:00 in your timezone, once per day. Check **Timezone** on the settings page.
+- If nothing changed and nothing is due in the next seven days, no digest is written.
+- The scheduler has to be running. See above.
+
+## I forgot my admin token
+
+There is no way to read it back. Set a new one and keep it in a password manager:
+
+```bash
+npx wrangler secret put ADMIN_TOKEN
+```
+
+Credentials you saved in the settings page then need re-entering. See [A saved credential needs re-entry](#a-saved-credential-needs-re-entry).
+
+## The sync broke after an upgrade
+
+You may have deployed without migrating. Run `npm run upgrade` again. It applies any migration that is still missing and deploys. See [Upgrade](/unicorn/upgrade).
+
+## A new tool or widget does not show
+
+A custom tool you just defined may need a new session before your agent lists it. A widget shows only in clients that support it, and the text fallback shows everywhere else. See [Widgets](/unicorn/widgets).

@@ -1,0 +1,74 @@
+---
+title: "Security"
+description: "What unicorn stores and where, who can read it, why it cannot write to your sources, and how to revoke access."
+icon: shield-check
+---
+
+unicorn runs on your own Cloudflare account and holds your course data there. Nobody else operates it, and there is no unicorn service in the middle. This page says what it keeps, what it can and cannot do, and how to shut access off.
+
+## What is stored, and where
+
+| What | Where | Notes |
+| --- | --- | --- |
+| Courses, threads, deadlines, grades, announcements, email subjects and snippets | Your Cloudflare database | Whatever your sources show you, kept so unicorn can spot changes. Gmail is limited to the scope you set. |
+| Change history, briefs, plans, saved corrections | Your Cloudflare database | Created by unicorn and your agent. |
+| Source credentials set with `wrangler secret put` | Cloudflare Worker secrets | Cloudflare does not let you read one back. |
+| Source credentials pasted in the settings page | Your Cloudflare database, encrypted | The key comes from your admin token. |
+| The Gmail sign-in token | Your Cloudflare database | Not separately encrypted. Revoke it at Google if you lose control of the deployment. |
+| Admin token and MCP token | Cloudflare Worker secrets | Generated at install. |
+| Connected apps (claude.ai, ChatGPT, Claude Code) | A small store in your Cloudflare account | Registrations and sign-ins for the apps you approved. |
+
+{/* TODO: verify — the Gmail refresh token is written to the database as given and the source does not encrypt it. Confirm before stating this as final, and decide whether it should be encrypted upstream. */}
+
+unicorn keeps no copy outside your Cloudflare account. It makes no calls to any AI service. Your agent's provider sees whatever your agent reads from unicorn during a chat, under that provider's terms, the same as anything else you share with it.
+
+## It cannot write to your sources
+
+unicorn reads from Ed, Moodle, Canvas and Gmail. It has no code path that posts a thread, submits work, changes a grade, replies to a message or sends mail. The consent text shown when you connect an app says so: it can read your unicorn memory and update unicorn's own state, never your sources.
+
+What unicorn does write is its own state: briefs, plans, labels on items, and corrections you ask your agent to save.
+
+One caveat applies to feeds. A manifest that reads from a remote MCP server calls whichever tool the manifest names. The built-in sources only read. Install a manifest you did not write only after you have read what it calls.
+
+## Who can read your memory
+
+| Address | Who gets in |
+| --- | --- |
+| `/mcp` | An app signed in with your MCP token, or one you approved through the browser |
+| `/mcp/admin` | The admin token only. A browser approval is never accepted. |
+| `/settings` | The admin token, as the password for user `unicorn` |
+| `/health` | Anyone. It shows only whether unicorn is running. |
+
+Both tokens are random and long when the installer makes them. Neither is printed again after install, except the **Connect your agent** card, which shows the MCP token to you when you are signed in to the settings page. The admin token is shown nowhere.
+
+Approving a new app needs the admin token, so a stranger who finds your Worker address cannot add an app. A stranger can register a name for an app, up to 20 of them, but cannot get access from it.
+
+## Tokens
+
+| Token | What it opens | Lifetime |
+| --- | --- | --- |
+| MCP token | `/mcp` | Until you replace it |
+| Admin token | The settings page, the admin connection, and approving apps | Until you replace it |
+| An approved app's sign-in | `/mcp` | Each sign-in lasts one hour and renews on its own. The renewal lasts 30 days. |
+
+Treat both tokens like passwords. Keep them in a password manager. Do not paste them into a shared chat or commit them.
+
+To replace the MCP token:
+
+```bash
+npx wrangler secret put MCP_TOKEN
+```
+
+Apps that used the old one must be given the new one. Replace the admin token the same way with `ADMIN_TOKEN`. Credentials you saved in the settings page are encrypted with a key from the admin token, so after you replace it they show as needing re-entry and you must paste them again. See [Troubleshooting](/unicorn/troubleshooting#a-saved-credential-needs-re-entry).
+
+## Revoke access
+
+- **One app:** open the settings page and remove it under **Connected apps**. The app has to ask for approval again.
+- **A source:** click **Disconnect** on its card, and revoke the credential at the source: delete the Ed token, sign out of Moodle, delete the Canvas token, or remove unicorn's access at `myaccount.google.com/permissions`.
+- **Everything:** replace both tokens, then delete the Worker and the database in the Cloudflare dashboard.
+
+## What unicorn needs from you
+
+- Use a long, unique admin token and keep it private.
+- Give Ed, Canvas and Moodle credentials the least access they allow. unicorn only reads, but the credential itself may do more.
+- Share the deployment with no one. It is built for one student, and anyone who has the admin token can approve an app that reads everything in it.

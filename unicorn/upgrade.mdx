@@ -1,0 +1,97 @@
+---
+title: "Upgrade"
+description: "Move your deployment to a newer unicorn release with one command, and know why the database changes first."
+icon: refresh-cw
+---
+
+A newer unicorn release can add tables and columns to your database. `npm run upgrade` applies those changes first and then deploys the new code. Your history, sources and connected apps carry over.
+
+## Upgrade
+
+<Steps>
+  <Step title="Back up the database">
+    ```bash
+    npx wrangler d1 export unicorn --remote --output backup.sql
+    ```
+
+    The free Cloudflare plan has no point-in-time restore, so this export is your only way back. Keep the file until you have run the checks below.
+  </Step>
+  <Step title="Get the new release">
+    From your unicorn folder:
+
+    ```bash
+    git pull
+    npm install
+    ```
+
+    {/* TODO: verify — `npm run setup` writes your database ID into the tracked wrangler.jsonc, so `git pull` can report a conflict there. Confirm the recommended way to keep that line. */}
+
+    If `git pull` stops because of changes in `wrangler.jsonc`, that is your own database ID. Keep your line when you resolve it.
+  </Step>
+  <Step title="Run the upgrade">
+    ```bash
+    npm run upgrade
+    ```
+
+    This runs two commands in order: it applies the database migrations to your remote database, then deploys the Worker.
+  </Step>
+  <Step title="Check it">
+    Open `https://<your-worker>.workers.dev/health`. You want `"status":"ready"`, `"database":true` and `"scheduler":"running"`. Then ask your agent to check unicorn's status, as in [Connect your agent](/unicorn/connect#verify-the-connection).
+  </Step>
+</Steps>
+
+You do not need to start the scheduler again. It keeps running through a deploy unless you had stopped it.
+
+## Why the database changes first
+
+The hourly sync in the new code reads tables and columns that the new migrations add. If you deploy first, every sync fails until the migration lands. If you migrate first, the old code keeps working against a database that only gained something.
+
+For the same reason, do not run `wrangler deploy` by itself to upgrade. Always use `npm run upgrade`, or the two commands it contains, in that order.
+
+To see which migrations your database has applied:
+
+```bash
+npx wrangler d1 migrations list unicorn --remote
+```
+
+A migration that has already run is never run again.
+
+## Check the sync after an upgrade
+
+To run a sync now rather than wait for the hour, use the settings page: open **Maintenance** and click **Sync now**.
+
+From a terminal, use your admin token:
+
+```bash
+curl -X POST https://<your-worker>.workers.dev/sync -H "Authorization: Bearer <your-admin-token>"
+```
+
+A `200` answer means every source pulled cleanly. A `207` means at least one source reported an error, and the response names it.
+
+## If you deployed an earlier version
+
+Releases before the memory layer ran their own AI agent inside the Worker and had a different database. If your database is at migration 0011, the upgrade to the current release also:
+
+- Deletes the old agent's conversation history, notification queue and job records. They are not recoverable without your backup.
+- Keeps your saved corrections.
+- Copies your existing change history into the new format, and later removes the noisiest legacy entries, such as view counts and vote counts, while keeping real changes like deadlines and state changes. Your agent's saved position in the change feed keeps working.
+- Removes the old agent class from the Worker.
+
+The Telegram, email and Discord settings are no longer read by anything. You can delete those secrets:
+
+```bash
+npx wrangler secret list
+npx wrangler secret delete AI_API_KEY
+npx wrangler secret delete TELEGRAM_BOT_TOKEN
+npx wrangler secret delete TELEGRAM_CHAT_ID
+npx wrangler secret delete NOTIFIER_URL
+npx wrangler secret delete RESEND_API_KEY
+npx wrangler secret delete EMAIL_FROM
+npx wrangler secret delete EMAIL_TO
+```
+
+Delete only the ones `secret list` shows. Keep `ADMIN_TOKEN`, `MCP_TOKEN` and every source credential.
+
+## Roll back
+
+Database migrations only go forward, and your backup cannot be replayed over a migrated database. To go back, restore the backup into a new database and point the older release at it. The unicorn repository's `docs/UPGRADING.md` has the exact steps. Your original database stays untouched, so you can move forward again later.
