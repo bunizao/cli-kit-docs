@@ -13,6 +13,9 @@
     "dark": "/logo/dark.svg"
   },
   "favicon": "/favicon.svg",
+  "icons": {
+    "library": "lucide"
+  },
   "fonts": {
     "heading": {
       "family": "IBM Plex Sans"
