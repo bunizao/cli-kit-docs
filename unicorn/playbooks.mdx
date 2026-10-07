@@ -1,0 +1,104 @@
+---
+title: "Playbooks"
+description: "Run unicorn's four built-in procedures on demand or on a schedule: weekly plan, assignment breakdown, forum brief and triage."
+icon: list-checks
+---
+
+A playbook is a written procedure that your agent follows. unicorn supplies the steps and the data, your agent does the thinking, and the result lands in your briefs or plans. unicorn runs no model itself, so a playbook only happens when your agent runs it.
+
+Each playbook needs only unicorn. If you also have Ed or Moodle connected live, your agent may use them to read a spec or a thread in full, but the playbook works without them.
+
+## The four playbooks
+
+| Playbook | What it does | Output | Suggested schedule |
+| --- | --- | --- | --- |
+| `weekly-plan` | Builds a dated checklist for the next seven days across every course, using deadlines due in the next 14 days. | A weekly plan and a brief | Monday 07:30 |
+| `decompose-assignment` | Splits each assessment due within 21 days that has no plan yet into three to seven tasks, spread across the days left. | An assignment plan and a brief per assessment | Daily 08:00 |
+| `forum-brief` | Summarises staff notices and edited threads since the last forum brief, grouped by course. | A brief | Daily 18:00 |
+| `triage` | Files items unicorn could not place into buckets. It leaves unsure items alone. | Labels, and a brief only if something needs you | Daily 07:15 |
+
+How each one behaves, in terms you can check:
+
+- **weekly-plan** puts multi-day work on the earlier days, not the day before it is due. When two deadlines collide, or a state is unclear, it adds a "Needs your input" section and asks one question. A quiet week still produces a plan that says nothing is due, so your other devices find a plan for it.
+- **decompose-assignment** never overwrites a plan that exists. If it cannot find the assessment's description, it says so instead of inventing tasks. It sizes the work to the assessment's weight and plans lighter weekends unless you have told it otherwise.
+- **forum-brief** remembers where it stopped, so each run covers only what is new. It always writes a brief, saying "Nothing new on the forums" when that is the case, so the next run does not re-read the same period.
+- **triage** puts something in `life/other` rather than guess a course, and never changes a label you or your agent set on purpose. See [buckets](/unicorn/reference/tools#buckets).
+
+All four follow the notes you saved with `remember`. A note such as "no work on Sundays" changes the plans.
+
+## Run one now
+
+Ask for it by name, in any client:
+
+```text
+Run the unicorn weekly-plan playbook.
+```
+
+To narrow it, say so in the request:
+
+```text
+Run the unicorn forum-brief playbook for UNIT only.
+```
+
+```text
+Run the unicorn decompose-assignment playbook for the second assignment in UNIT.
+```
+
+{/* TODO: verify — the playbook prompts declare an `assignment` or `course` argument, but unicorn's text for the procedure does not insert it. Naming the target in your request works because your agent reads it, not because unicorn passes it on. */}
+
+How your client offers them:
+
+- **Claude Code with the plugin** installs each playbook as a skill. Claude picks the right one from a request such as "plan my week" or "what did staff post". Type `/` and search for the playbook name to choose one yourself. {/* TODO: verify — the exact slash command names the plugin produces. */}
+- **claude.ai** serves them as prompts you can pick from your connector.
+- **ChatGPT and any client that only calls tools** use the `run_playbook` tool. Say "run the weekly-plan playbook" and the client calls it.
+
+`run_playbook` returns the procedure, the data it needs, already fetched, and your saved corrections. Your agent then follows the steps, filing briefs and plans as it goes.
+
+## Schedule them
+
+A scheduled run is a routine: your client's own scheduler starts a fresh session on a timetable and sends one line, such as "Run the unicorn weekly-plan playbook." unicorn has no scheduler for playbooks, because unicorn never starts your agent.
+
+<Warning>
+  A routine runs in the cloud, so it cannot use a plugin or local connection on your computer. It reaches unicorn only through the connector you added to your Claude account. Complete the claude.ai steps in [Connect your agent](/unicorn/connect) first.
+</Warning>
+
+### Claude Code
+
+The easiest way is to ask. With the plugin installed, say:
+
+```text
+Set up my unicorn routines.
+```
+
+The plugin's `setup-routines` skill walks you through adding the connection to your account, then creates each routine. To create one yourself:
+
+```text
+/schedule every Monday at 7:30am, run the unicorn weekly-plan playbook
+```
+
+When it asks which connectors the routine can use, make sure unicorn is included. A routine that calls only unicorn does not use files, so any repository works if it asks for one.
+
+You can also create routines in the browser at claude.ai/code/routines, or from the desktop app's Code tab.
+
+### Cowork
+
+Open the **Schedule** tab, click **New Task**, name it, paste the one-line prompt and choose a cadence. Cowork offers hourly, daily, weekly and weekdays, so pick the nearest match. A time may drift from the table above. Check that unicorn is enabled for the task.
+
+### ChatGPT
+
+{/* TODO: verify — ChatGPT scheduling for connectors is not covered in unicorn's docs. Confirm what ChatGPT offers before promising it. */}
+
+unicorn's documentation does not cover scheduling in ChatGPT. Run playbooks there on demand with `run_playbook`.
+
+### The prompts
+
+| Playbook | Prompt |
+| --- | --- |
+| `weekly-plan` | `Run the unicorn weekly-plan playbook.` |
+| `decompose-assignment` | `Run the unicorn decompose-assignment playbook.` |
+| `forum-brief` | `Run the unicorn forum-brief playbook.` |
+| `triage` | `Run the unicorn triage playbook.` |
+
+### Check that it worked
+
+After a routine has run, ask your agent "What's new in unicorn?". The brief appears with its title, for example "Weekly plan — 2026-W39". Use **Run now** in the scheduler to try one before its first real run.

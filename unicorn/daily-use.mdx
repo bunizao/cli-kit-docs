@@ -1,0 +1,141 @@
+---
+title: "Daily use"
+description: "Read your morning brief, see what changed, check a course across systems, and keep plans and corrections, with prompts to copy."
+icon: calendar-check
+---
+
+You do not call unicorn's tools yourself. You ask your agent in plain language, and it picks the tool. The prompts below are examples, not required wording. Each section names the tool behind it, so you can see what your agent is doing. The full list is in the [tool reference](/unicorn/reference/tools).
+
+## Start with your briefs
+
+A brief is a note unicorn or your agent leaves in your inbox. The most common one is the daily digest. Your agent checks the inbox at the start of a session, and marks briefs as read once it has shown them to you.
+
+```text
+What's new in unicorn?
+```
+
+```text
+Show me my unread briefs.
+```
+
+Claude Code with the plugin prints up to five unread titles before you type anything.
+
+### The daily digest
+
+Once a day, at or after 07:00 in your timezone, unicorn writes a digest when something happened. If nothing did, it writes nothing. The digest has up to three sections:
+
+| Section | What it lists |
+| --- | --- |
+| Due soon | Deadlines in the next seven days, up to 20 |
+| Notices | New announcements and notices since the last digest, up to 20 |
+| Changes | Deadlines that moved, grades that were released, and content that was updated, up to 20 |
+
+unicorn writes the digest with no AI model. It is a plain report of what its sources showed. If you want it summarised or prioritised, ask your agent.
+
+Change the timezone under **Timezone** on the settings page. The digest follows the new zone from the next day.
+
+## See what changed
+
+Ask what changed since a time you name, a course, or a kind of change.
+
+```text
+What changed since Monday?
+```
+
+```text
+Any deadline changes in UNIT this week?
+```
+
+```text
+Were any grades released today?
+```
+
+Behind this is `changes_since`. Every change has a position number. Your agent remembers the last one it read and asks only for newer changes next time, so nothing is shown twice and nothing is missed. If it has no position yet, it starts with the latest 20. The eight kinds of change are listed in the [reference](/unicorn/reference/tools#change-types).
+
+## See a course across systems
+
+```text
+Show me everything for UNIT.
+```
+
+```text
+What's open for the second assignment in UNIT, across Moodle, Ed and my email?
+```
+
+`course` joins what Ed, Moodle, Canvas and Gmail know about one course and sorts it into buckets, one per assignment plus a general one. The [reference](/unicorn/reference/tools#buckets) lists them.
+
+Two things can come back that are worth knowing:
+
+- **More than one match.** If the same code exists in two terms, unicorn shows both and asks you which one. It does not guess.
+- **Unplaced items.** Items it could not place are marked unlabeled. Your agent can file them, or the triage playbook does it on a schedule. See [Playbooks](/unicorn/playbooks).
+
+Things that are not tied to a course, such as events and admin notices, are under `life`.
+
+```text
+What's on in my life outside my units?
+```
+
+## Check upcoming deadlines
+
+```text
+What's due in the next two weeks?
+```
+
+```text
+What's due in UNIT in the next 30 days, including anything overdue?
+```
+
+`upcoming` looks 14 days ahead unless you ask for more, up to 180. It leaves out overdue items unless you ask. When you do, it goes back 90 days.
+
+## Search
+
+```text
+Find anything about the late-penalty policy.
+```
+
+`search_items` searches the titles and text of everything unicorn holds. You can narrow it by kind of item, course or date.
+
+## Plans that follow you
+
+A plan is a checklist your agent saves in unicorn. Because it lives in unicorn rather than in one chat, you can start it in Claude Code and tick it off on your phone.
+
+```text
+Plan my week and save it.
+```
+
+```text
+Open this week's plan.
+```
+
+```text
+Break down the second assignment in UNIT and save the plan.
+```
+
+There are two kinds: a weekly plan, named after the ISO week such as `2026-W39`, and an assignment plan, tied to one item. Plans use task syntax, with `- [ ]` and `- [x]`. In a client that shows [widgets](/unicorn/widgets), ticking an item in the plan card saves it for every device.
+
+## Correct unicorn with remember
+
+When something unicorn files is wrong for you, tell your agent once and it saves the note for good.
+
+```text
+Remember that quizzes in UNIT don't count toward my grade.
+```
+
+```text
+Remember: ignore tutorial sign-up threads.
+```
+
+Each note is stored as you wrote it, up to 500 characters, with the date. Your agent reads them back when it runs a playbook, so the weekly plan and the forum brief follow your rules.
+
+- Save only rules that last. A one-off fact belongs in the chat.
+- A repeated note is ignored.
+- When the notes are full, the oldest drop off to make room.
+- Your agent cannot delete a note. To remove one you would need the admin connection. {/* TODO: verify — the door has no delete tool for corrections and list_corrections is admin read-only. Confirm there is a reader-facing way to remove one. */}
+
+## Check on unicorn itself
+
+```text
+Is unicorn syncing?
+```
+
+`status` shows each source, when it last synced, its last error and whether the scheduler is running. If a source shows an error, see [Troubleshooting](/unicorn/troubleshooting).

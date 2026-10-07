@@ -1,0 +1,120 @@
+---
+title: "Connect your agent"
+description: "Add unicorn to Claude Code, claude.ai, Claude desktop, Claude on mobile, Cowork or ChatGPT."
+icon: plug
+---
+
+Your agent reaches unicorn at one address: `https://<your-worker>.workers.dev/mcp`. Every client below uses it. What differs is how you prove it is you.
+
+<Info>
+  There are two ways to sign in. A **token** is a long secret you paste once, which suits a terminal or a script. **OAuth** opens a page in your browser where you approve the connection, which is what claude.ai and ChatGPT use. unicorn supports both, so you pick whichever your client offers.
+</Info>
+
+| Client | How it connects |
+| --- | --- |
+| Claude Code | Plugin (token), or direct add (token or browser approval) |
+| claude.ai (web) and Claude desktop | Custom connector, browser approval |
+| Claude on mobile | The same account connection, nothing to add |
+| Cowork | The same account connection, nothing to add |
+| ChatGPT | Custom connector, browser approval only |
+
+## Before you start
+
+- A deployed unicorn. See [Deploy](/unicorn/deploy).
+- Your admin token, for the browser approval page. The user name there is `unicorn`.
+- Your MCP token for a token sign-in. The **Connect your agent** card on the settings page shows commands with it already filled in.
+
+## Claude Code
+
+Use the plugin. It adds the connection, the four playbooks and a start-of-session check for unread briefs.
+
+<Steps>
+  <Step title="Add the plugin">
+    ```bash
+    claude plugin marketplace add TuuHub/unicorn
+    claude plugin install unicorn@unicorn
+    ```
+
+    Inside a session, the equivalent is `/plugin marketplace add TuuHub/unicorn` followed by `/plugin install unicorn`. The settings page shows these slash forms.
+  </Step>
+  <Step title="Enter two values">
+    Claude Code asks for your **Worker URL** and your **MCP token**. You can change them later with `/config`. Enter the base address, such as `https://<your-worker>.workers.dev`, with no trailing slash and without `/mcp`. The token is stored and never shown again.
+  </Step>
+  <Step title="Start a new session">
+    Open Claude Code in any folder. At the start of each session the plugin asks unicorn for up to five unread brief titles and prints them. If unicorn does not answer within three seconds, it stays silent and the session starts normally.
+  </Step>
+</Steps>
+
+The plugin also includes a `setup-routines` skill, which schedules the playbooks for you. See [Playbooks](/unicorn/playbooks#schedule-them).
+
+### Without the plugin
+
+Add the connection directly, with your MCP token:
+
+```bash
+claude mcp add --transport http unicorn https://<your-worker>.workers.dev/mcp --header "Authorization: Bearer <your-token>"
+```
+
+Or leave out `--header` to sign in through the browser. Run `/mcp` inside a session, choose `unicorn` and follow the approval page.
+
+## claude.ai, Claude desktop, mobile and Cowork
+
+Add unicorn once to your Claude account and every Claude app uses it.
+
+<Steps>
+  <Step title="Open connectors">
+    In claude.ai, go to **Customize → Connectors**. Depending on your version, the entry is under **Settings → Connectors**.
+  </Step>
+  <Step title="Add a custom connector">
+    Click **Add custom connector** and enter `https://<your-worker>.workers.dev/mcp`.
+  </Step>
+  <Step title="Approve">
+    Claude opens your browser. When the browser asks for a user name and password, enter `unicorn` and your admin token, then click **Approve**.
+  </Step>
+</Steps>
+
+On a Team or Enterprise plan, an owner first adds the connection under **Organization settings → Connectors**. Each member then clicks **Connect** under their own **Customize → Connectors** and approves it separately. Every person who connects needs the admin token of the deployment, so share unicorn only with people who should see that student's data.
+
+Claude on your phone and Cowork read the same account list, so there is nothing more to add once you have approved on the web or desktop. Cowork's scheduled tasks reach unicorn through this same connection.
+
+## ChatGPT
+
+ChatGPT needs a paid plan and Developer mode.
+
+<Steps>
+  <Step title="Turn on Developer mode">
+    Go to **Settings → Apps & Connectors → Advanced settings** and switch on **Developer mode**.
+  </Step>
+  <Step title="Create the connector">
+    Go to **Settings → Connectors** and click **Create**. Enter `https://<your-worker>.workers.dev/mcp`.
+  </Step>
+  <Step title="Approve">
+    Sign in with user name `unicorn` and your admin token, then click **Approve**.
+  </Step>
+</Steps>
+
+ChatGPT accepts browser approval only. A pasted token does not work there.
+
+ChatGPT calls tools but does not list unicorn's playbooks as commands. To run one, ask for it in words: "Run the unicorn weekly-plan playbook." See [Playbooks](/unicorn/playbooks).
+
+## What approving grants
+
+Approving gives that client one permission: read your unicorn memory and update unicorn's own notes, such as briefs and plans. It never writes to Ed, Moodle, Canvas or Gmail. See [Security](/unicorn/security).
+
+A connection stays signed in without asking you again. To cut one off, open the settings page and remove it under **Connected apps**. The client then has to ask for approval again.
+
+## Verify the connection
+
+In any client, ask:
+
+```text
+Check unicorn's status.
+```
+
+Your agent calls `status` and replies with one line per source, showing its item count and either `last sync` with a time or `waiting for its first sync`, followed by the scheduler state and your timezone.
+
+<Check>
+  Each source you set up shows a recent `last sync` time and no `error:`, and the line `Scheduler: running` appears. The connection works end to end.
+</Check>
+
+If the client cannot connect, see [Troubleshooting](/unicorn/troubleshooting#a-client-cannot-connect).
