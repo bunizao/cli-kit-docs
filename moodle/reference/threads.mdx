@@ -28,4 +28,23 @@ moodle threads show [options] <discussion>
 | `--post <id>` | Show a specific post ID. |
 | `--body` | Show full post body. |
 
+## moodle threads reply
+
+```bash
+moodle threads reply [options] <post> <text>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `post` | Yes | Post id or discussion URL with a #p anchor |
+| `text` | Yes | Reply text |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--attach <path>` | Attach a local file; repeat for several files. |
+
 Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

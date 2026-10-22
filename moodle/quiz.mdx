@@ -1,0 +1,48 @@
+---
+title: Quizzes
+description: Start a quiz attempt, save answers and submit it from the terminal, and review a finished attempt.
+sidebarTitle: Quizzes
+icon: list-checks
+---
+
+`moodle quiz` starts an attempt, saves answers and submits it, the same way the quiz pages do in a browser. It is in beta: a Moodle update can break it. It is only available from the terminal, never through the MCP server.
+
+<Warning>
+  Answers you send are your own submission under your institution's rules. Use `moodle quiz` only where the quiz allows it, and check the attempt in a browser before you finish.
+</Warning>
+
+## Take a quiz
+
+```bash
+moodle quiz start "UNIT Practice quiz"
+moodle quiz show ATTEMPT QUIZ --page 2
+moodle quiz answer ATTEMPT QUIZ 1 b
+moodle quiz answer ATTEMPT QUIZ 2 "a,c"
+moodle quiz answer ATTEMPT QUIZ 3 --from essay.md
+moodle quiz finish ATTEMPT QUIZ
+```
+
+1. `quiz start` takes a quiz id, URL or `UNIT TASK` phrase. It continues an attempt already in progress instead of starting a new one, and shows the first page with the attempt and quiz ids the other commands need.
+2. `quiz show` shows one page: its questions, options and the answers saved so far.
+3. `quiz answer` saves one answer by question number as shown on the page: option letters (`b`, or `a,c` for several), answer text, `--from FILE` for a long text answer, or `--value` once per field for a question with several fields.
+4. `quiz finish` submits the attempt for grading. Moodle does not allow undoing this.
+
+## Before anything changes
+
+- Before `quiz start` asks you to confirm, it names the time limit and how many attempts are left. The timer starts at once and does not pause.
+- A quiz that moves forward only refuses an earlier page, and `quiz show --page` asks before opening the next page, because that locks the current one.
+- Every write shows the beta and academic-integrity notice and asks for a yes. In a script, pass `--yes`; `--dry-run` shows the plan.
+- A quiz with an access password asks for it at the terminal, without echoing it and without storing it. Scripts pass `--password`.
+
+## What it cannot do
+
+- A quiz that requires the Safe Exam Browser cannot be taken here, because Moodle checks the browser itself.
+- Question types without a plain choice or text input are shown, but must be answered in a browser.
+
+## Review a finished attempt
+
+```bash
+moodle attempt "UNIT Practice quiz"
+```
+
+`moodle attempt` lists each question with your response, plus the mark, correct answer and feedback wherever the site shows them. See [`moodle attempt`](/moodle/reference/attempt).

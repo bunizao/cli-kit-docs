@@ -1,0 +1,39 @@
+---
+title: "moodle submission"
+description: "Read or remove your assignment submission."
+sidebarTitle: "submission"
+---
+
+```bash
+moodle submission [options] [command]
+```
+
+## moodle submission show
+
+```bash
+moodle submission show [options] <ref>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `ref` | Yes | Assignment id, URL or UNIT TASK phrase |
+
+## moodle submission remove
+
+```bash
+moodle submission remove [options] <ref>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `ref` | Yes | Assignment id, URL or UNIT TASK phrase |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

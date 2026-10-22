@@ -1,0 +1,93 @@
+---
+title: "Set up with an agent"
+description: "Instructions an AI agent follows to install moodle-cli, sign the student in, and optionally deploy a private remote MCP server, through a short conversation."
+icon: "bot"
+---
+
+This page is written for an AI agent with terminal access, such as Claude Code or Codex. A student can hand it over in one line:
+
+```text
+Read https://unicorn.tuuhub.com/docs/moodle/agent-setup.md and set up moodle-cli for me.
+```
+
+The rest of the page speaks to the agent.
+
+## Your job
+
+You are connecting the student's university Moodle account to `moodle-cli`. Take ownership of the setup. Keep commands and configuration out of the conversation unless the student asks, or you need their help with an error. Use the student's language.
+
+## Safety rules
+
+- Never ask the student to copy a Moodle cookie, session key, browser database or API token into the conversation.
+- Never print credentials, and leave session values out of everything you report.
+- Keep the Moodle session on the student's computer.
+- Put any access credential for a remote client into that client's connection settings, not the chat.
+
+## Start with one question
+
+Ask this, and wait for the answer before doing any setup work:
+
+> What is your university's Moodle URL? You can paste any Moodle page you use, such as the dashboard, a course, or the login page.
+
+Do not ask the student to find the site origin, trim the URL, choose a runtime or edit a configuration file.
+
+## Install
+
+1. Check for Node.js 22.13 or newer and for Bun. Older Node cannot read browser cookies.
+2. Install with whichever runtime is there: `npm install -g moodle-cli`, or, when Bun is the only runtime, use `bunx --bun moodle-cli` as the command prefix for every command below.
+
+## Point it at the site
+
+1. Run `moodle auth site <the URL they pasted> --json`. It asks the site for its own address, which can include a path such as `/moodle`, and saves it to the config, keeping other settings. Do not trim the URL yourself.
+2. If it reports another host, show the student the address it found and rerun with `--yes` once they agree.
+3. If it reports a sign-in page or no Moodle, ask the student for the address of a page they see inside Moodle after signing in, and run step 1 again with it.
+
+## Sign in
+
+Tell the student that Moodle may open in their browser and that you will wait while they complete their university sign-in. Then run `moodle auth login`. If a browser opens, let the student finish single sign-on there and continue when the command returns. If sign-in times out, run `moodle auth login` again once the student is ready.
+
+## Verify
+
+1. Run `moodle user --json` and `moodle overview --json`.
+2. If either fails on configuration or authentication, diagnose it (`moodle doctor --json` explains most failures) and retry before reporting success.
+
+## Keep the session alive
+
+After verification, set up session renewal:
+
+- On macOS, run `moodle auth keepalive install` and confirm it with `moodle auth keepalive status --json`.
+- On Linux, schedule `moodle auth keepalive --json` every 30 minutes with cron.
+- Elsewhere, use the operating system's scheduler for the same command, or explain that `moodle auth keepalive` renews the session on demand.
+
+## Install the agent skill
+
+Run `moodle skills add`. In a Bun-only environment, run `bunx --bun skills add https://github.com/bunizao/moodle-cli` instead.
+
+## Offer remote access
+
+After local verification succeeds, ask:
+
+> Do you have a Cloudflare account? I can use it to deploy a private remote MCP server, which lets supported web AI clients connect to your Moodle.
+
+If the student declines or has no account, finish with local access and mention that remote access can be added later.
+
+If they want it:
+
+1. Run `moodle mcp deploy`. Let the student complete Cloudflare authorization in the browser when it is requested. The command creates the server, uploads the encrypted Moodle session, sets up local renewal and configures supported local clients.
+2. For claude.ai, Claude Desktop or another hosted client that signs in with OAuth, run `moodle mcp pair`. Give the student the connector URL and the one-time pairing code it prints, and let them enter the code on the approval page their client opens. The code expires in ten minutes and covers one approval.
+3. Run `moodle mcp status --json`, and keep troubleshooting until it reports that the server and the Moodle session are ready.
+4. Ask which web AI client the student wants to use, and guide them through that client's current custom MCP connector flow.
+
+When your shell has no browser for the student to use, `moodle mcp deploy --remote-login --yes` signs in to Moodle remotely instead. See [Set up without a local browser](/moodle/mcp-server#set-up-without-a-local-browser).
+
+## Finish with something useful
+
+Run `moodle todo --days 14 --json` and summarize the student's upcoming work in their language. Report the verified Moodle site and account.
+
+End with three requests they can try next, adapted to what you found:
+
+- "Plan my Moodle work for this week."
+- "Download the slides from this Moodle link."
+- "Find forum posts about the next assessment."
+
+If nothing is due, say so and use their enrolled units to suggest relevant requests.

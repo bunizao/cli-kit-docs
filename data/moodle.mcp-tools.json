@@ -1,7 +1,7 @@
 [
   {
     "name": "home",
-    "description": "Today, timezone, due items and unread counts. Use when: dashboard. Not for: due for longer deadline lists. Refs: days defaults to 14. Then: unit or item. Cost: small dashboard.",
+    "description": "Today's date and timezone, items due soon, unread counts and the current section of each unit. Input: days defaults to 14.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -23,7 +23,7 @@
   },
   {
     "name": "due",
-    "description": "Items due in a date window. Use when: deadlines. Not for: item for submission details. Refs: unit code, name, id or URL. Then: item with activity_id. Cost: up to 20 rows by default.",
+    "description": "Items due in a date window. Input: unit code, name, id or URL.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -64,7 +64,7 @@
   },
   {
     "name": "units",
-    "description": "Enrolled units with ids, codes and names. Use when: unit names. Not for: unit for sections. Refs: none. Then: unit with a name or id. Cost: small list.",
+    "description": "Enrolled units with ids, codes and names. Input: none.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -86,7 +86,7 @@
   },
   {
     "name": "unit",
-    "description": "Section index and current section; section argument returns activities and files. Use when: a unit or section. Not for: find for a named item. Refs: unit code, name, id or URL; section number or name. Then: item or file with activity id. Cost: index about 4 KB; section about 0.5 KB.",
+    "description": "Section index and current section; section argument returns activities and files. Input: unit code, name, id or URL; section number or name.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -131,7 +131,7 @@
   },
   {
     "name": "find",
-    "description": "Ranked sections, activities and discussion subjects. Use when: find slides or a task. Not for: search_forums for post text; due for deadlines. Refs: query and optional unit code, name, id or URL. Then: item or file with id. Cost: up to 20 rows by default.",
+    "description": "Ranked sections, activities and discussion subjects. Input: query and optional unit code, name, id or URL.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -179,7 +179,7 @@
   },
   {
     "name": "item",
-    "description": "Activity due dates, status, grades, files, or latest forum threads. Use when: submission or item detail. Not for: file for binary content. Refs: id, same-site URL, or UNIT TASK phrase. Then: file with id or files URL. Cost: one item.",
+    "description": "One activity in full: due date, status, grade, marker feedback with rubric or marking-guide rows and feedback files, attached files, quiz attempts, or a forum's latest threads. Input: id, same-site URL, or UNIT TASK phrase.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -210,8 +210,40 @@
     }
   },
   {
+    "name": "attempt",
+    "description": "Each question with your response, and mark, correct answer and feedback when the site shows them. Input: attempt id or review URL.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "attempt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          ]
+        }
+      },
+      "required": [
+        "attempt"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
     "name": "grades",
-    "description": "Grades across units or in one unit. Use when: my grades. Not for: item for submission status. Refs: optional unit code, name, id or URL. Then: item for an ungraded task. Cost: graded_only narrows output.",
+    "description": "Marked items; summary counts; all adds ungraded; feedback opt-in. Input: unit; types: assign, quiz, h5pactivity.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -228,8 +260,42 @@
             }
           ]
         },
-        "graded_only": {
+        "mode": {
+          "default": "graded",
+          "type": "string",
+          "enum": [
+            "summary",
+            "graded",
+            "all"
+          ]
+        },
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "include_feedback": {
           "default": false,
+          "type": "boolean"
+        },
+        "include_ungraded": {
+          "default": false,
+          "type": "boolean"
+        },
+        "limit": {
+          "default": 20,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "offset": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0
+        },
+        "graded_only": {
           "type": "boolean"
         }
       },
@@ -244,7 +310,7 @@
   },
   {
     "name": "news",
-    "description": "Latest announcement threads with first-post text. Use when: announcements. Not for: search_forums for other discussions. Refs: optional unit code, name, id or URL. Then: thread with discussion id. Cost: up to 5 announcements by default.",
+    "description": "Latest announcement threads with first-post text. Input: optional unit code, name, id or URL.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -279,7 +345,7 @@
   },
   {
     "name": "thread",
-    "description": "A discussion and a page of compact posts, with attachment links. Use when: discussion posts. Not for: news for announcements. Refs: discussion_id; offset and limit. Then: increase offset while posts_total exceeds returned. Cost: up to 20 posts by default.",
+    "description": "A discussion and a page of compact posts, with attachment links. Input: discussion_id; offset and limit.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -313,7 +379,7 @@
   },
   {
     "name": "search_forums",
-    "description": "Matching posts with unit and forum name maps. Use when: forum post text. Not for: find for activity names. Refs: query, optional unit or courseId and forumId. Then: thread with discussion_id. Cost: bounded forum scan; total covers scanned scope.",
+    "description": "Matching posts with unit and forum name maps. Input: query, optional unit or courseId and forumId.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -395,7 +461,7 @@
   },
   {
     "name": "submit",
-    "description": "Upload local files into an assignment; returns the receipt Moodle shows afterwards. Use when: upload assignment files. Not for: item for status only. Refs: assignment id, same-site URL or UNIT TASK phrase; local file paths. Then: dry_run (default) only plans; show the plan to the person, then rerun with dry_run false; final submits for grading and cannot be undone. Cost: writes to Moodle.",
+    "description": "Upload local files into an assignment; returns the receipt Moodle shows afterwards. Input: assignment id, same-site URL or UNIT TASK phrase; local file paths. dry_run (default) only plans; show the plan to the person, then rerun with dry_run false; final submits for grading and cannot be undone; without a draft stage saving is the submission, so it is refused unless final is true.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -420,6 +486,14 @@
             "type": "string",
             "minLength": 1
           }
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text_file": {
+          "type": "string",
+          "minLength": 1
         },
         "final": {
           "default": false,
@@ -452,7 +526,7 @@
   },
   {
     "name": "file",
-    "description": "One authenticated file as embedded content, at most 16 MiB. Use when: download a file. Not for: item for file choices. Refs: resource id, same-site URL, or UNIT TASK phrase. Then: read the returned resource. Cost: binary content up to 16 MiB.",
+    "description": "One authenticated file: an image as image content, anything else as embedded binary, at most 16 MiB. Input: id of a one-file activity, file or activity URL, or UNIT TASK phrase.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -473,6 +547,102 @@
       "required": [
         "ref"
       ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "messages",
+    "description": "Direct and group conversations with unread counts and the latest message. Input: limit and offset.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "default": 20,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "offset": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "conversation",
+    "description": "A conversation's latest messages in chronological order; does not mark them read. Input: conversation_id, limit and offset (from newest).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "conversation_id": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "limit": {
+          "default": 50,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "offset": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "conversation_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "calendar",
+    "description": "All course, user and site calendar events in the date window. Input: days and optional unit.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "days": {
+          "default": 14,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 365
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          ]
+        }
+      },
       "additionalProperties": false
     },
     "annotations": {

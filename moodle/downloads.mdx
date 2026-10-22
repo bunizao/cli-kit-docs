@@ -1,74 +1,76 @@
 ---
 title: Downloads
-description: Download an authenticated Moodle file with download/dl, and how that differs from get.
+description: Save one activity, a whole section or a single file, and keep units mirrored locally with sync.
 sidebarTitle: Downloads
 icon: download
 ---
 
-moodle-cli has two ways to pull a file to disk. [`moodle get`](/moodle/daily-use#downloading-by-reference) resolves a resource id, a Moodle URL, or a `UNIT TASK` phrase the same way the bare-target syntax does, then downloads it — see [Daily use](/moodle/daily-use) and [`moodle get`](/moodle/reference/get) for that phrase-resolution path. This page covers `download` (alias `dl`), which takes a course-module ID or an authenticated Moodle file URL directly, with no phrase resolution.
+`moodle download` saves what the course page offers. `dl` and `get` are aliases of the same command.
 
-## Downloading a file
-
-```bash
-moodle download 91234
-moodle dl 91234
-```
-
-`dl` is a real alias for `download`, not a separate command — both run the same code. The source is either a resource activity's course-module ID, or an authenticated Moodle file URL on your configured site: a `/mod/resource/view.php?id=` URL or a `/pluginfile.php/...` URL. A URL on any other host is rejected.
+## What you can download
 
 ```bash
-moodle download 'https://moodle.example.edu/pluginfile.php/12345/mod_resource/content/1/handout.pdf'
+moodle download "UNIT week 7 slides"
+moodle dl "UNIT week 5" --to ./week-5
+moodle download 'https://moodle.example.edu/mod/resource/view.php?id=91234' --dest './Week 03/slides.pdf'
 ```
 
-By numeric ID, moodle-cli looks up the activity first and refuses anything that isn't a `resource` activity — a folder, page, or assignment ID will not download this way (see [Folder activities](#folder-activities-and-their-files) below).
+A reference is an activity id, a same-site Moodle URL, or a `UNIT TASK` phrase resolved the same way as [Daily use](/moodle/daily-use). It can name:
 
-### `--dest` and `--force`
+- one activity: a resource, every file in a folder, or the files attached to an assignment (its brief, datasets);
+- a whole section, by phrase (`"UNIT week 5"`) or by section URL (`…/course/view.php?id=34637&section=5`), including child sections the page shows inside it;
+- a single file link (`…/pluginfile.php/…`).
 
-`--dest <path>` sets the exact downloaded file path, including its filename. Without it, moodle-cli picks a filename Moodle reports for the download, the resource's own file entry, or the URL, in that order, and writes it into the current directory. `--force` replaces an existing destination file cleanly; without it, moodle-cli refuses to overwrite a file that's already there.
+A URL on another host is refused. Quote URLs in zsh, where `?` is a glob character.
+
+## Browse when you are not sure
 
 ```bash
-moodle download 91234 --dest ./handouts/week3.pdf --force
+moodle dl
+moodle dl UNIT
 ```
 
-<Note>
-  `get` uses `--to <directory>` (a destination *directory*, keeping Moodle's own filename) and `--force`, not `--dest`. The two commands don't share flag names for this. See [`moodle get`](/moodle/reference/get).
-</Note>
+With no argument at a terminal, `download` walks unit, then section, then item, the way the course page does. Type to filter and press Escape to go back a step. `moodle dl UNIT` starts at that unit's sections.
 
-### `-o`/`--output` is not `--dest`
+## Where files land
 
-`-o, --output <file>` is a global flag on every moodle-cli command: it writes the command's *rendered response* (the JSON, YAML or table output) to a file instead of stdout. `--dest` controls where the *downloaded file itself* lands. They answer different questions and can both be passed at once — one redirects the summary of what happened, the other redirects the file it describes.
+| Flag | Effect |
+| --- | --- |
+| `--to <directory>` | Save into this directory, created when missing. Without it, files land in the current directory. |
+| `--dest <path>` | The exact path for the file, when the reference resolves to exactly one file. |
+| `--force` | Download everything again and replace existing files. |
+
+A file already at the destination is skipped, so rerunning a section after Ctrl+C or a dropped connection fetches only what is missing. The same document linked twice is saved once, and two different files with one name get a ` (2)` suffix.
+
+`-o, --output <file>` is different: it writes the command's own output (the summary of what was saved) to a file, not the downloaded file.
 
 ```bash
-moodle download 91234 --dest ./handouts/week3.pdf --json -o ./out/week3.json
+moodle download "UNIT week 7 slides" --to ./downloads --json -o ./downloads/receipt.json
 ```
 
-## Folder activities and their files
+To see which files an activity holds before downloading, run `moodle activities show ID`; it lists the files `download` would save.
 
-A folder activity holds more than one file, so neither `get` nor `download` resolves a folder by its course-module ID directly — there's no single file to pick. Instead, inspect the folder first:
+## Keep units in sync
+
+`moodle sync` keeps one folder per unit in step with Moodle: resources, folder contents and assignment attachments, laid out by section. Pages and books are saved as single HTML files with their images embedded, so they read the same offline.
 
 ```bash
-moodle activities show FOLDER_ID
+moodle sync --to ~/Units
+moodle sync UNIT --to ~/Units
+moodle sync --dry-run
 ```
 
-The response lists the folder's files, each with its own authenticated `pluginfile.php` URL. Pass one of those URLs to `download`/`dl` (or `get`) to fetch that file:
+The first form syncs every unit into its own subfolder, the second just one unit, and `--dry-run` reports what would change without writing anything.
 
-```bash
-moodle download 'https://moodle.example.edu/pluginfile.php/12345/mod_folder/content/0/dataset.csv'
-```
-
-There's no bulk "download the whole folder" — each file is a separate download.
-
-## What the command reports
-
-Every successful download prints a summary confirming what was written: where the file landed, its name, and how many bytes came through.
-
-Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#download) for the exact JSON shape.
+- A rerun asks Moodle only whether each file changed, and usually downloads nothing.
+- A changed file replaces your copy only when you have not edited it. An edited copy stays put and the new version lands beside it as `name (updated YYYY-MM-DD).ext`.
+- Files removed from Moodle are reported and kept locally. A file you delete stays deleted until Moodle changes it.
+- Each unit folder holds a `.moodle-sync.json` file that records which unit it mirrors, so you can rename or move the folder freely.
 
 ## Failure modes
 
-- A URL your site doesn't recognize as a resource or pluginfile path fails with a usage error before any request is made. A numeric ID that isn't a `resource` activity fails the same way, right after moodle-cli looks up the activity to check its type.
-- A resource that resolves to more than one file refuses to guess which one you want.
-- Moodle returning a login page instead of a file means the session expired — run `moodle auth login`.
-- An existing destination file without `--force` fails rather than silently overwriting it.
+- A reference that matches several items lists the candidates instead of guessing. At a terminal you pick one.
+- Moodle returning a sign-in page instead of a file means the session expired. Run `moodle auth login`.
+- An existing file is never overwritten without `--force`.
 
 See [Errors and exit codes](/concepts/errors-and-exit-codes) for exit codes and the JSON error shape.

@@ -1,26 +1,27 @@
 ---
 title: "moodle download"
-description: "Download one authenticated Moodle file."
+description: "Download files: one activity, a whole section, or a file URL. With no argument, browse."
 sidebarTitle: "download"
 ---
 
 ```bash
-moodle download [options] <source>
+moodle download [options] [ref...]
 ```
 
-**Aliases:** `dl`
+**Aliases:** `dl`, `get`
 
 **Arguments**
 
 | Argument | Required | Description |
 | --- | --- | --- |
-| `source` | Yes | Course-module ID or authenticated Moodle file URL |
+| `ref...` | No | Activity id, same-site activity/section/file URL, or UNIT TASK phrase |
 
 **Options**
 
 | Flags | Description |
 | --- | --- |
-| `--dest <path>` | Exact downloaded file path |
-| `--force` | Atomically replace an existing destination |
+| `--to <directory>` | Destination directory; created when missing. |
+| `--dest <path>` | Exact path for a single downloaded file. |
+| `--force` | Atomically replace existing files. |
 
 Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

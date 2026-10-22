@@ -24,6 +24,11 @@ moodle grades list [options] [unit]
 
 | Flags | Description |
 | --- | --- |
-| `--graded-only` | Only return graded items. |
+| `--mode <mode>` | graded (default), summary or all. |
+| `--types <types>` | Comma-separated module types (assign, quiz, h5pactivity). |
+| `--include-feedback` | Include full grader feedback. |
+| `--include-ungraded` | Include ungraded items in graded mode. |
+| `--offset <number>` | Skip this many matching rows. |
+| `--graded-only` | Alias for --mode graded. |
 
 Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

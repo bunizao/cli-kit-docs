@@ -39,4 +39,23 @@ moodle activities show [options] <id>
 | --- | --- | --- |
 | `id` | Yes | Course-module ID |
 
+## moodle activities captions
+
+```bash
+moodle activities captions [options] <id> [media]
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Label course-module ID |
+| `media` | No | Media ID or 1-based position when the label has multiple videos |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--to <file>` | Text file to create. |
+
 Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

@@ -1,0 +1,22 @@
+---
+title: "moodle update"
+description: "Update the package and redeploy the managed MCP Worker when either is behind."
+sidebarTitle: "update"
+---
+
+```bash
+moodle update [options]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--check` | Report versions without installing or deploying. |
+| `--quiet` | Print nothing; refresh the cached version only. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

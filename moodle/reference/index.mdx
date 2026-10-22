@@ -4,7 +4,7 @@ description: "Every moodle command, its arguments, options and defaults, generat
 sidebarTitle: "Reference"
 ---
 
-`moodle` v0.9.2 — Read Moodle and submit work from the command line.
+`moodle` v0.11.1 — Read Moodle and submit work from the command line.
 
 ## Global options
 
@@ -37,9 +37,11 @@ For what each exit code means, see [Errors and exit codes](/concepts/errors-and-
 | [`due`](/moodle/reference/due) | — | Items due in a date window. |
 | [`news`](/moodle/reference/news) | — | Latest announcement threads with first-post text. |
 | [`find`](/moodle/reference/find) | — | Ranked sections, activities and discussion subjects. |
-| [`get`](/moodle/reference/get) | — | Download a resource by id, URL, or UNIT TASK phrase. |
 | [`open`](/moodle/reference/open) | — | Open a unit or activity reference in the browser. |
 | [`submit`](/moodle/reference/submit) | — | Upload local files into an assignment; returns the receipt Moodle shows afterwards. |
+| [`submission`](/moodle/reference/submission) | — | Read or remove your assignment submission. |
+| [`complete`](/moodle/reference/complete) | — | Mark an activity complete manually. |
+| [`quiz`](/moodle/reference/quiz) | — | Take a quiz: start an attempt, answer questions, finish it. Beta. |
 | [`units`](/moodle/reference/units) | `courses` | Inspect enrolled units. |
 | [`activities`](/moodle/reference/activities) | — | Inspect activities. |
 | [`grades`](/moodle/reference/grades) | — | Inspect grades. |
@@ -50,13 +52,17 @@ For what each exit code means, see [Errors and exit codes](/concepts/errors-and-
 
 | Command | Aliases | Description |
 | --- | --- | --- |
+| [`sync`](/moodle/reference/sync) | — | Keep one local folder per unit in step with Moodle: new files arrive, changed ones update, and a file you edited is never overwritten. |
 | [`user`](/moodle/reference/user) | — | Show authenticated user info. |
 | [`todo`](/moodle/reference/todo) | — | List upcoming actionable timeline items. |
 | [`alerts`](/moodle/reference/alerts) | — | List notifications and message counts. |
+| [`messages`](/moodle/reference/messages) | — | Read and send direct or group messages. |
+| [`calendar`](/moodle/reference/calendar) | — | All course, user and site calendar events in the date window. |
 | [`overview`](/moodle/reference/overview) | — | Show a compact multi-source overview. |
-| [`download`](/moodle/reference/download) | `dl` | Download one authenticated Moodle file. |
+| [`download`](/moodle/reference/download) | `dl`, `get` | Download files: one activity, a whole section, or a file URL. With no argument, browse. |
 | [`auth`](/moodle/reference/auth) | — | Session and keepalive utilities. |
 | [`doctor`](/moodle/reference/doctor) | — | Diagnose runtime, browser access, session, background jobs and MCP setup. |
+| [`coverage`](/moodle/reference/coverage) | — | Check each command against this Moodle site with the signed-in session, one live read at a time. Nothing is created. |
 | [`completion`](/moodle/reference/completion) | — | Print shell completion for zsh, bash or fish. |
 | [`uninstall`](/moodle/reference/uninstall) | — | Remove local background jobs; optionally remove the selected Worker and configuration. |
 

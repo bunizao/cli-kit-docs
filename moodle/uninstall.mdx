@@ -69,7 +69,9 @@ What's on disk depends on how you installed it. Configuration lives at `~/.confi
 | `npx moodle-cli` | Nothing persistent beyond npm's execution cache; npm manages that cache itself. |
 | `bunx moodle-cli` | Nothing persistent beyond Bun's execution cache; Bun manages that cache itself. |
 
-Cloudflare deployment management uses a copy of its companion tool already on your `PATH` if present, or downloads one to `~/.config/moodle-cli/tools/wrangler@<version>` — `--purge` removes that along with the rest of the config directory.
+Cloudflare deployment management uses a copy of its companion tool already on your `PATH` if present, or downloads one to `~/.config/moodle-cli/tools/wrangler@<version>` — `--purge` removes that along with the rest of the config directory. Neither the CLI nor the local MCP server installs it otherwise, and the standalone binary needs Node.js or Bun only when you manage a Cloudflare deployment.
+
+Background jobs are opt-in: nothing runs on a schedule until you install keepalive or deploy an MCP server.
 
 ## Removing the package
 

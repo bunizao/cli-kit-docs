@@ -39,8 +39,24 @@ moodle activities show 91234
 ```
 
 <Note>
-  Resource and folder activities return file entries you can pass straight to [`moodle get` or `moodle download`](/moodle/downloads).
+  `activities show` lists the files [`moodle download`](/moodle/downloads) would save for that activity.
 </Note>
+
+### Embedded lecture videos
+
+Lecture recordings often sit inside a label rather than in an activity of their own, and labels stay out of the compact section view. Include them when you look for a video, then inspect the label for its media title and viewer URL:
+
+```bash
+moodle activities list UNIT --section "Week 12" --include-labels --json
+moodle activities show LABEL_ID --json
+moodle activities captions LABEL_ID --to ./lecture-captions.txt
+```
+
+`activities captions` saves the timestamped captions as SRT or VTT text, with the video's id and source URL. When a label holds several videos, pass the media id or its position (starting at 1) after `LABEL_ID`.
+
+- Panopto captions need a signed-in Panopto session in your browser. Open the viewer URL that `activities show` prints and sign in first.
+- A recording with no captions, an expired Panopto session, or a response that is not caption text creates no file.
+- The command never overwrites an existing file.
 
 ### The current section
 
@@ -68,7 +84,7 @@ Shows your notification and message counts, plus up to `--limit` individual noti
 moodle overview --todo-days 7
 ```
 
-A compact combination of the dashboard's due items, unread counts, and unit list — the same `home` data as bare `moodle`, scoped by `--todo-days`. `--todo-limit` and `--alerts-limit` are accepted on the command line but don't change the result in 0.9.2: the dashboard always returns up to 5 due items and a single "has any unread" pass over your alert counts; only `--todo-days` changes what's included.
+A compact combination of the dashboard's due items, unread counts, and unit list — the same `home` data as bare `moodle`, scoped by `--todo-days`. `--todo-limit` and `--alerts-limit` are accepted on the command line but don't change the result: the dashboard always returns up to 5 due items and a single "has any unread" pass over your alert counts; only `--todo-days` changes what's included.
 
 ## User
 

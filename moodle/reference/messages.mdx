@@ -1,0 +1,76 @@
+---
+title: "moodle messages"
+description: "Read and send direct or group messages."
+sidebarTitle: "messages"
+---
+
+```bash
+moodle messages [options] [command]
+```
+
+## moodle messages list
+
+```bash
+moodle messages list [options]
+```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--offset <number>` | Skip this many conversations. |
+
+## moodle messages show
+
+```bash
+moodle messages show [options] <conversation>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `conversation` | Yes | Conversation id |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--offset <number>` | Skip this many newest messages. |
+
+## moodle messages send
+
+```bash
+moodle messages send [options] <recipient> <text>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `recipient` | Yes | Conversation id, conversation:ID or user:ID |
+| `text` | Yes | Message text |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## moodle messages read
+
+```bash
+moodle messages read [options] [conversation]
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `conversation` | No | Conversation id |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--all` | Mark every unread conversation as read. |
+
+Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

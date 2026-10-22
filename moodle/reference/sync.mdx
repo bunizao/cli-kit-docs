@@ -1,0 +1,23 @@
+---
+title: "moodle sync"
+description: "Keep one local folder per unit in step with Moodle: new files arrive, changed ones update, and a file you edited is never overwritten."
+sidebarTitle: "sync"
+---
+
+```bash
+moodle sync [options] [unit]
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | No | Unit code, name, id or URL; omit for every unit |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--to <directory>` | Folder holding one subfolder per unit; defaults to the current directory. |
+
+Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

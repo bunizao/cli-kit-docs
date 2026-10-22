@@ -94,3 +94,28 @@ Deployment and remote-session issues for the managed MCP server (Cloudflare sign
 | `session` | warn | No saved session, or it's no longer alive. | Run `moodle auth login`. |
 | `browser` | fail | Every cookie store on the machine is unreadable. | See [macOS: browser cookie store unreadable](#macos-browser-cookie-store-unreadable) above. |
 | `job` | warn | A keepalive or MCP renewal job can't read cookies, or its runtime is missing. | Run `moodle auth keepalive install`, or `moodle mcp deploy` to repair renewal. |
+
+## Check your site with `moodle coverage`
+
+```bash
+moodle coverage
+moodle coverage --json > coverage.json
+```
+
+Moodle sites differ: some turn off web services, and themes, languages and course formats change the pages moodle-cli reads. moodle-cli asks your site for its own wording of the labels it looks for, so a site in another language, or one that renamed a label, is read the same way.
+
+`moodle coverage` signs in with your session and runs each read-only command once against your own units, printing one line per command as it finishes. Nothing is created and submitting is never tried. Moodle does log the pages it opens as views, as it does when you browse them, and can mark forum posts read.
+
+A command passes only when its answer agrees with what the site states elsewhere: an activity's name and files against the unit's contents, an assignment's due date against the calendar, a forum search against a discussion the forum is known to hold. Each passing line says what it was checked against. The other outcomes are:
+
+| Outcome | Meaning |
+| --- | --- |
+| Fallback | The command worked through a second way of reading the site. Some first choices are never allowed on a stock site; going around those is normal and is not reported as a fallback. |
+| `?` | The page was read but not understood. |
+| `≠` | The answer contradicts the site. |
+| Failed | The command did not work. |
+| Skipped | Your units had nothing to test it on. |
+
+Only activities you can open are sampled, a network error is retried once, and a check that hangs times out. The command exits with code 3 when a command fails, contradicts the site, or reads a page it does not understand.
+
+The first line names your moodle-cli version and whether it is the latest. A failure from an old release may already be fixed, so run `moodle update` before reporting one. The JSON report adds the moodle-cli version and runtime, the Moodle release and theme, and the services the site turns off. It holds counts, ids and error messages, not your name or the titles of your units, so you can attach it to an issue when your site misbehaves.

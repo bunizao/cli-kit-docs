@@ -1,5 +1,5 @@
 $ moodle --help
-moodle v0.9.2
+moodle v0.11.1
 Read Moodle and submit work from the command line
 
 Usage
@@ -9,33 +9,49 @@ Arguments
   target  Unit name, section, item phrase, or Moodle URL
 
 Core commands
-  due [unit]               Items due in a date window
-  news [unit]              Latest announcement threads with first-post text
-  find <query> [unit]      Ranked sections, activities and discussion subjects
-  get <ref>                Download a resource by id, URL, or UNIT TASK phrase
-  open <ref>               Open a unit or activity reference in the browser
-  submit <ref> [files...]  Upload files into an assignment
-  units, courses           Inspect enrolled units
-  activities               Inspect activities
-  grades                   Inspect grades
-  threads                  Inspect forum discussion threads
-  forums                   Inspect forums
+  due [unit]                  Items due in a date window
+  news [unit]                 Latest announcement threads with first-post text
+  find <query> [unit]         Ranked sections, activities and discussion
+                              subjects
+  open <ref>                  Open a unit or activity reference in the browser
+  submit <ref> [files...]     Upload files into an assignment
+  submission                  Read or remove your assignment submission
+  complete <ref>              Mark an activity complete manually
+  quiz                        Take a quiz (beta)
+  units, courses              Inspect enrolled units
+  activities                  Inspect activities
+  grades                      Inspect grades
+  threads                     Inspect forum discussion threads
+  forums                      Inspect forums
 
 Additional commands
-  user                     Show authenticated user info
-  todo                     List upcoming actionable timeline items
-  alerts                   List notifications and message counts
-  overview                 Show a compact multi-source overview
-  download, dl <source>    Download one authenticated Moodle file
-  auth                     Session and keepalive utilities
-  doctor                   Diagnose runtime, session and MCP setup
-  completion <shell>       Print shell completion for zsh, bash or fish
-  uninstall                Remove background jobs, Worker and config
+  sync [unit]                 Mirror units into local folders
+  user                        Show authenticated user info
+  todo                        List upcoming actionable timeline items
+  alerts                      List notifications and message counts
+  messages                    Read and send direct or group messages
+  calendar                    All course, user and site calendar events in the
+                              date window
+  overview                    Show a compact multi-source overview
+  download, dl, get [ref...]  Download files: one activity, a whole section, or
+                              a file URL. With no argument, browse.
+  auth                        Session and keepalive utilities
+  doctor                      Diagnose runtime, session and MCP setup
+  coverage                    Check which commands work on this site
+  completion <shell>          Print shell completion for zsh, bash or fish
+  uninstall                   Remove background jobs, Worker and config
 
 Agent commands
-  mcp                      Private MCP server on Cloudflare
-  commands                 Describe the complete command tree
-  skills                   Agent skill metadata
+  mcp                         Private MCP server on Cloudflare
+  commands                    Describe the complete command tree
+  skills                      Agent skill metadata
+
+Commands
+  attempt <ref>               Each question with your response, and mark,
+                              correct answer and feedback when the site shows
+                              them
+  update                      Update the package and redeploy the managed MCP
+                              Worker when either is behind
 
 Options
   -V, --version        Show the version
@@ -125,20 +141,34 @@ Global options
   --days <number>
 
 
-$ moodle get --help
-moodle get
-Download a resource by id, URL, or UNIT TASK phrase
+$ moodle attempt --help
+moodle attempt
+Each question with your response, and mark, correct answer and feedback when the
+site shows them
 
 Usage
-  moodle get [options] <ref>
+  moodle attempt [options] <ref>
 
 Arguments
-  ref  Resource id, URL, or UNIT TASK phrase
+  ref  Quiz attempt id or review URL
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle update --help
+moodle update
+Update the package and redeploy the managed MCP Worker when either is behind
+
+Usage
+  moodle update [options]
 
 Options
-  --to <directory>  Destination directory
-  --force           Replace an existing file atomically
-  -h, --help        Show help
+  --check     Report versions without installing or deploying
+  --quiet     Print nothing; refresh the cached version only
+  -h, --help  Show help
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -161,10 +191,189 @@ Arguments
 Options
   --final             Also submit for grading. Moodle does not allow undoing
                       this.
+  --text <text>       Online text to save; blank lines preserve paragraphs
+  --text-file <path>  Read online text from a Markdown, text or HTML file
   --replace           Remove the files already in the submission first
   --accept-statement  Agree to the site's submission statement when it requires
                       one
   -h, --help          Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle submission --help
+moodle submission
+Read or remove your assignment submission
+
+Usage
+  moodle submission [options] [command]
+
+Commands
+  show <ref>
+  remove <ref>
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle submission <command> --help' for details on a command.
+
+
+$ moodle submission show --help
+moodle submission show
+
+Usage
+  moodle submission show [options] <ref>
+
+Arguments
+  ref  Assignment id, URL or UNIT TASK phrase
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle submission remove --help
+moodle submission remove
+
+Usage
+  moodle submission remove [options] <ref>
+
+Arguments
+  ref  Assignment id, URL or UNIT TASK phrase
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle quiz --help
+moodle quiz
+Take a quiz: start an attempt, answer questions, finish it. Beta.
+
+Usage
+  moodle quiz [options] [command]
+
+Commands
+  start <ref>                                  Start a new attempt, or continue the one in progress, and show its first page
+  show <attempt> <quiz>                        Show one page of an attempt in progress: questions, options and saved answers
+  answer <attempt> <quiz> <question> [answer]  Save an answer: choice letters (b or a,c) or text
+  finish <attempt> <quiz>                      Submit the attempt for grading. Moodle does not allow undoing this.
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle quiz <command> --help' for details on a command.
+
+moodle quiz is beta: it replays the browser's quiz forms, and a Moodle update can break it without warning.
+Academic integrity: answers you send are your own submission under your institution's rules. Only use this
+where the quiz allows it, and check the attempt in a browser before you finish.
+
+
+$ moodle quiz start --help
+moodle quiz start
+Start a new attempt, or continue the one in progress, and show its first page
+
+Usage
+  moodle quiz start [options] <ref>
+
+Arguments
+  ref  Quiz id, URL, or UNIT TASK phrase
+
+Options
+  --password <password>  Quiz access password for scripts; at a terminal you are
+                         asked for it instead
+  -h, --help             Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle quiz show --help
+moodle quiz show
+Show one page of an attempt in progress: questions, options and saved answers
+
+Usage
+  moodle quiz show [options] <attempt> <quiz>
+
+Arguments
+  attempt  Attempt id
+  quiz     Quiz id
+
+Options
+  --page <n>  Page number, starting at 1
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle quiz answer --help
+moodle quiz answer
+Save an answer: choice letters (b or a,c) or text
+
+Usage
+  moodle quiz answer [options] <attempt> <quiz> <question> [answer]
+
+Arguments
+  attempt   Attempt id
+  quiz      Quiz id
+  question  Question number as shown
+  answer    Option letters or answer text
+
+Options
+  --from <file>    Read the answer text from a file
+  --value <value>  Value; repeat for multi-field questions
+  -h, --help       Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle quiz finish --help
+moodle quiz finish
+Submit the attempt for grading. Moodle does not allow undoing this.
+
+Usage
+  moodle quiz finish [options] <attempt> <quiz>
+
+Arguments
+  attempt  Attempt id
+  quiz     Quiz id
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle complete --help
+moodle complete
+Mark an activity complete manually
+
+Usage
+  moodle complete [options] <ref>
+
+Arguments
+  ref  Activity id, URL or UNIT TASK phrase
+
+Options
+  --undo      Mark the activity incomplete
+  -h, --help  Show help
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -272,11 +481,154 @@ moodle alerts
 List notifications and message counts
 
 Usage
-  moodle alerts [options]
+  moodle alerts [options] [command]
+
+Commands
+  read [notification]  Mark one notification, or all notifications, as read
 
 Options
   --limit <number>  Maximum number of notifications (default: 20)
   -h, --help        Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle alerts <command> --help' for details on a command.
+
+
+$ moodle alerts read --help
+moodle alerts read
+Mark one notification, or all notifications, as read
+
+Usage
+  moodle alerts read [options] [notification]
+
+Arguments
+  notification  Notification id
+
+Options
+  --all       Mark every notification as read
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle messages --help
+moodle messages
+Read and send direct or group messages
+
+Usage
+  moodle messages [options] [command]
+
+Commands
+  list                     Direct and group conversations with unread counts and
+                           the latest message
+  show <conversation>      A conversation's latest messages in chronological
+                           order; does not mark them read
+  send <recipient> <text>  Send a message to a conversation id or user:ID
+  read [conversation]      Mark one conversation, or all conversations, as read
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+Run 'moodle messages <command> --help' for details on a command.
+
+
+$ moodle messages list --help
+moodle messages list
+Direct and group conversations with unread counts and the latest message
+
+Usage
+  moodle messages list [options]
+
+Options
+  --limit <number>   Maximum conversations (default: 20)
+  --offset <number>  Skip this many conversations (default: 0)
+  -h, --help         Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle messages show --help
+moodle messages show
+A conversation's latest messages in chronological order; does not mark them read
+
+Usage
+  moodle messages show [options] <conversation>
+
+Arguments
+  conversation  Conversation id
+
+Options
+  --limit <number>   Maximum messages (default: 50)
+  --offset <number>  Skip this many newest messages (default: 0)
+  -h, --help         Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle messages send --help
+moodle messages send
+Send a message to a conversation id or user:ID
+
+Usage
+  moodle messages send [options] <recipient> <text>
+
+Arguments
+  recipient  Conversation id, conversation:ID or user:ID
+  text       Message text
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle messages read --help
+moodle messages read
+Mark one conversation, or all conversations, as read
+
+Usage
+  moodle messages read [options] [conversation]
+
+Arguments
+  conversation  Conversation id
+
+Options
+  --all       Mark every unread conversation as read
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle calendar --help
+moodle calendar
+All course, user and site calendar events in the date window
+
+Usage
+  moodle calendar [options]
+
+Options
+  --days <number>  Events within the next N days (1–365) (default: 14)
+  --unit <unit>    Only events for this unit
+  --ics            Export an iCalendar file to stdout or --output
+  -h, --help       Show help
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -311,8 +663,9 @@ Usage
   moodle activities [options] [command]
 
 Commands
-  list <unit>  List activities in a unit; narrow by section
-  show <id>    Show activity details
+  list <unit>            List activities in a unit; narrow by section
+  show <id>              Show activity details
+  captions <id> [media]  Export timestamped captions from an inline video label
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -346,8 +699,7 @@ Global options
 
 $ moodle activities show --help
 moodle activities show
-Show activity details; resource and folder files can be passed to moodle get or
-download
+Show activity details, including the files moodle download would save
 
 Usage
   moodle activities show [options] <id>
@@ -361,20 +713,65 @@ Global options
   --days <number>
 
 
-$ moodle download --help
-moodle download
-Download one authenticated Moodle file
+$ moodle activities captions --help
+moodle activities captions
+Export timestamped captions from an inline video label
 
 Usage
-  moodle download [options] <source>
+  moodle activities captions [options] <id> [media]
 
 Arguments
-  source  Course-module ID or authenticated Moodle file URL
+  id     Label course-module ID
+  media  Media ID or 1-based position when the label has multiple videos
 
 Options
-  --dest <path>  Exact downloaded file path
-  --force        Atomically replace an existing destination
-  -h, --help     Show help
+  --to <file>  Text file to create
+  -h, --help   Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle download --help
+moodle download
+Download files: one activity, a whole section, or a file URL. With no argument,
+browse.
+
+Usage
+  moodle download [options] [ref...]
+
+Arguments
+  ref  Activity id, same-site activity/section/file URL, or UNIT TASK phrase
+
+Options
+  --to <directory>  Destination directory; created when missing
+  --dest <path>     Exact path for a single downloaded file
+  --force           Atomically replace existing files
+  -h, --help        Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle sync --help
+moodle sync
+Keep one local folder per unit in step with Moodle: new files arrive, changed
+ones update, and a file you edited is never overwritten
+
+Usage
+  moodle sync [options] [unit]
+
+Arguments
+  unit  Unit code, name, id or URL; omit for every unit
+
+Options
+  --to <directory>  Folder holding one subfolder per unit; defaults to the
+                    current directory
+  -h, --help        Show help
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -390,7 +787,7 @@ Usage
   moodle grades [options] [command]
 
 Commands
-  list [unit]  Show grade details for a unit
+  list [unit]  Show marked grades; request summary or all
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -402,7 +799,7 @@ Run 'moodle grades <command> --help' for details on a command.
 
 $ moodle grades list --help
 moodle grades list
-Show grade details for a unit
+Show marked grades; request summary or all
 
 Usage
   moodle grades list [options] [unit]
@@ -411,8 +808,14 @@ Arguments
   unit  Unit code, name, id or URL
 
 Options
-  --graded-only  Only return graded items
-  -h, --help     Show help
+  --mode <mode>       graded (default), summary or all
+  --types <types>     Comma-separated module types (assign, quiz, h5pactivity)
+  --include-feedback  Include full grader feedback
+  --include-ungraded  Include ungraded items in graded mode
+  --limit <number>    Maximum returned rows across units
+  --offset <number>   Skip this many matching rows
+  --graded-only       Alias for --mode graded
+  -h, --help          Show help
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -428,7 +831,8 @@ Usage
   moodle threads [options] [command]
 
 Commands
-  show <discussion>  Show posts in a forum discussion
+  show <discussion>    Show posts in a forum discussion
+  reply <post> <text>  Reply to a forum post
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -461,6 +865,27 @@ Global options
   --days <number>
 
 
+$ moodle threads reply --help
+moodle threads reply
+Reply to a forum post
+
+Usage
+  moodle threads reply [options] <post> <text>
+
+Arguments
+  post  Post id or discussion URL with a #p anchor
+  text  Reply text
+
+Options
+  --attach <path>  Attach a local file; repeat for several files (default: [])
+  -h, --help       Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
 $ moodle forums --help
 moodle forums
 Inspect forums
@@ -469,9 +894,12 @@ Usage
   moodle forums [options] [command]
 
 Commands
-  show <forum>    List discussions from a forum
-  list <unit>     List forum activities in a unit
-  search <query>  Search forum discussion titles and post text
+  show <forum>         List discussions from a forum
+  post <forum>         Create a forum discussion
+  subscribe <forum>    Subscribe to a forum
+  unsubscribe <forum>  Unsubscribe from a forum
+  list <unit>          List forum activities in a unit
+  search <query>       Search forum discussion titles and post text
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -495,6 +923,59 @@ Options
   --limit <number>  Maximum number of discussions (default: 50)
   --query <query>   Filter discussion titles by query
   -h, --help        Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle forums post --help
+moodle forums post
+Create a forum discussion
+
+Usage
+  moodle forums post [options] <forum>
+
+Arguments
+  forum  Forum module id or URL
+
+Options
+  --subject <subject>  Discussion subject
+  --text <text>        Discussion text
+  -h, --help           Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle forums subscribe --help
+moodle forums subscribe
+Subscribe to a forum
+
+Usage
+  moodle forums subscribe [options] <forum>
+
+Arguments
+  forum  Forum module id or URL
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle forums unsubscribe --help
+moodle forums unsubscribe
+Unsubscribe from a forum
+
+Usage
+  moodle forums unsubscribe [options] <forum>
+
+Arguments
+  forum  Forum module id or URL
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -564,6 +1045,20 @@ Global options
   --days <number>
 
 
+$ moodle coverage --help
+moodle coverage
+Check each command against this Moodle site with the signed-in session, one live
+read at a time. Nothing is created.
+
+Usage
+  moodle coverage [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
 $ moodle completion --help
 moodle completion
 Print shell completion for zsh, bash or fish
@@ -607,10 +1102,11 @@ Usage
   moodle auth [options] [command]
 
 Commands
-  status     Show cached session freshness and keepalive state
-  login      Sign in through a browser the CLI controls, then capture the
-             session
-  keepalive  Renew the session once
+  status          Show cached session freshness and keepalive state
+  site [address]  Find and save the Moodle site
+  login           Sign in through a browser the CLI controls, then capture the
+                  session
+  keepalive       Renew the session once
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -626,6 +1122,23 @@ Show cached session freshness and keepalive state
 
 Usage
   moodle auth status [options]
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
+  --days <number>
+
+
+$ moodle auth site --help
+moodle auth site
+Find the Moodle site from any page address and save it; with no address, show
+the saved one
+
+Usage
+  moodle auth site [options] [address]
+
+Arguments
+  address  Any Moodle page address: front page, dashboard, course, or login page
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -760,8 +1273,12 @@ Options
   --repair        Repair authentication and managed deployment state
   --rotate-key    Rotate the session encryption key and migrate the active
                   session
-  --rotate-token  Rotate the MCP access token with an overlap window
+  --rotate-token  Rotate the MCP access token. The old token and every connected
+                  OAuth client stop working at once; reconnect them after.
   --rollback      Restore the previous healthy Worker release
+  --remote-login  Skip the local Moodle session and integrations; print a link
+                  to sign in through the Worker's remote browser. For cloud
+                  sessions without a desktop browser.
   -h, --help      Show help
 
 Global options

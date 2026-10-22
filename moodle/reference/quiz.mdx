@@ -1,0 +1,95 @@
+---
+title: "moodle quiz"
+description: "Take a quiz: start an attempt, answer questions, finish it. Beta."
+sidebarTitle: "quiz"
+---
+
+```bash
+moodle quiz [options] [command]
+```
+
+## moodle quiz start
+
+```bash
+moodle quiz start [options] <ref>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `ref` | Yes | Quiz id, URL, or UNIT TASK phrase |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--password <password>` | Quiz access password for scripts; at a terminal you are asked for it instead. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## moodle quiz show
+
+```bash
+moodle quiz show [options] <attempt> <quiz>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `attempt` | Yes | Attempt id |
+| `quiz` | Yes | Quiz id |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--page <n>` | Page number, starting at 1. |
+
+## moodle quiz answer
+
+```bash
+moodle quiz answer [options] <attempt> <quiz> <question> [answer]
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `attempt` | Yes | Attempt id |
+| `quiz` | Yes | Quiz id |
+| `question` | Yes | Question number as shown |
+| `answer` | No | Option letters or answer text |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--from <file>` | Read the answer text from a file. |
+| `--value <value>` | Value; repeat for multi-field questions. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## moodle quiz finish
+
+```bash
+moodle quiz finish [options] <attempt> <quiz>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `attempt` | Yes | Attempt id |
+| `quiz` | Yes | Quiz id |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

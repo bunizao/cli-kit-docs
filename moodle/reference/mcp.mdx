@@ -20,8 +20,9 @@ moodle mcp deploy [options]
 | --- | --- |
 | `--repair` | Repair authentication and managed deployment state. |
 | `--rotate-key` | Rotate the session encryption key and migrate the active session. |
-| `--rotate-token` | Rotate the MCP access token with an overlap window. |
+| `--rotate-token` | Rotate the MCP access token. The old token and every connected OAuth client stop working at once; reconnect them after. |
 | `--rollback` | Restore the previous healthy Worker release. |
+| `--remote-login` | Skip the local Moodle session and integrations; print a link to sign in through the Worker's remote browser. For cloud sessions without a desktop browser. |
 
 <Warning>
 This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.

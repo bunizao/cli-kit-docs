@@ -84,7 +84,7 @@ Pass any single argument that parses as a URL and moodle-cli dispatches on its p
 Any other `/mod/*/view.php` URL — a lesson, a choice, a book, a feedback activity, and so on — resolves to its parent unit, not to that activity's own detail, because moodle-cli only has dedicated handling for the module types listed above. There's no general "show me this activity" fallback for module types outside that list.
 
 <Note>
-  Both `moodle get` and `moodle download` accept file and resource URLs; see [Downloads](/moodle/downloads) rather than duplicating that here.
+  `moodle download` accepts file, resource and section URLs; see [Downloads](/moodle/downloads).
 </Note>
 
 ## Finding things across a unit (or all of them)
@@ -98,10 +98,10 @@ moodle find "week 7 slides" UNIT
 ## Downloading by reference
 
 ```bash
-moodle get "UNIT week 7 slides" --to ./downloads --force
+moodle dl "UNIT week 7 slides" --to ./downloads
 ```
 
-`get` resolves a resource id, a Moodle URL, or a `UNIT TASK` phrase the same way the bare-target syntax above does, then downloads the matching file. `--to` sets the destination directory and `--force` replaces a file already there. This is distinct from `moodle download` (alias `dl`), which takes a course-module ID or an authenticated Moodle file URL directly, with no phrase resolution — see [Downloads](/moodle/downloads) for the difference and the rest of its flags.
+`download` (aliases `dl` and `get`) resolves an activity id, a Moodle URL, or a `UNIT TASK` phrase the same way the bare-target syntax above does, then saves the matching files. A section phrase saves the whole section. See [Downloads](/moodle/downloads) for the rest of its flags and for `moodle sync`.
 
 ## Opening a reference in your browser
 
@@ -121,5 +121,13 @@ Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#ambig
 ## The JSON output
 
 Every command accepts `--json` for a script or another program to consume; at an interactive terminal, table output is the default and needs no flag.
+
+JSON output and the MCP tools share the same compact envelopes, named after what they hold: `units`, `unit` plus `sections`, `due`, `item`, `grades`, `news`, `thread`, `results` or `file`.
+
+- Empty strings and lists are left out, and `total: 0` marks an empty result.
+- List rows carry `type`, `unit_id`, `section_id` and `name`.
+- Dates come with an ISO offset and as epoch seconds.
+- A unit defaults to its section index; pass a section to get its activities.
+- `--fields` keeps only the envelope keys you name.
 
 Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#json-shapes-per-command) for each command's field-by-field shape.

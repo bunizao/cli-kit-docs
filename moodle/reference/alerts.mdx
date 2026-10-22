@@ -5,7 +5,25 @@ sidebarTitle: "alerts"
 ---
 
 ```bash
-moodle alerts [options]
+moodle alerts [options] [command]
 ```
+
+## moodle alerts read
+
+```bash
+moodle alerts read [options] [notification]
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `notification` | No | Notification id |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--all` | Mark every notification as read. |
 
 Global options apply to every command. See [Global options](/moodle/reference/index#global-options).

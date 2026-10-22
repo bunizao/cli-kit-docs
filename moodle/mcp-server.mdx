@@ -47,8 +47,13 @@ Flags:
 | `--dry-run` | Preview deployment changes without applying them |
 | `--repair` | Repair authentication and managed deployment state |
 | `--rotate-key` | Rotate the session encryption key and migrate the active session |
-| `--rotate-token` | Rotate the MCP access token, with an overlap window so in-flight clients don't break |
-| `--rollback` | Restore the previous healthy Worker release |
+| `--rotate-token` | Rotate the MCP access token. The old token and every connected OAuth client stop working at once; reconnect them afterwards. Clients connected through `mcp bridge` pick up the new token on their own. |
+| `--rollback` | Restore the previous healthy Worker release. It never restores revoked credentials or a release that cannot read the current session. |
+| `--remote-login` | Deploy without a local Moodle session and print a link to sign in through a browser that runs in your own Cloudflare account. See [Set up without a local browser](#set-up-without-a-local-browser). |
+
+Each deployment serves one Moodle account. Uploading a session for a different account is refused; deploy a separate server for that account. The remote server is read-only. Its `file` tool returns files up to 16 MiB inside the response, so a client never needs a signed-in Moodle link of its own.
+
+`--rotate-key` re-encrypts the active session with a new key, checks it, then retires the old key. `--repair` brings the deployment back in line after an upload was interrupted.
 
 ### Managing the deployment tool
 
@@ -100,7 +105,30 @@ Runs the process that `mcp connect --mode bridge` wires into a client's config. 
 moodle mcp pair
 ```
 
-Opens a pairing window so Claude can connect to the remote MCP server through OAuth. The window lasts 10 minutes and the code it prints is good for one approval — request a new one if it expires or you need to pair a second time.
+Opens a pairing window so claude.ai, Claude Desktop or another client that signs in with OAuth can connect to your deployed server. It prints the connector URL and a one-time code. Add the URL as a custom connector in the client, sign in when the client opens the approval page, and enter the code. The window lasts 10 minutes and the code is good for one approval; run `mcp pair` again for a new one. While no pairing window is open, the approval page refuses every request.
+
+The client then keeps its own token that renews itself, not your access token.
+
+The approval page also offers **Sign in with Moodle**. It opens Moodle in a browser that runs in your own Cloudflare account. Signing in there as the deployment's Moodle account approves the client without a code and renews the deployed session at the same time. Any other Moodle account is refused.
+
+## Set up without a local browser
+
+From a cloud sandbox or any machine without a signed-in desktop browser:
+
+```bash
+moodle mcp deploy --remote-login --yes
+```
+
+1. Without a terminal, Cloudflare sign-in prints a `dash.cloudflare.com` link. Approve it in any browser; no API token is needed.
+2. The command deploys the server without a Moodle session and prints a sign-in link valid for 10 minutes.
+3. Open the link and sign in to Moodle in the remote browser. The deployment now belongs to that Moodle account.
+4. Add the printed URL as a custom connector. In the same browser the approval page already knows you; elsewhere, **Sign in with Moodle** does the same.
+
+If the link expires first, run `moodle mcp pair` on the same machine for a new one. Until Moodle is signed in, and whenever the session expires, the connector stays connected and its tools answer with the sign-in link instead of data. Each remote sign-in uses about two minutes of browser time; the Cloudflare free plan allows ten minutes a day.
+
+## Staying signed in
+
+Where your Moodle site turns on its mobile app service, the deployed server needs one sign-in only. Whenever it receives a session, it also asks Moodle for a mobile app key, keeps it encrypted next to the session, and uses it to open a fresh session when the old one expires. `moodle mcp status` shows which path your server is on: `renewal: mobile_token`, or `sign_in` when the site has the mobile service off or you are a site administrator. You can revoke the key at any time in Moodle under **Preferences**, then **Security keys**.
 
 ## `mcp clients` and `mcp revoke`
 
@@ -110,7 +138,7 @@ moodle mcp revoke CLIENT_ID
 moodle mcp revoke --all
 ```
 
-`clients` lists pending and approved OAuth clients on your deployed server. `revoke` removes one client by id, or every client, token, pending authorization and pairing window at once with `--all`.
+`clients` lists pending and approved OAuth clients on your deployed server. `revoke` removes one client by id, or every client, token, pending authorization and pairing window at once with `--all`. A client that registered but was never approved expires after 10 minutes, and up to 20 clients can be approved at once.
 
 ## `mcp session push` and `mcp renewal run`
 
