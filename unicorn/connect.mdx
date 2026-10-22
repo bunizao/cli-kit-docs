@@ -97,11 +97,13 @@ ChatGPT accepts browser approval only. A pasted token does not work there.
 
 ChatGPT calls tools but does not list unicorn's playbooks as commands. To run one, ask for it in words: "Run the unicorn weekly-plan playbook." See [Playbooks](/unicorn/playbooks).
 
+ChatGPT may ask you to confirm each tool call that saves something, such as marking briefs read or saving a plan. That prompt is ChatGPT's own default. Those calls only ever change unicorn's notes, never a source.
+
 ## What approving grants
 
 Approving gives that client one permission: read your unicorn memory and update unicorn's own notes, such as briefs and plans. It never writes to Ed, Moodle, Canvas or Gmail. See [Security](/unicorn/security).
 
-A connection stays signed in without asking you again. To cut one off, open the settings page and remove it under **Connected apps**. The client then has to ask for approval again.
+A connection renews its sign-in on its own, and each renewal lasts 30 days. If a client asks you to approve again, sign in as before. {/* TODO: verify — the refresh token TTL is 30 days; confirm whether a rotated refresh token restarts that window. */} To cut one off, open the settings page and remove it under **Connected apps**. The client then has to ask for approval again.
 
 ## Verify the connection
 

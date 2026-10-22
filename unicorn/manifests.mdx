@@ -1,0 +1,125 @@
+---
+title: "Manifest format"
+description: "The JSON your agent writes to add a feed, an API or a remote MCP tool as a unicorn source."
+icon: file-json
+---
+
+A manifest is one JSON document that tells unicorn how to read one more source. Your agent usually writes it for you from a sample response and saves it with the admin tool `put_plugin_manifest`. See [Sources](/unicorn/sources#feeds-and-manifests) for when to use one. This page is the format, for you or your agent to check.
+
+A manifest never runs code. Every value comes from a fixed value or a path into a record, so you can read one and know what it does.
+
+## The shape
+
+Every manifest has these four fields:
+
+```json
+{ "version": 1, "id": "unit-news", "name": "Unit news", "mapping": { } }
+```
+
+| Field | Meaning |
+| --- | --- |
+| `version` | Always `1`. |
+| `id` | Lowercase letters, digits and hyphens, 2 to 63 characters, starting with a letter or digit. It becomes the source name on every item. |
+| `name` | The display name, up to 100 characters. |
+| `mapping` | How each record becomes an item. See [Mapping](#mapping). |
+
+Then it reads from exactly one place:
+
+- **An address.** Set `format` to `"json"` or `"rss"` and `url` to an `https://` address.
+- **A remote MCP tool.** Set `transport` to `{ "type": "mcp", "url": "...", "tool": "...", "arguments": { } }`. unicorn calls that tool once per sync.
+
+Both accept `itemsPath`, a dot path to the list of records in the response, such as `"data.issues"`. A number in the path picks an array entry, as in `"messages.0"`. Leave it out when the response is already the list.
+
+## Authentication
+
+A source that needs a key reads it from a Worker secret whose name starts with `PLUGIN_SECRET_`. Set the secret first:
+
+```bash
+npx wrangler secret put PLUGIN_SECRET_UNIT_NEWS
+```
+
+Then name it in `auth`. A manifest cannot reach any other secret, and the key never appears in the manifest itself.
+
+| `auth` for an address | Sends the key as |
+| --- | --- |
+| `{ "type": "bearer", "binding": "PLUGIN_SECRET_X" }` | `Authorization: Bearer <key>` |
+| `{ "type": "header", "name": "X-Api-Key", "binding": "PLUGIN_SECRET_X" }` | A header you name |
+| `{ "type": "query", "name": "key", "binding": "PLUGIN_SECRET_X" }` | A query parameter you name |
+
+A remote MCP tool takes `{ "type": "bearer", "binding": "PLUGIN_SECRET_X" }` inside `transport`, or `{ "type": "oauth", "provider": "google" }`, which is what the Gmail source uses.
+
+## Mapping
+
+```json
+"mapping": {
+  "id": { "path": "id" },
+  "kind": { "value": "issue" },
+  "title": { "path": "title" },
+  "timestamp": { "path": "updated_at" },
+  "url": { "path": "html_url" },
+  "body": { "path": "body" }
+}
+```
+
+Each field is either `{ "path": "<dot.path>" }`, read from the record, or `{ "value": <json> }`, a fixed value. `id`, `kind`, `title` and `timestamp` are required. `url` and `body` are optional.
+
+To tag items with the course codes they mention, add a facet that unicorn computes itself:
+
+```json
+"facets": [{ "derive": "course-mention", "from": ["title", "body"] }]
+```
+
+## More than one page
+
+A JSON address can follow extra pages before mapping. Add one of these as `pagination`:
+
+| `pagination` | Follows |
+| --- | --- |
+| `{ "type": "link-header" }` | The `Link: rel="next"` response header, as Canvas and GitHub send |
+| `{ "type": "cursor", "cursorPath": "nextCursor", "param": "cursor" }` | A cursor in the response body, sent back as `param`, until it is empty |
+| `{ "type": "page", "param": "page", "start": 1 }` | A page number that counts up from `start`, until a page is empty |
+
+Each takes `maxPages`: 5 by default, never more than 10. A next-page link that points at a different site stops the sync with an error, so your key is never sent somewhere the manifest did not name.
+
+## One request per parent
+
+`fanOut` fetches a list first, then runs the main request once for each entry, such as every course and then each course's assignments:
+
+```json
+{
+  "version": 1,
+  "id": "unit-assignments",
+  "name": "Unit assignments",
+  "format": "json",
+  "url": "https://lms.example.edu/api/v1/courses/{{course.id}}/assignments?per_page=50",
+  "auth": { "type": "bearer", "binding": "PLUGIN_SECRET_LMS" },
+  "pagination": { "type": "link-header" },
+  "fanOut": {
+    "from": { "url": "https://lms.example.edu/api/v1/courses?per_page=50", "pagination": { "type": "link-header" } },
+    "as": "course",
+    "max": 15
+  },
+  "mapping": {
+    "id": { "path": "id" },
+    "kind": { "value": "assignment" },
+    "title": { "path": "name" },
+    "timestamp": { "path": "due_at" },
+    "url": { "path": "html_url" },
+    "body": { "path": "$parent.course_code" }
+  }
+}
+```
+
+- `from` is the list to fetch, with its own optional `itemsPath` and `pagination`.
+- `as` names the entry. Use it in the main `url` as `{{course.<path>}}`. A name that does not match `as` is rejected.
+- `max` is how many entries to visit, from 1 to 20.
+- A mapping path that starts with `$parent.` reads from the list entry instead of the record.
+
+## Limits
+
+- Pagination and `fanOut` work with `format: "json"` only, never with RSS or a remote MCP tool.
+- One source may make 25 requests per sync, counting every page and every entry. Past that, the source fails with an error instead of saving part of its data.
+- A response over 5 MB is rejected.
+- Every address must use `https://`.
+
+A manifest that breaks any rule is rejected when it is saved, so a broken one never reaches the hourly sync.

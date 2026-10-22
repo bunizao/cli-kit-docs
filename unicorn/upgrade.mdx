@@ -94,4 +94,36 @@ Delete only the ones `secret list` shows. Keep `ADMIN_TOKEN`, `MCP_TOKEN` and ev
 
 ## Roll back
 
-Database migrations only go forward, and your backup cannot be replayed over a migrated database. To go back, restore the backup into a new database and point the older release at it. The unicorn repository's `docs/UPGRADING.md` has the exact steps. Your original database stays untouched, so you can move forward again later.
+Database migrations only go forward, and your backup cannot be replayed over a migrated database. To go back, restore the backup into a new database and point the older release at it. Your original database stays untouched, so you can move forward again later.
+
+<Steps>
+  <Step title="Restore the backup into a new database">
+    ```bash
+    npx wrangler d1 create unicorn-rollback
+    npx wrangler d1 execute unicorn-rollback --remote --file backup.sql
+    ```
+
+    The first command prints a database ID. Copy it.
+  </Step>
+  <Step title="Check out the release you came from">
+    ```bash
+    git checkout <previous-commit>
+    ```
+  </Step>
+  <Step title="Point it at the restored database">
+    In that checkout's `wrangler.jsonc`, set `database_name` to `unicorn-rollback` and `database_id` to the ID you copied.
+  </Step>
+  <Step title="Deploy">
+    ```bash
+    npx wrangler deploy
+    ```
+  </Step>
+</Steps>
+
+If you are rolling back past the memory-layer release, add one more entry to the `migrations` list in `wrangler.jsonc` before you deploy, because Cloudflare has already removed the old agent class:
+
+```json
+{ "tag": "v4", "new_sqlite_classes": ["AgentSession"] }
+```
+
+The old agent's conversations do not come back. Only the database does.

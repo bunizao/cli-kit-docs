@@ -1,0 +1,103 @@
+---
+title: "Set up with your agent"
+description: "Instructions a coding agent follows to deploy unicorn for you, add your sources and connect a client."
+sidebarTitle: "Agent setup"
+icon: bot
+---
+
+Give this page to a coding agent that can use your terminal, such as Claude Code or Codex:
+
+```text
+Read https://unicorn.tuuhub.com/docs/unicorn/agent-setup.md and set up unicorn for me.
+```
+
+The rest of this page is written to that agent. You stay at the keyboard for the steps marked **you**: signing in to Cloudflare, choosing your admin token, and pasting source credentials. The agent never sees those values.
+
+## Rules for the agent
+
+- Never ask the user for a password, token, cookie or API key, and never put one in a command, a file or the chat. The user enters every credential in their own browser or terminal prompt.
+- The installer prints the MCP token inside a connect command. Do not repeat it in the chat or save it anywhere. Prefer the browser approval below, which needs no token.
+- Run commands one step at a time and show the user what each one did. Stop and ask when a step fails. Do not work around the browser sign-in.
+- Do not run `npm run setup` a second time. It generates new tokens, which breaks any connection already made.
+
+## 1. Check the prerequisites
+
+```bash
+node --version
+git --version
+curl --version
+```
+
+Node.js must be 22.19 or newer. The user needs a free Cloudflare account. If they do not have one, ask them to create it at `dash.cloudflare.com/sign-up` and wait.
+
+Ask the user two things:
+
+- Which sources they use: `ed`, `moodle`, `canvas`, `gmail`. Any subset is fine, including none.
+- Their timezone, as an IANA name such as `Australia/Melbourne`. The daily digest is written at 07:00 in this zone. If they are unsure, leave it out and the installer uses the computer's zone.
+
+## 2. Get the code
+
+```bash
+git clone https://github.com/TuuHub/unicorn.git
+cd unicorn
+```
+
+## 3. Run the installer
+
+```bash
+npm run setup -- --yes --sources ed,canvas --timezone Australia/Melbourne
+```
+
+Use the sources and timezone from step 1. Early on, the installer opens a browser window for Cloudflare sign-in. Ask the user to sign in and approve it, and wait; this is the one step the user completes during the run. Apart from that, with `--yes` the installer never prompts. It creates the database, applies migrations, generates the admin and MCP tokens, and deploys the Worker. A source whose credential is not already in the environment is skipped with a note, which is expected: the user adds it in step 5.
+
+Read the Worker address from the deploy output, for example `https://unicorn.<subdomain>.workers.dev`. You need it for every later step.
+
+## 4. Replace the admin token (you)
+
+The installer stores an admin token but never prints it, and Cloudflare cannot show it again. Ask the user to run this in their own terminal and paste a long random value they keep in a password manager:
+
+```bash
+npx wrangler secret put ADMIN_TOKEN
+```
+
+This must happen before step 5. Credentials pasted into the settings page are encrypted with a key derived from the admin token, so changing it later makes them unreadable.
+
+## 5. Start the scheduler and add sources (you)
+
+Ask the user to open `https://<worker>/settings` and sign in with user name `unicorn` and the admin token from step 4. Then:
+
+1. Click **Start scheduler**.
+2. Fill in the card for each source they chose and click **Save**, then **Test connection**.
+3. Click **Sync now** under **Maintenance**.
+
+Point the user to [Sources](/unicorn/sources) for what each card needs. Moodle needs a site address and a session. Gmail needs a Google Cloud OAuth client the user creates in Google's console first.
+
+## 6. Check the deployment
+
+```bash
+curl https://<worker>/health
+```
+
+The answer should contain `"status":"ready"`, `"database":true` and `"scheduler":"running"`. If `scheduler` is `stopped`, the user has not clicked **Start scheduler** yet.
+
+## 7. Connect a client
+
+For Claude Code, add unicorn with browser approval, so no token passes through you:
+
+```bash
+claude mcp add --transport http unicorn https://<worker>/mcp
+```
+
+Then ask the user to run `/mcp` in a Claude Code session, choose `unicorn`, and approve with user name `unicorn` and their admin token.
+
+For claude.ai, Claude desktop, Cowork or ChatGPT, give the user the address `https://<worker>/mcp` and the steps in [Connect your agent](/unicorn/connect). They add it themselves in the client's settings.
+
+## 8. Confirm it works
+
+Ask the connected client:
+
+```text
+Check unicorn's status.
+```
+
+Each source the user added should show a recent `last sync` time and no error, and the scheduler should read `running`. If not, see [Troubleshooting](/unicorn/troubleshooting).
