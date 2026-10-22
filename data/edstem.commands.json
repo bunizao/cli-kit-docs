@@ -1,6 +1,6 @@
 {
   "name": "edstem",
-  "version": "0.7.0",
+  "version": "0.8.2",
   "description": "Read and post on Ed Discussion from the command line.",
   "commands": [
     {
@@ -24,6 +24,23 @@
               "description": "Read the token from the first line of stdin.",
               "required": false,
               "variadic": false
+            },
+            {
+              "flags": "--no-browser",
+              "description": "Print the token page link without opening a browser.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--region <region>",
+              "description": "Ed region (detected from the token when omitted; skips detection).",
+              "required": true,
+              "variadic": false,
+              "enumValues": [
+                "au",
+                "us",
+                "eu"
+              ]
             }
           ],
           "mutating": false,
@@ -136,7 +153,7 @@
           ],
           "options": [
             {
-              "flags": "-n, --max <count>",
+              "flags": "-n, --limit <count>",
               "description": "Maximum threads to return",
               "required": true,
               "variadic": false
@@ -180,6 +197,12 @@
             {
               "flags": "--unanswered",
               "description": "Only unanswered threads.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--unread",
+              "description": "Only threads Ed reports as unseen.",
               "required": false,
               "variadic": false
             },
@@ -221,7 +244,7 @@
           ],
           "options": [
             {
-              "flags": "-n, --max <count>",
+              "flags": "-n, --limit <count>",
               "description": "Maximum threads to return",
               "required": true,
               "variadic": false
@@ -265,6 +288,115 @@
             {
               "flags": "--unanswered",
               "description": "Only unanswered threads.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--unread",
+              "description": "Only threads Ed reports as unseen.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--offset <count>",
+              "description": "Skip this many threads before filtering.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--since <when>",
+              "description": "Only threads created at or after an ISO date or a relative offset such as 7d.",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "export",
+          "noun": "threads",
+          "verb": "export",
+          "aliases": [],
+          "description": "Export a unit's forum and attachments to a local Markdown archive.",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit ID or code",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--dest <directory>",
+              "description": "Archive directory.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--no-files",
+              "description": "Keep remote attachment links without downloading.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--force",
+              "description": "Rewrite completed thread files.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "-n, --limit <count>",
+              "description": "Maximum threads to return",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "-s, --sort <order>",
+              "description": "Ed sort order; defaults to new and pinned threads may remain first.",
+              "required": true,
+              "variadic": false,
+              "enumValues": [
+                "new",
+                "old",
+                "top",
+                "hot"
+              ]
+            },
+            {
+              "flags": "-c, --category <category>",
+              "description": "Filter by exact top-level category.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--subcategory <subcategory>",
+              "description": "Filter by exact second-level subcategory.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "-t, --type <type>",
+              "description": "Filter by thread type.",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "flags": "--answered",
+              "description": "Only answered threads.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--unanswered",
+              "description": "Only unanswered threads.",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--unread",
+              "description": "Only threads Ed reports as unseen.",
               "required": false,
               "variadic": false
             },
@@ -325,6 +457,171 @@
           ],
           "options": [],
           "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "star",
+          "noun": "threads",
+          "verb": "star",
+          "aliases": [],
+          "description": "star a thread.",
+          "positionals": [
+            {
+              "name": "reference",
+              "description": "Thread ID or UNIT#number; use UNIT with mark-read --all",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": true,
+          "commands": []
+        },
+        {
+          "name": "unstar",
+          "noun": "threads",
+          "verb": "unstar",
+          "aliases": [],
+          "description": "unstar a thread.",
+          "positionals": [
+            {
+              "name": "reference",
+              "description": "Thread ID or UNIT#number; use UNIT with mark-read --all",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": true,
+          "commands": []
+        },
+        {
+          "name": "watch",
+          "noun": "threads",
+          "verb": "watch",
+          "aliases": [],
+          "description": "watch a thread.",
+          "positionals": [
+            {
+              "name": "reference",
+              "description": "Thread ID or UNIT#number; use UNIT with mark-read --all",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": true,
+          "commands": []
+        },
+        {
+          "name": "unwatch",
+          "noun": "threads",
+          "verb": "unwatch",
+          "aliases": [],
+          "description": "unwatch a thread.",
+          "positionals": [
+            {
+              "name": "reference",
+              "description": "Thread ID or UNIT#number; use UNIT with mark-read --all",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": true,
+          "commands": []
+        },
+        {
+          "name": "upvote",
+          "noun": "threads",
+          "verb": "upvote",
+          "aliases": [],
+          "description": "upvote a thread.",
+          "positionals": [
+            {
+              "name": "reference",
+              "description": "Thread ID or UNIT#number; use UNIT with mark-read --all",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--comment <id>",
+              "description": "Vote on a comment belonging to the thread.",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "mutating": true,
+          "commands": []
+        },
+        {
+          "name": "unvote",
+          "noun": "threads",
+          "verb": "unvote",
+          "aliases": [],
+          "description": "unvote a thread.",
+          "positionals": [
+            {
+              "name": "reference",
+              "description": "Thread ID or UNIT#number; use UNIT with mark-read --all",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--comment <id>",
+              "description": "Vote on a comment belonging to the thread.",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "mutating": true,
+          "commands": []
+        },
+        {
+          "name": "mark-read",
+          "noun": "threads",
+          "verb": "mark-read",
+          "aliases": [],
+          "description": "mark-read a thread or every thread in a unit.",
+          "positionals": [
+            {
+              "name": "reference",
+              "description": "Thread ID or UNIT#number; use UNIT with mark-read --all",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--all",
+              "description": "Mark every thread in the unit as read.",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": true,
+          "commands": []
+        },
+        {
+          "name": "mark-unread",
+          "noun": "threads",
+          "verb": "mark-unread",
+          "aliases": [],
+          "description": "mark-unread a thread.",
+          "positionals": [
+            {
+              "name": "reference",
+              "description": "Thread ID or UNIT#number; use UNIT with mark-read --all",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "mutating": true,
           "commands": []
         },
         {
@@ -769,7 +1066,7 @@
       ],
       "options": [
         {
-          "flags": "-n, --max <count>",
+          "flags": "-n, --limit <count>",
           "description": "Maximum activity items",
           "required": true,
           "variadic": false

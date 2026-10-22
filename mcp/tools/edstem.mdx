@@ -3,24 +3,27 @@ title: "Ed Discussion MCP tool catalog"
 description: "Every tool the Ed Discussion MCP servers expose, with its parameters, gating, and whether it writes to Ed."
 ---
 
-This catalog lists the 23 tools the Ed Discussion Model Context Protocol (MCP) server provides, in the order it lists them. Descriptions are the exact text the server ships for each tool.
+This catalog lists the 27 tools the Ed Discussion Model Context Protocol (MCP) server provides, in the order it lists them. Descriptions are the exact text the server ships for each tool.
 
 Every tool is listed on every surface — stdio (`edstem-mcp`), a self-deployed Worker, and the hosted `https://edstem.tuuhub.com/mcp` service. Gating happens when a tool is called, not when it is listed:
 
 - `create_thread` and `reply_thread` post publicly to a course. They fail with `INSUFFICIENT_SCOPE` unless posting is allowed: `EDSTEM_ALLOW_POSTING=1` for stdio, `MCP_ALLOW_POSTING=1` for a self-deployed Worker, or the write scope granted during the hosted service's OAuth consent.
 - `mark_lessons_read`, `submit_slide_answer` and `submit_slide` write too, but only require write access, not the posting flag. stdio and a self-deployed Worker grant write access to the token holder unconditionally; the hosted service still requires the same OAuth write scope that gates posting.
+- The four `show_*` tools are read-only views. Hosts that support MCP Apps render them in the chat; other hosts get the same data as text. On stdio, `EDSTEM_WIDGETS=0` removes them from the list.
+
+Alongside the views, the server offers a `teach_lesson` prompt. Give it a unit and words from a lesson title, and it reads the lesson and runs `show_lesson_guide` end to end.
 
 See [Security](/mcp/security) for the full gating model. For the CLI equivalents, see [`/edstem/reference`](/edstem/reference/index).
 
 ### get_user
 
-Get the current Ed identity and enrolled courses.
+Who is signed in and the courses they can see. Use when a request is vague or you need to learn how this Ed site names its courses. Not for course details beyond id, code, name and status (same list as list_courses). Then pass a course id or code to any courseId argument. Cost: small.
 
 Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### list_courses
 
-List enrolled courses; archived courses are omitted by default.
+Enrolled courses with id, code, name and status; archived courses omitted unless includeArchived. Use when the user asks what they are enrolled in, or names a course you cannot resolve. Then use the id or the code exactly as returned as courseId. Cost: small.
 
 <ParamField path="includeArchived" type="boolean" default="false">
   Also return courses Ed marks as archived; defaults to false.
@@ -30,10 +33,10 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### list_lessons
 
-List compact lesson summaries for one course. courseId accepts a numeric ID or course code. Call without filters first: an empty list means the course has no Ed Lessons. Filters are case-insensitive; use all or omit a filter to include every value.
+Compact lesson summaries for one course: id, title, module, type, state, progress. Use when the user asks which lessons, modules or weeks exist, or what is unfinished. Call without filters first; an empty list means the course has no Ed Lessons. Filters are case-insensitive; pass all or omit a filter to include every value. courseId accepts a numeric ID, a unit code, or part of the unit name. Then get_lesson for slides, list_lesson_files for downloads, mark_lessons_read to update progress. Cost: about 100 bytes per lesson.
 
 <ParamField path="courseId" type="integer | string" required>
-  Ed course ID or exact course code.
+  Ed course ID, the unit code as Ed shows it, or part of the unit name.
 </ParamField>
 
 <ParamField path="lessonType" type="string">
@@ -56,7 +59,7 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### get_lesson
 
-Get one lesson with slide content.
+One lesson with its slides and slide content. Use when the user asks what a lesson says or you need a slide id. Not for downloadable files (list_lesson_files) or quiz questions (list_slide_questions). lessonId comes from list_lessons. Cost: large for long lessons.
 
 <ParamField path="lessonId" type="integer" required>
   Ed lesson ID as returned by `list_lessons`.
@@ -66,7 +69,7 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### list_lesson_files
 
-List Ed-hosted downloadable files and direct resource links for one lesson.
+Ed-hosted downloadable files and direct resource links for one lesson, returned as resource links. Use when the user wants slides, PDFs or attachments. Not for external links inside lesson text (get_lesson). lessonId comes from list_lessons. Cost: small.
 
 <ParamField path="lessonId" type="integer" required>
   Ed lesson ID as returned by `list_lessons`.
@@ -76,7 +79,7 @@ Available on: stdio, self-deployed Worker, hosted. Read-only. Returns a JSON blo
 
 ### list_thread_files
 
-List Ed-hosted downloadable files and direct resource links attached to one thread, including its answers and comments.
+Ed-hosted downloadable files and direct resource links attached to one thread, including its answers and comments, returned as resource links. Use when the user wants attachments from a thread. threadId is the global id from list_threads. Cost: small.
 
 <ParamField path="threadId" type="integer" required>
   Global thread ID as returned by `list_threads`.
@@ -86,7 +89,7 @@ Available on: stdio, self-deployed Worker, hosted. Read-only. Returns a JSON blo
 
 ### list_slide_questions
 
-List quiz questions for one lesson slide.
+Quiz questions for one lesson slide with one-based choice numbers. Use when the user wants to see or answer a quiz. slideId comes from get_lesson. Then submit_slide_answer per question, then submit_slide. Cost: small.
 
 <ParamField path="slideId" type="integer" required>
   Ed slide ID as returned by `get_lesson`.
@@ -96,7 +99,7 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### list_slide_responses
 
-List saved quiz responses for one lesson slide.
+Saved quiz responses for one lesson slide. Use when the user asks what they answered or whether a quiz is submitted. slideId comes from get_lesson. Cost: small.
 
 <ParamField path="slideId" type="integer" required>
   Ed slide ID as returned by `get_lesson`.
@@ -106,7 +109,7 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### get_slide
 
-Get one lesson slide with its content.
+One lesson slide with its content as structured data. Use when you already have a slide id and need only that slide rather than the whole lesson. slideId comes from get_lesson. For prose, prefer read_slide. Cost: small to medium.
 
 <ParamField path="slideId" type="integer" required>
   Ed slide ID as returned by `get_lesson`.
@@ -116,10 +119,10 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### list_threads
 
-List compact thread summaries for one course. courseId accepts a numeric ID or course code. Categories are hierarchical: category is top-level and subcategory is second-level. Sort defaults to new; Ed may keep pinned threads first.
+Compact thread summaries for one course: id, number, title, category, answered state. Use when the user asks what is being discussed or wants a thread by title. Categories are hierarchical: category is top-level and subcategory is second-level, spelled as Ed shows them. Sort defaults to new; Ed may keep pinned threads first. Not for thread bodies (get_thread) or the user's own posts (list_activity). courseId accepts a numeric ID, a unit code, or part of the unit name. Cost: about 150 bytes per thread; use limit.
 
 <ParamField path="courseId" type="integer | string" required>
-  Ed course ID or exact course code.
+  Ed course ID, the unit code as Ed shows it, or part of the unit name.
 </ParamField>
 
 <ParamField path="answered" type="boolean">
@@ -158,10 +161,10 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### search_threads
 
-Search threads in one course. Every query word must appear, case-insensitively, in the thread title or body; Ed is paged client-side until limit threads match. Accepts the same filters as list_threads.
+Threads in one course whose title or body contains every query word, case-insensitively. Use when the user asks about a topic rather than a thread number. Ed is paged client-side until limit threads match; accepts the same filters as list_threads. courseId accepts a numeric ID, a unit code, or part of the unit name. Then get_thread or read_thread for the body. Cost: several Ed pages for rare words; use limit and since.
 
 <ParamField path="courseId" type="integer | string" required>
-  Ed course ID or exact course code.
+  Ed course ID, the unit code as Ed shows it, or part of the unit name.
 </ParamField>
 
 <ParamField path="query" type="string" required>
@@ -204,7 +207,7 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### get_thread
 
-Get a compact thread detail by global thread ID.
+One thread with its answers and comments, compact. Use when the user wants what a thread says. threadId is the global id from list_threads or list_activity; for a course-local number such as #42 use get_course_thread. Cost: proportional to replies.
 
 <ParamField path="threadId" type="integer" required>
   Global Ed thread ID as returned by `list_threads`; for the number shown inside a course use `get_course_thread`.
@@ -218,10 +221,10 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### get_course_thread
 
-Get a compact thread detail by course ID or code and course-local number.
+One thread addressed by course and course-local number (the #N Ed shows), compact. Use when the user gives a thread number rather than a global id. courseId accepts a numeric ID, a unit code, or part of the unit name. Cost: as get_thread.
 
 <ParamField path="courseId" type="integer | string" required>
-  Ed course ID or exact course code.
+  Ed course ID, the unit code as Ed shows it, or part of the unit name.
 </ParamField>
 
 <ParamField path="number" type="integer" required>
@@ -236,7 +239,7 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### list_activity
 
-List compact current-user activity, optionally filtered by course ID or code.
+The signed-in user's recent threads, answers and comments, optionally within one course. Use when the user asks what they posted or whether anyone replied. Not for other people's activity (list_threads). courseId is optional and accepts a numeric ID, a unit code, or part of the unit name. Cost: small.
 
 <ParamField path="courseId" type="integer | string">
   Ed course ID or exact course code to filter by. Omit for every course.
@@ -254,14 +257,14 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### read_thread
 
-Read one thread as Markdown. Pass either threadId, or courseId plus the course-local number.
+One thread with its answers and comments as Markdown. Use when the user wants to read a thread rather than inspect its fields. Pass either threadId, or courseId plus the course-local number (the #N Ed shows). Cost: proportional to replies.
 
 <ParamField path="threadId" type="integer">
   Global Ed thread ID; use instead of `courseId` and `number`.
 </ParamField>
 
 <ParamField path="courseId" type="integer | string">
-  Ed course ID or exact course code.
+  Ed course ID, the unit code as Ed shows it, or part of the unit name.
 </ParamField>
 
 <ParamField path="number" type="integer">
@@ -272,7 +275,7 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### read_lesson
 
-Read one lesson and its slides as Markdown.
+One lesson and its slides as Markdown. Use when the user wants to read or summarise a lesson. lessonId comes from list_lessons. Not for files (list_lesson_files) or quiz questions (list_slide_questions). Cost: large for long lessons.
 
 <ParamField path="lessonId" type="integer" required>
   Ed lesson ID.
@@ -282,7 +285,7 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### read_slide
 
-Read one lesson slide as Markdown.
+One lesson slide as Markdown. Use when the user wants to read a single slide. slideId comes from get_lesson. Cost: small to medium.
 
 <ParamField path="slideId" type="integer" required>
   Ed lesson slide ID.
@@ -292,10 +295,10 @@ Available on: stdio, self-deployed Worker, hosted. Read-only.
 
 ### mark_lessons_read
 
-Mark matching lessons and slides as read using a course ID or code.
+Mark lessons and their slides as read; writes progress. Use only when the user explicitly asks to mark lessons read or complete. queries are words that must appear in lesson or module names; no queries means every lesson in the course. courseId accepts a numeric ID, a unit code, or part of the unit name. Cost: one write per slide.
 
 <ParamField path="courseId" type="integer | string" required>
-  Ed course ID or exact course code.
+  Ed course ID, the unit code as Ed shows it, or part of the unit name.
 </ParamField>
 
 <ParamField path="all" type="boolean" default="false">
@@ -314,7 +317,7 @@ Available on: stdio, self-deployed Worker, hosted. Writes to Ed (marks progress)
 
 ### submit_slide_answer
 
-Submit one-based quiz choices for one question.
+Save one-based choices for one quiz question; writes. Use only when the user has chosen the answer. questionId comes from list_slide_questions. Then submit_slide to finalise the slide. Cost: one write.
 
 <ParamField path="questionId" type="integer" required>
   Ed question ID as returned by `list_slide_questions`.
@@ -332,7 +335,7 @@ Available on: stdio, self-deployed Worker, hosted. Writes to Ed. Requires write 
 
 ### submit_slide
 
-Submit all saved answers for one quiz slide.
+Submit all saved answers for one quiz slide; writes and is usually final. Use only with explicit user intent after answers are saved. slideId comes from get_lesson. Cost: one write.
 
 <ParamField path="slideId" type="integer" required>
   Ed slide ID whose saved answers are submitted, as returned by `get_lesson`.
@@ -342,10 +345,10 @@ Available on: stdio, self-deployed Worker, hosted. Writes to Ed. Requires write 
 
 ### create_thread
 
-Create a thread in one course. body is Markdown and is converted to Ed's document format. The thread is posted publicly to the course as the token owner and cannot be removed from here; ask the user before calling it.
+Create a thread in one course; posts publicly as the token owner and cannot be removed from here. Use only when the user explicitly asks to post and has approved the title and body. body is Markdown and is converted to Ed's document format. courseId accepts a numeric ID, a unit code, or part of the unit name. Cost: one write.
 
 <ParamField path="courseId" type="integer | string" required>
-  Ed course ID or exact course code.
+  Ed course ID, the unit code as Ed shows it, or part of the unit name.
 </ParamField>
 
 <ParamField path="title" type="string" required>
@@ -376,7 +379,7 @@ Available on: stdio, self-deployed Worker, hosted. Writes to Ed, publicly by def
 
 ### reply_thread
 
-Reply to one thread, or to one comment inside it. body is Markdown and is converted to Ed's document format. The reply is posted publicly as the token owner and cannot be removed from here; ask the user before calling it.
+Reply to one thread, or to one comment inside it; posts publicly as the token owner and cannot be removed from here. Use only when the user explicitly asks to reply and has approved the body. body is Markdown and is converted to Ed's document format. threadId is the global id. Cost: one write.
 
 <ParamField path="threadId" type="integer" required>
   Global Ed thread ID to reply to.
@@ -406,10 +409,66 @@ Available on: stdio, self-deployed Worker, hosted. Writes to Ed, publicly by def
 
 ### list_modules
 
-List the lesson modules of one course with the number of lessons in each. courseId accepts a numeric ID or course code. Use it to pick a module value for list_lessons.
+Lesson modules of one course with the number of lessons in each. Use when the user asks which weeks or modules exist, or to pick a module value for list_lessons. courseId accepts a numeric ID, a unit code, or part of the unit name. Cost: small.
 
 <ParamField path="courseId" type="integer | string" required>
-  Ed course ID or exact course code.
+  Ed course ID, the unit code as Ed shows it, or part of the unit name.
 </ParamField>
 
 Available on: stdio, self-deployed Worker, hosted. Read-only.
+
+### show_forum_catchup
+
+Interactive catch-up view of one course forum: unread announcements, then the threads from the last days (default 14) that are new to the user or have new replies, each expandable in place. Use first when the user asks what they missed, what is new, or to catch up on a course; hosts without interactive views get the same list as text. Not for plain-text answers when the user asks for text (list_threads), or finding a topic (search_threads). courseId accepts a numeric ID, a unit code, or part of the unit name. Then add one or two sentences on what stands out; do not repeat the list. Cost: one to a few Ed pages.
+
+<ParamField path="courseId" type="integer | string" required>
+  Ed course ID, the unit code as Ed shows it, or part of the unit name.
+</ParamField>
+
+<ParamField path="days" type="integer" default="14">
+  How many days back to look, from 1 to 60.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only. Renders an interactive view in hosts that support MCP Apps and returns the same data as text elsewhere; `EDSTEM_WIDGETS=0` removes it from stdio.
+
+### show_thread_activity
+
+Interactive weekly chart of new threads in one course over the last weeks (default 12), stacked by category, with each week expandable to its busiest threads; announcements and pinned threads are excluded. Use when the user asks what people are asking about, when the forum gets busy, or how discussion changed over the term. Not for individual threads (list_threads) or plain-text answers when the user asks for text. courseId accepts a numeric ID, a unit code, or part of the unit name. Then name the one or two patterns worth noticing. Cost: up to ten Ed pages.
+
+<ParamField path="courseId" type="integer | string" required>
+  Ed course ID, the unit code as Ed shows it, or part of the unit name.
+</ParamField>
+
+<ParamField path="weeks" type="integer" default="12">
+  How many weeks back to chart, from 1 to 26.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only. Renders an interactive view in hosts that support MCP Apps and returns the same data as text elsewhere; `EDSTEM_WIDGETS=0` removes it from stdio.
+
+### show_lesson_progress
+
+Interactive progress view of one course's Ed Lessons: completed of total for each released module in release order, its unfinished lessons on click, and a count of modules not released yet. Use when the user asks what they are behind on, what is left, or how far through the lessons they are. Not for plain-text answers when the user asks for text (list_lessons). courseId accepts a numeric ID, a unit code, or part of the unit name. Then say where to start; do not repeat the numbers. Cost: one Ed request.
+
+<ParamField path="courseId" type="integer | string" required>
+  Ed course ID, the unit code as Ed shows it, or part of the unit name.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only. Renders an interactive view in hosts that support MCP Apps and returns the same data as text elsewhere; `EDSTEM_WIDGETS=0` removes it from stdio.
+
+### show_lesson_guide
+
+Show a study guide you wrote for one lesson as a step-through card, then a short practice quiz that the user answers and the widget grades in place. Use when the user asks to be taught, walked through, or quizzed on a lesson or topic. First read_lesson; then pass 3 to 6 sections of 2 to 4 short points, and 3 to 6 multiple-choice practice questions of your own, each with its answer index, a one-line why, and the index of the section it tests. Never copy, answer or hint at the lesson's own Ed quiz questions: Ed marks them. Then say one line and let the user work; do not restate the guide. Cost: one Ed request.
+
+<ParamField path="lessonId" type="integer" required>
+  Ed lesson ID from `list_lessons`.
+</ParamField>
+
+<ParamField path="sections" type="array" required>
+  The guide in teaching order: one to eight sections, each a short `title` and one to five `points`.
+</ParamField>
+
+<ParamField path="quiz" type="array" default="[]">
+  Up to eight practice questions the assistant wrote, each with `question`, two to five `options`, the zero-based `answer`, a one-line `why`, and the `section` it tests. Never the lesson's own Ed quiz questions.
+</ParamField>
+
+Available on: stdio, self-deployed Worker, hosted. Read-only. Renders an interactive view in hosts that support MCP Apps and returns the same data as text elsewhere; `EDSTEM_WIDGETS=0` removes it from stdio.

@@ -1,0 +1,43 @@
+---
+title: "Export a forum"
+description: "Save a unit's threads and attachments as a Markdown archive you can read offline and resume later."
+---
+
+`edstem threads export` saves a unit's forum to a folder of plain Markdown: every thread, its replies, and the files attached to them.
+
+## Export a unit
+
+```bash
+edstem threads export UNIT --dest ./archive
+edstem threads export UNIT --dest ./archive --since 2026-07-01 --no-files
+edstem threads export UNIT --dest ./archive --force
+```
+
+Export accepts the same filters as `threads list` (`--category`, `--since`, `--unanswered` and the rest), but has no default limit and no ten-request cap: without filters it exports the whole forum.
+
+| Flag | Effect |
+| --- | --- |
+| `--dest <directory>` | Where to write the archive. |
+| `--no-files` | Keep attachment links pointing at Ed instead of downloading the files. |
+| `--force` | Rewrite threads that were already exported. |
+
+## What the archive holds
+
+| Path | Contents |
+| --- | --- |
+| `index.md` | One row per thread: number, title, category, author, date and reply count. |
+| `threads/0042-title.md` | One file per thread, with its answers and comments. |
+| `files/0042/<attachment>` | Ed-hosted files from the thread and its nested comments. Links in the thread file point here. |
+| `manifest.json` | The unit, when it was exported, and which threads it holds. |
+
+## Resume and refresh
+
+A thread file that is already complete is skipped on the next run, along with its downloads, so an interrupted export picks up where it stopped. Pass `--force` to write every thread again.
+
+An export is a snapshot. Running it again adds threads that are new, but does not update threads that changed or remove files for deleted threads. Use a separate destination for each unit.
+
+Export never marks threads read and never moves the [catch-up marker](/edstem/threads#catch-up-since-your-last-visit). Progress goes to stderr; stdout prints a short summary of the destination and how many threads, skipped threads and files the run handled.
+
+<Card title="Command reference: threads export" icon="terminal" href="/edstem/reference/threads">
+  Full syntax for `threads export`.
+</Card>

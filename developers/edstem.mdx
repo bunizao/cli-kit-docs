@@ -39,7 +39,7 @@ rateLimit:
 
 | Key | Default | Effect |
 | --- | --- | --- |
-| `fetch.count` | `30` | Default page size used when a command's own `--max`/`-n` is not passed — for example, `activity` and every thread-listing command. |
+| `fetch.count` | `30` | Default page size used when a command's own `--limit`/`-n` is not passed — for example, `activity` and every thread-listing command. |
 | `rateLimit.maxRetries` | `3` | How many times a rate-limited or temporarily failing **read** is retried. |
 | `rateLimit.retryBaseDelay` | `1.0` | Delay in seconds before the first retry; each retry after that waits longer. |
 
@@ -49,14 +49,17 @@ A non-integer or non-positive `fetch.count`, a non-integer or negative `rateLimi
 
 | Variable | Effect |
 | --- | --- |
-| `EDSTEM_BASE_URL` | Override the Ed JSON API base URL. Defaults to `https://edstem.org/api/`. |
+| `EDSTEM_BASE_URL` | Override the Ed JSON API base URL. Defaults to the API of the selected site. |
+| `EDSTEM_REGION` | `au` (`edstem.org`), `us` or `eu`. Overrides the saved site. |
 | `EDSTEM_TOKEN` | Provide the Ed API token directly, skipping the saved token file. |
 | `EDSTEM_CONFIG` | Override the config file path. |
 | `EDSTEM_ALLOW_POSTING` | Set to `1` to enable the posting tools (`create_thread`, `reply_thread`) on the `edstem-mcp` server. |
+| `EDSTEM_WIDGETS` | Set to `0` to remove the interactive `show_*` tools from the `edstem-mcp` server. |
 
 ### Precedence
 
 - **Token:** `EDSTEM_TOKEN`, if set and non-empty, always wins over the saved token file — even right after `auth login` writes a new file. Running `auth login` while `EDSTEM_TOKEN` is set still verifies and saves the pasted token to the file, but the environment variable keeps winning at runtime until you unset it.
+- **Site:** `EDSTEM_REGION`, if set, overrides the site saved by `auth login`. A token from `EDSTEM_TOKEN` uses `au` unless `EDSTEM_REGION` says otherwise; it never borrows the saved file's site.
 - **API base URL:** `EDSTEM_BASE_URL`, if set, overrides the config file's value; there's no config-file key for it.
 - **Config path:** `EDSTEM_CONFIG`, if set, replaces the default `~/.config/edstem-cli/config.yaml` path outright, rather than merging with it.
 
@@ -65,7 +68,16 @@ A non-integer or non-positive `fetch.count`, a non-integer or negative `rateLimi
 Pipe a token in instead of the interactive prompt:
 
 ```bash
-printf '%s\n' "<your-token>" | edstem auth login --token-stdin
+printf '%s\n' "<your-token>" | edstem auth login --region us --token-stdin
+```
+
+Without `--region`, non-interactive login still detects the site, and fails with a request for `--region` when it cannot tell. It never opens a browser and never prompts; a failed verification is an error instead of a menu.
+
+For a token that should not be saved at all, export it instead:
+
+```bash
+export EDSTEM_TOKEN="<your-token>"
+export EDSTEM_REGION="us"
 ```
 
 `auth login` does not require `--yes` or a saved token beforehand: passing a token, piped or typed, is already an explicit action.
@@ -74,11 +86,15 @@ printf '%s\n' "<your-token>" | edstem auth login --token-stdin
 
 A read request that comes back `429`, `502`, `503`, or `504` is retried automatically, up to `rateLimit.maxRetries` times, waiting longer between each attempt. If Ed asks the CLI to wait a specific amount of time first, the CLI waits at least that long instead, whichever is larger.
 
-Writes — `threads send`, `replies send`, `lessons mark-read`, `slides submit`, `auth logout` — are never retried automatically. Retrying a write that may have already succeeded risks duplicating it; see [Posting](/edstem/posting) and [Mutations](/concepts/mutations).
+Writes (`threads send`, `replies send`, the thread state actions such as `threads star`, `lessons mark-read`, `slides submit`, `auth logout`) are never retried automatically. Retrying a write that may have already succeeded risks duplicating it; see [Posting](/edstem/posting) and [Mutations](/concepts/mutations).
 
 ## Self-deploying the Ed Worker
 
 This is the same source the hosted server at `https://edstem.tuuhub.com/mcp` runs. Deploying it yourself gives you your own endpoint, your own Worker variables, and the static-token mode below as an alternative to OAuth. See [MCP server](/edstem/mcp-server#hosted-server) for what the hosted service stores instead.
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/bunizao/edstem-cli)
+
+The button copies the repository to your Git provider and deploys it to your Cloudflare account. To deploy from a checkout instead:
 
 ```bash
 npm ci
@@ -86,12 +102,14 @@ npx wrangler login
 npm run deploy:worker
 ```
 
-A self-deployed Worker exposes two endpoints:
+The Worker needs no database or storage. Check `https://<worker-host>/healthz` after deploying; it answers with `{"ok":true,...}`. A self-deployed Worker exposes two endpoints:
 
 ```text
 https://<worker-host>/mcp
 https://<worker-host>/healthz
 ```
+
+The hosted server and a self-deployed Worker reach `edstem.org` only. For an account on `us.edstem.org` or `eu.edstem.org`, use the local `edstem-mcp` server.
 
 ### Worker variables
 
@@ -111,7 +129,16 @@ A self-deployed Worker also accepts a static Ed token directly, instead of OAuth
 - The Worker doesn't store this token anywhere — it's used for that one request and then forgotten.
 - The Worker does not write the token header to logs.
 
-This mode is a convenience for clients that can send custom headers but can't do MCP OAuth; it's not part of the MCP OAuth flow itself.
+This mode is a convenience for clients that can send custom headers but can't do MCP OAuth; it's not part of the MCP OAuth flow itself. Never put the token in a URL.
+
+| Client | Use |
+| --- | --- |
+| ChatGPT | The hosted OAuth server. ChatGPT has no field for a custom header. |
+| Codex | Your Worker, with the token from an environment variable. See [Codex](/mcp/clients/codex). |
+| Claude connector with request headers | Your Worker, with an `Authorization` or `X-API-Key` header. |
+| Claude connector without request headers | The hosted OAuth server. |
+
+Do not configure a static header and OAuth on the same connector.
 
 ## MCP tools
 

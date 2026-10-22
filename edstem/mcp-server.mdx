@@ -13,20 +13,21 @@ The package also installs `edstem-mcp`, an MCP server that runs on your own mach
 {
   "mcpServers": {
     "edstem": {
-      "command": "edstem-mcp",
-      "env": { "EDSTEM_TOKEN": "<your-token>" }
+      "command": "edstem-mcp"
     }
   }
 }
 ```
 
-It authenticates with `EDSTEM_TOKEN`, the same environment variable the CLI reads, falling back to the saved token file if the variable isn't set.
+It uses the token and Ed site saved by `edstem auth login`, so after signing in once it needs no configuration. To pass a token instead, set `EDSTEM_TOKEN` (and `EDSTEM_REGION` for `us.edstem.org` or `eu.edstem.org`) in the server's `env`, the same variables the CLI reads.
+
+This is the server to use for an account on `us.edstem.org` or `eu.edstem.org`: the hosted server and a self-deployed Worker reach `edstem.org` only.
 
 The `create_thread` and `reply_thread` tools — the only tools that post to Ed — are disabled by default. Set `EDSTEM_ALLOW_POSTING=1` in the server's environment to enable them. Every other tool is always available without that variable, but not all of them are read-only: `mark_lessons_read`, `submit_slide`, and `submit_slide_answer` write to Ed too, marking lesson progress and submitting quiz answers, without needing `EDSTEM_ALLOW_POSTING`.
 
 ## Hosted server
 
-A hosted server is available at `https://edstem.tuuhub.com/mcp` for clients that connect over OAuth rather than running a local program.
+A hosted server is available at `https://edstem.tuuhub.com/mcp` for clients that connect over OAuth rather than running a local program, such as Claude and ChatGPT on the web. Add it as a custom connector and sign in with your Ed token when the client asks. It works with `edstem.org` accounts only.
 
 ### What the hosted service stores
 
@@ -37,6 +38,23 @@ Your token is encrypted before it's stored, and the key that decrypts it is kept
 Your MCP client never receives your raw Ed token. Instead, the service issues its own access and refresh tokens for your client to use, so those can be revoked or expire independently of your Ed account.
 
 Full data handling and retention terms, including what account deletion removes and what backups may retain, are in the service's [Terms of Service](https://github.com/bunizao/edstem-cli/blob/main/TOS.md).
+
+## Interactive views
+
+In hosts that support MCP Apps (Claude and ChatGPT among them), four tools draw a view in the chat instead of a wall of text:
+
+| Tool | Shows |
+| --- | --- |
+| `show_forum_catchup` | Unread announcements and threads that are new to you or have new replies, each expandable in place. |
+| `show_thread_activity` | New threads per week, stacked by category, with each week expandable to its busiest threads. |
+| `show_lesson_progress` | Completed lessons per released module, with what is left on click. |
+| `show_lesson_guide` | A step-through guide the assistant writes for one lesson, then a short practice quiz graded in place. The lesson's own Ed quiz is never answered. |
+
+Views are the default. Ask for a plain-text answer and the assistant uses the `list_*` and `read_*` tools instead. Hosts without MCP Apps get the same data as text, and `EDSTEM_WIDGETS=0` removes the views from `edstem-mcp`. The `teach_lesson` prompt runs the lesson guide end to end.
+
+## Files over MCP
+
+`list_lesson_files` and `list_thread_files` return each file as a link the client can open. A remote server cannot save to your disk, so use `edstem files get` when you want the files in a folder.
 
 ## Self-hosting
 

@@ -24,13 +24,14 @@ edstem threads list [options] <unit>
 
 | Flags | Description | Choices |
 | --- | --- | --- |
-| `-n, --max <count>` | Maximum threads to return |  |
+| `-n, --limit <count>` | Maximum threads to return |  |
 | `-s, --sort <order>` | Ed sort order; defaults to new and pinned threads may remain first. | `new`, `old`, `top`, `hot` |
 | `-c, --category <category>` | Filter by exact top-level category. |  |
 | `--subcategory <subcategory>` | Filter by exact second-level subcategory. |  |
 | `-t, --type <type>` | Filter by thread type. |  |
 | `--answered` | Only answered threads. |  |
 | `--unanswered` | Only unanswered threads. |  |
+| `--unread` | Only threads Ed reports as unseen. |  |
 | `--offset <count>` | Skip this many threads before filtering. |  |
 | `--since <when>` | Only threads created at or after an ISO date or a relative offset such as 7d. |  |
 
@@ -51,13 +52,44 @@ edstem threads search [options] <unit> <query...>
 
 | Flags | Description | Choices |
 | --- | --- | --- |
-| `-n, --max <count>` | Maximum threads to return |  |
+| `-n, --limit <count>` | Maximum threads to return |  |
 | `-s, --sort <order>` | Ed sort order; defaults to new and pinned threads may remain first. | `new`, `old`, `top`, `hot` |
 | `-c, --category <category>` | Filter by exact top-level category. |  |
 | `--subcategory <subcategory>` | Filter by exact second-level subcategory. |  |
 | `-t, --type <type>` | Filter by thread type. |  |
 | `--answered` | Only answered threads. |  |
 | `--unanswered` | Only unanswered threads. |  |
+| `--unread` | Only threads Ed reports as unseen. |  |
+| `--offset <count>` | Skip this many threads before filtering. |  |
+| `--since <when>` | Only threads created at or after an ISO date or a relative offset such as 7d. |  |
+
+## edstem threads export
+
+```bash
+edstem threads export [options] <unit>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `unit` | Yes | Unit ID or code |
+
+**Options**
+
+| Flags | Description | Choices |
+| --- | --- | --- |
+| `--dest <directory>` | Archive directory. |  |
+| `--no-files` | Keep remote attachment links without downloading. |  |
+| `--force` | Rewrite completed thread files. |  |
+| `-n, --limit <count>` | Maximum threads to return |  |
+| `-s, --sort <order>` | Ed sort order; defaults to new and pinned threads may remain first. | `new`, `old`, `top`, `hot` |
+| `-c, --category <category>` | Filter by exact top-level category. |  |
+| `--subcategory <subcategory>` | Filter by exact second-level subcategory. |  |
+| `-t, --type <type>` | Filter by thread type. |  |
+| `--answered` | Only answered threads. |  |
+| `--unanswered` | Only unanswered threads. |  |
+| `--unread` | Only threads Ed reports as unseen. |  |
 | `--offset <count>` | Skip this many threads before filtering. |  |
 | `--since <when>` | Only threads created at or after an ISO date or a relative offset such as 7d. |  |
 
@@ -90,6 +122,152 @@ edstem threads read [options] <reference>
 | Argument | Required | Description |
 | --- | --- | --- |
 | `reference` | Yes | Thread ID or unit ID/code plus #number |
+
+## edstem threads star
+
+```bash
+edstem threads star [options] <reference>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `reference` | Yes | Thread ID or UNIT#number; use UNIT with mark-read --all |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## edstem threads unstar
+
+```bash
+edstem threads unstar [options] <reference>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `reference` | Yes | Thread ID or UNIT#number; use UNIT with mark-read --all |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## edstem threads watch
+
+```bash
+edstem threads watch [options] <reference>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `reference` | Yes | Thread ID or UNIT#number; use UNIT with mark-read --all |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## edstem threads unwatch
+
+```bash
+edstem threads unwatch [options] <reference>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `reference` | Yes | Thread ID or UNIT#number; use UNIT with mark-read --all |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## edstem threads upvote
+
+```bash
+edstem threads upvote [options] <reference>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `reference` | Yes | Thread ID or UNIT#number; use UNIT with mark-read --all |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--comment <id>` | Vote on a comment belonging to the thread. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## edstem threads unvote
+
+```bash
+edstem threads unvote [options] <reference>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `reference` | Yes | Thread ID or UNIT#number; use UNIT with mark-read --all |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--comment <id>` | Vote on a comment belonging to the thread. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## edstem threads mark-read
+
+```bash
+edstem threads mark-read [options] <reference>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `reference` | Yes | Thread ID or UNIT#number; use UNIT with mark-read --all |
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--all` | Mark every thread in the unit as read. |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
+## edstem threads mark-unread
+
+```bash
+edstem threads mark-unread [options] <reference>
+```
+
+**Arguments**
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `reference` | Yes | Thread ID or UNIT#number; use UNIT with mark-read --all |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
 
 ## edstem threads send
 

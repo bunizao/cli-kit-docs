@@ -8,14 +8,14 @@ description: "List your own recent activity across one unit or every unit."
 ```bash
 edstem activity
 edstem activity UNIT
-edstem activity UNIT --max 10 --filter all
+edstem activity UNIT --limit 10 --filter all
 ```
 
 `edstem activity` with no `<unit>` returns activity across every unit you're enrolled in. Passing `<unit>` scopes it to that one unit; `<unit>` resolves the same way it does everywhere else — see [Units](/edstem/units).
 
 | Flag | Effect |
 | --- | --- |
-| `-n, --max <count>` | Maximum activity items to return. |
+| `-n, --limit <count>` | Maximum activity items to return. |
 | `-f, --filter <type>` | Activity type. Defaults to `all`. |
 
 `--filter` accepts `all`, `thread`, `answer` or `comment`. The CLI doesn't check this value itself — a value outside that list is rejected by Ed, not by the CLI.

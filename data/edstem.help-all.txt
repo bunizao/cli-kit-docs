@@ -1,5 +1,5 @@
 $ edstem --help
-edstem v0.7.0
+edstem v0.8.2
 Read and post on Ed Discussion from the command line
 
 Usage
@@ -71,8 +71,11 @@ Usage
   edstem auth login [options]
 
 Options
-  --token-stdin  Read the token from the first line of stdin
-  -h, --help     Show help
+  --token-stdin      Read the token from the first line of stdin
+  --no-browser       Print the token page link without opening a browser
+  --region <region>  Ed region (detected from the token when omitted; skips
+                     detection) (choices: "au", "us", "eu")
+  -h, --help         Show help
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -174,8 +177,18 @@ Usage
 Commands
   list <unit>               List threads in a unit
   search <unit> <query...>  Search threads in a unit
+  export <unit>             Export a unit's forum and attachments to a local
+                            Markdown archive
   show <reference>          Show a thread
   read <reference>          Read a thread body as Markdown
+  star <reference>          star a thread
+  unstar <reference>        unstar a thread
+  watch <reference>         watch a thread
+  unwatch <reference>       unwatch a thread
+  upvote <reference>        upvote a thread
+  unvote <reference>        unvote a thread
+  mark-read <reference>     mark-read a thread or every thread in a unit
+  mark-unread <reference>   mark-unread a thread
   send <unit>               Post a new thread in a unit
 
 Global options
@@ -196,7 +209,7 @@ Arguments
   unit  Unit ID or code
 
 Options
-  -n, --max <count>            Maximum threads to return
+  -n, --limit <count>          Maximum threads to return
   -s, --sort <order>           Ed sort order; defaults to new and pinned threads
                                may remain first (choices: "new", "old", "top",
                                "hot", default: "new")
@@ -205,6 +218,7 @@ Options
   -t, --type <type>            Filter by thread type
   --answered                   Only answered threads
   --unanswered                 Only unanswered threads
+  --unread                     Only threads Ed reports as unseen
   --offset <count>             Skip this many threads before filtering (default:
                                0)
   --since <when>               Only threads created at or after an ISO date or a
@@ -228,7 +242,7 @@ Arguments
   query  Words that must all appear in the title or body
 
 Options
-  -n, --max <count>            Maximum threads to return
+  -n, --limit <count>          Maximum threads to return
   -s, --sort <order>           Ed sort order; defaults to new and pinned threads
                                may remain first (choices: "new", "old", "top",
                                "hot", default: "new")
@@ -237,6 +251,42 @@ Options
   -t, --type <type>            Filter by thread type
   --answered                   Only answered threads
   --unanswered                 Only unanswered threads
+  --unread                     Only threads Ed reports as unseen
+  --offset <count>             Skip this many threads before filtering (default:
+                               0)
+  --since <when>               Only threads created at or after an ISO date or a
+                               relative offset such as 7d
+  -h, --help                   Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads export --help
+edstem threads export
+Export a unit's forum and attachments to a local Markdown archive
+
+Usage
+  edstem threads export [options] <unit>
+
+Arguments
+  unit  Unit ID or code
+
+Options
+  --dest <directory>           Archive directory
+  --no-files                   Keep remote attachment links without downloading
+  --force                      Rewrite completed thread files
+  -n, --limit <count>          Maximum threads to return
+  -s, --sort <order>           Ed sort order; defaults to new and pinned threads
+                               may remain first (choices: "new", "old", "top",
+                               "hot", default: "new")
+  -c, --category <category>    Filter by exact top-level category
+  --subcategory <subcategory>  Filter by exact second-level subcategory
+  -t, --type <type>            Filter by thread type
+  --answered                   Only answered threads
+  --unanswered                 Only unanswered threads
+  --unread                     Only threads Ed reports as unseen
   --offset <count>             Skip this many threads before filtering (default:
                                0)
   --since <when>               Only threads created at or after an ISO date or a
@@ -276,6 +326,138 @@ Usage
 
 Arguments
   reference  Thread ID or unit ID/code plus #number
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads star --help
+edstem threads star
+star a thread
+
+Usage
+  edstem threads star [options] <reference>
+
+Arguments
+  reference  Thread ID or UNIT#number; use UNIT with mark-read --all
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads unstar --help
+edstem threads unstar
+unstar a thread
+
+Usage
+  edstem threads unstar [options] <reference>
+
+Arguments
+  reference  Thread ID or UNIT#number; use UNIT with mark-read --all
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads watch --help
+edstem threads watch
+watch a thread
+
+Usage
+  edstem threads watch [options] <reference>
+
+Arguments
+  reference  Thread ID or UNIT#number; use UNIT with mark-read --all
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads unwatch --help
+edstem threads unwatch
+unwatch a thread
+
+Usage
+  edstem threads unwatch [options] <reference>
+
+Arguments
+  reference  Thread ID or UNIT#number; use UNIT with mark-read --all
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads upvote --help
+edstem threads upvote
+upvote a thread
+
+Usage
+  edstem threads upvote [options] <reference>
+
+Arguments
+  reference  Thread ID or UNIT#number; use UNIT with mark-read --all
+
+Options
+  --comment <id>  Vote on a comment belonging to the thread
+  -h, --help      Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads unvote --help
+edstem threads unvote
+unvote a thread
+
+Usage
+  edstem threads unvote [options] <reference>
+
+Arguments
+  reference  Thread ID or UNIT#number; use UNIT with mark-read --all
+
+Options
+  --comment <id>  Vote on a comment belonging to the thread
+  -h, --help      Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads mark-read --help
+edstem threads mark-read
+mark-read a thread or every thread in a unit
+
+Usage
+  edstem threads mark-read [options] <reference>
+
+Arguments
+  reference  Thread ID or UNIT#number; use UNIT with mark-read --all
+
+Options
+  --all       Mark every thread in the unit as read
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem threads mark-unread --help
+edstem threads mark-unread
+mark-unread a thread
+
+Usage
+  edstem threads mark-unread [options] <reference>
+
+Arguments
+  reference  Thread ID or UNIT#number; use UNIT with mark-read --all
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -586,7 +768,7 @@ Arguments
   unit  Unit ID or code
 
 Options
-  -n, --max <count>    Maximum activity items
+  -n, --limit <count>  Maximum activity items
   -f, --filter <type>  Activity type (default: "all")
   -h, --help           Show help
 

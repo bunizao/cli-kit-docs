@@ -31,7 +31,7 @@ npx edstem-cli --version
 
 ## Create an Ed API token
 
-Create a token at [Ed settings → API tokens](https://edstem.org/settings/api-tokens). `edstem auth login` links to the same page if you run it without a token first.
+Create a token on Ed's API tokens page while signed in to the Ed site you use: [edstem.org](https://edstem.org/settings/api-tokens), [us.edstem.org](https://us.edstem.org/settings/api-tokens) or [eu.edstem.org](https://eu.edstem.org/settings/api-tokens). `edstem auth login` opens that page for you.
 
 ## Sign in
 
@@ -39,11 +39,21 @@ Create a token at [Ed settings → API tokens](https://edstem.org/settings/api-t
 edstem auth login
 ```
 
-This prompts for the token without echoing it, verifies it against Ed, and saves it to the token file.
+Login opens the token page in your browser, asks for the token without echoing it, and works out which Ed site accepts it. It verifies the token there, then saves the token and the site together, so every later command and the local MCP server use the right one.
+
+| Value | Ed site |
+| --- | --- |
+| `au` | `edstem.org` (the default) |
+| `us` | `us.edstem.org` |
+| `eu` | `eu.edstem.org` |
+
+Pass `--region au|us|eu` to skip detection. If the token works on none of the sites, or on more than one, login asks you to choose. `--no-browser` prints the link instead of opening it.
+
+If verification fails, login does not just exit. You can retry the same token (after a connection problem), enter a different token, pick another site, or cancel. Cancelling leaves any saved credentials as they were.
+
+Login also warns when `EDSTEM_TOKEN`, `EDSTEM_REGION` or `EDSTEM_BASE_URL` is set, because each one overrides what it saves. Their values are never printed.
 
 Signing in from a script or CI job? See [Ed Discussion CLI for scripts and agents](/developers/edstem#non-interactive-use) for piping a token in without a prompt.
-
-`auth login` does not require `--yes` or a saved token beforehand: entering a token at the prompt is already an explicit action. If `EDSTEM_TOKEN` is already set in the environment, login still verifies and saves the pasted token, but warns that the environment variable takes precedence over the file at runtime.
 
 <Note>
   A terminal session with no saved token walks you through this automatically: the first command that needs Ed shows the wordmark, asks for a token, and verifies it before saving.
@@ -51,7 +61,7 @@ Signing in from a script or CI job? See [Ed Discussion CLI for scripts and agent
 
 ### Token file
 
-The token is saved to `~/.config/edstem-cli/token`, readable only by you, inside a `~/.config/edstem-cli` directory with the same restricted access. Nothing else is stored in that file — no expiry, no refresh token, only the token text.
+The token and its site are saved to `~/.config/edstem-cli/token`, readable only by you. A failed save keeps the previous file. Older files that hold only a token still work and are read as `edstem.org`.
 
 ## Check what's active
 
@@ -59,7 +69,7 @@ The token is saved to `~/.config/edstem-cli/token`, readable only by you, inside
 edstem auth status
 ```
 
-Reports whether the current token was read from `EDSTEM_TOKEN` or from the token file, and verifies it against Ed. `EDSTEM_TOKEN` always takes precedence over the saved file when both are present.
+Reports the active site and where it came from (`environment`, `file` or `default`), where the token came from, and whether Ed accepts it. `EDSTEM_TOKEN` always takes precedence over the saved file when both are present.
 
 ## Sign out
 

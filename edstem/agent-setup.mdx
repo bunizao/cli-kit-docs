@@ -1,0 +1,63 @@
+---
+title: "Set up with an agent"
+description: "Instructions an AI agent follows to install edstem-cli, get the user signed in, and connect it, through a short conversation."
+icon: "bot"
+---
+
+This page is written for an AI agent with terminal access, such as Claude Code or Codex. A person can hand it over in one line:
+
+```text
+Read https://unicorn.tuuhub.com/docs/edstem/agent-setup.md and set up edstem-cli for me.
+```
+
+The rest of the page speaks to the agent.
+
+## Your job
+
+You are connecting the user's Ed Discussion account to `edstem-cli`. Take ownership of the setup. Keep commands and configuration out of the conversation unless the user asks, or you need their help with an error. Use the user's language.
+
+Never ask the user to paste their Ed API token into the conversation, and never print it. The token stays on the user's computer.
+
+## Install
+
+1. Check for Node.js 20 or newer with `node --version`. If it is missing or older, tell the user and stop until it is installed.
+2. Install the CLI with `npm install -g edstem-cli`.
+3. Confirm with `edstem --version`.
+
+## Get the user signed in
+
+Ed signs in with a personal API token that only the user can create. Tell the user, in one or two sentences, that you will open Ed's token page and that they will create a token there and enter it into a sign-in prompt, not into this chat.
+
+Then sign in:
+
+- If your shell is an interactive terminal the user can type into, run `edstem auth login`. It opens the token page, reads the token without echoing it, works out which Ed site the account is on, and saves both.
+- If your shell cannot take hidden input (most agent shells), ask the user to run `edstem auth login` in their own terminal. In Claude Code they can type `! edstem auth login` in the prompt. Wait for them to say it finished.
+
+If the user says their Ed is at `us.edstem.org` or `eu.edstem.org`, add `--region us` or `--region eu`. Do not ask which site they use unless login reports it cannot tell.
+
+## Verify
+
+1. Run `edstem auth status --json`. It should report a token source and an active site. If it reports an authentication error, ask the user to run `edstem auth login` again; a token copied with extra characters is the usual cause.
+2. Run `edstem units --json`. Show the user their unit names in one short list, and confirm this is the account they meant.
+
+Do not report success until both commands work. See [Troubleshooting](/edstem/troubleshooting) for specific errors.
+
+## Install the agent skill
+
+Run `npx skills add https://github.com/bunizao/edstem-cli`. The skill teaches agents which `edstem` command answers which request. See [Agent skills](/agents/skills).
+
+## Offer AI client access
+
+After verification, ask one question:
+
+> Do you also want Ed in an AI app such as Claude or ChatGPT on the web?
+
+- **Claude or ChatGPT on the web, or another remote client:** the user adds the hosted server, `https://edstem.tuuhub.com/mcp`, as a custom connector and signs in with their Ed token there. It works for `edstem.org` accounts only. Walk them through the steps on the page for their client under [Connect a client](/mcp/clients/claude-ai).
+- **A desktop or coding agent on this computer:** configure the local `edstem-mcp` server, which reuses the saved sign-in. Follow the page for that client, for example [Claude Code](/mcp/clients/claude-code) or [Codex](/mcp/clients/codex).
+- **No:** finish here, and mention that they can add it later.
+
+Posting tools stay off unless the user asks for them. See [MCP server](/edstem/mcp-server).
+
+## Finish
+
+Tell the user, in two or three sentences, what now works and one thing to try, such as "What's new on the forum in UNIT?". Do not list commands unless they ask.

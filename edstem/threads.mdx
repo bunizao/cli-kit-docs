@@ -9,7 +9,7 @@ description: "List, search, show, and read Ed threads, and every filter that nar
 
 ```bash
 edstem threads UNIT
-edstem threads list UNIT --max 20
+edstem threads list UNIT --limit 20
 ```
 
 `edstem threads UNIT` and `edstem threads list UNIT` are the same command — `list` is the default verb for one argument.
@@ -39,13 +39,14 @@ All of these apply to both `threads list` and `threads search`.
 
 | Flag | Effect |
 | --- | --- |
-| `-n, --max <count>` | Maximum threads to return. |
+| `-n, --limit <count>` | Maximum threads to return. |
 | `-s, --sort <order>` | `new`, `old`, `top`, or `hot`. Defaults to `new`. |
 | `-c, --category <category>` | Exact match on the top-level category. |
 | `--subcategory <subcategory>` | Exact match on the second-level subcategory. |
 | `-t, --type <type>` | Exact match on thread type. |
 | `--answered` | Only threads Ed has marked answered. |
 | `--unanswered` | Only threads Ed has not marked answered. |
+| `--unread` | Only threads Ed reports as unseen. |
 | `--offset <count>` | Skip this many threads from the start of Ed's own ordering before filtering. Default `0`. |
 | `--since <when>` | Only threads created at or after a time. |
 
@@ -55,7 +56,7 @@ Ed keeps pinned threads first in a unit's thread list regardless of the selected
 
 ### `--since`
 
-Accepts an ISO date (`2026-09-01`), an ISO datetime (`2026-09-01T10:00:00Z`), or a relative offset: a number followed by `d`, `h`, or `w` — `7d`, `12h`, `2w`.
+Accepts an ISO date (`2026-09-01`), an ISO datetime (`2026-09-01T10:00:00Z`), a relative offset (a number followed by `d`, `h`, or `w`: `7d`, `12h`, `2w`), or `last`. See [Catch up since your last visit](#catch-up-since-your-last-visit) for `last`.
 
 ```bash
 edstem threads UNIT --since 7d
@@ -66,10 +67,55 @@ edstem threads UNIT --since 2026-09-01
 
 Ed itself only understands `--sort`; everything else (`--category`, `--type`, `--answered`, `--since`, and search words) is applied by the CLI after Ed returns results.
 
-That means `--max 20 --unanswered` can't stop as soon as Ed's first batch of threads comes back, if fewer than 20 unanswered ones are in it. The CLI keeps asking Ed for more until it has enough matches or runs out of threads. If you ask for `--sort new` (the default) with `--since`, it also stops early once the threads coming back are older than the cutoff, since everything after that will be older still.
+That means `--limit 20 --unanswered` can't stop as soon as Ed's first batch of threads comes back, if fewer than 20 unanswered ones are in it. The CLI keeps asking Ed for more until it has enough matches, runs out of threads, or has made ten requests. If you ask for `--sort new` (the default) with `--since`, it also stops early once the threads coming back are older than the cutoff, since everything after that will be older still.
 
-A narrow filter on a large, old unit can therefore make `threads list` slower than an unfiltered call, and can still return fewer than `--max` results if the unit genuinely doesn't have that many matches.
+A narrow filter on a large, old unit can therefore make `threads list` slower than an unfiltered call, and can still return fewer than `--limit` results if the unit genuinely doesn't have that many matches.
 
-<Card title="Post a thread or reply" icon="pencil" href="/edstem/posting">
+## Catch up since your last visit
+
+Two ways to see what is new:
+
+```bash
+edstem threads UNIT --unread --limit 20
+edstem threads UNIT --since last --limit 100
+```
+
+`--unread` keeps threads Ed reports as unseen. `--since last` keeps threads created since your last catch-up listing of that unit. The first time, it looks back seven days.
+
+The CLI remembers your last catch-up on your machine, separately for each unit, so two enrolments that share a code never mix. It moves the marker forward only after a complete, plain listing:
+
+- Search, any filter (`--category`, `--subcategory`, `--type`, `--answered`, `--unanswered`, `--unread`), a nonzero `--offset`, or a sort other than `new` leave it where it is.
+- A result that reaches `--limit` or the ten-request cap leaves it unchanged and prints a warning, so you never skip threads. Raise `--limit` to see the rest.
+- A failed fetch leaves it unchanged too.
+
+Listing never marks anything read in Ed; the marker only lives on your machine.
+
+## Star, watch, vote and mark read
+
+These commands change a thread's state in Ed. Each one prints a plan and asks `y/N` in a terminal; scripts pass `--yes`, and `--dry-run` shows the plan without changing anything. See [Mutations](/concepts/mutations).
+
+```bash
+edstem threads star UNIT#42 --dry-run
+edstem threads watch UNIT#42 --yes
+edstem threads upvote UNIT#42 --comment 88991 --yes
+edstem threads mark-unread UNIT#42 --yes
+edstem threads mark-read UNIT --all --yes
+```
+
+| Command | Effect |
+| --- | --- |
+| `star`, `unstar` | Add or remove the thread from your starred threads. |
+| `watch`, `unwatch` | Turn notifications for the thread on or off, overriding the unit's default. |
+| `upvote`, `unvote` | Vote on the thread, or with `--comment <id>` on one of its comments. |
+| `mark-read`, `mark-unread` | Mark the thread read or unread. `mark-read UNIT --all` marks every thread in the unit. |
+
+Each command checks the thread first and skips the change if it is already in the requested state. `threads show` reports the current state as `isStarred`, `isWatched` (`null` when the thread follows the unit's default) and `vote`. These changes are never retried automatically, and they are available from the CLI only, not over MCP.
+
+<CardGroup cols={2}>
+  <Card title="Export a forum" icon="archive" href="/edstem/export">
+    Save a unit's threads and attachments as Markdown.
+  </Card>
+  <Card title="Post a thread or reply" icon="pencil" href="/edstem/posting">
   `threads send` and `replies send`.
-</Card>
+  </Card>
+</CardGroup>
