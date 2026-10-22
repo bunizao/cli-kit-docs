@@ -83,6 +83,7 @@
             "group": "Get started",
             "pages": [
               "unicorn/index",
+              "unicorn/agent-setup",
               "unicorn/deploy",
               "unicorn/sources",
               "unicorn/connect"
@@ -108,7 +109,8 @@
           {
             "group": "Reference",
             "pages": [
-              "unicorn/reference/tools"
+              "unicorn/reference/tools",
+              "unicorn/manifests"
             ]
           }
         ]
@@ -121,6 +123,7 @@
             "pages": [
               "moodle/index",
               "moodle/install",
+              "moodle/agent-setup",
               "moodle/sign-in",
               "moodle/daily-use",
               "moodle/units-and-activities",
@@ -128,6 +131,7 @@
               "moodle/forums",
               "moodle/downloads",
               "moodle/submit",
+              "moodle/quiz",
               "moodle/mcp-server",
               "moodle/configuration",
               "moodle/troubleshooting",
@@ -139,29 +143,37 @@
             "expanded": false,
             "pages": [
               "moodle/reference/index",
-              "moodle/reference/due",
-              "moodle/reference/news",
-              "moodle/reference/find",
-              "moodle/reference/get",
-              "moodle/reference/submit",
-              "moodle/reference/open",
-              "moodle/reference/user",
-              "moodle/reference/units",
-              "moodle/reference/todo",
-              "moodle/reference/alerts",
-              "moodle/reference/overview",
               "moodle/reference/activities",
-              "moodle/reference/download",
-              "moodle/reference/grades",
-              "moodle/reference/threads",
-              "moodle/reference/forums",
-              "moodle/reference/doctor",
-              "moodle/reference/completion",
-              "moodle/reference/uninstall",
+              "moodle/reference/alerts",
+              "moodle/reference/attempt",
               "moodle/reference/auth",
-              "moodle/reference/mcp",
+              "moodle/reference/calendar",
               "moodle/reference/commands",
-              "moodle/reference/skills"
+              "moodle/reference/complete",
+              "moodle/reference/completion",
+              "moodle/reference/coverage",
+              "moodle/reference/doctor",
+              "moodle/reference/download",
+              "moodle/reference/due",
+              "moodle/reference/find",
+              "moodle/reference/forums",
+              "moodle/reference/grades",
+              "moodle/reference/mcp",
+              "moodle/reference/messages",
+              "moodle/reference/news",
+              "moodle/reference/open",
+              "moodle/reference/overview",
+              "moodle/reference/quiz",
+              "moodle/reference/skills",
+              "moodle/reference/submission",
+              "moodle/reference/submit",
+              "moodle/reference/sync",
+              "moodle/reference/threads",
+              "moodle/reference/todo",
+              "moodle/reference/uninstall",
+              "moodle/reference/units",
+              "moodle/reference/update",
+              "moodle/reference/user"
             ]
           }
         ]
@@ -174,8 +186,10 @@
             "pages": [
               "edstem/index",
               "edstem/install",
+              "edstem/agent-setup",
               "edstem/units",
               "edstem/threads",
+              "edstem/export",
               "edstem/posting",
               "edstem/lessons-and-slides",
               "edstem/files",
@@ -214,6 +228,7 @@
             "pages": [
               "ontrack/index",
               "ontrack/install",
+              "ontrack/agent-setup",
               "ontrack/sign-in",
               "ontrack/units-and-tasks",
               "ontrack/downloads",

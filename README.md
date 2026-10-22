@@ -7,10 +7,10 @@ Guides, command references and MCP setup instructions for three command-line too
 
 | Tool | Source repository | Documented version |
 | --- | --- | --- |
-| Moodle CLI | [moodle-cli](https://github.com/bunizao/moodle-cli) | 0.9.2 |
-| Ed Discussion CLI | [edstem-cli](https://github.com/bunizao/edstem-cli) | 0.7.0 |
+| Moodle CLI | [moodle-cli](https://github.com/bunizao/moodle-cli) | 0.11.1 |
+| Ed Discussion CLI | [edstem-cli](https://github.com/bunizao/edstem-cli) | 0.8.2 |
 | OnTrack CLI | [ontrack-cli](https://github.com/bunizao/ontrack-cli) | 0.3.2 |
-| unicorn | [unicorn](https://github.com/TuuHub/unicorn) | commit e8a3559 (database migrations through 0016) |
+| unicorn | [unicorn](https://github.com/TuuHub/unicorn) | commit ae73c78 (database migrations through 0016) |
 
 The site covers installation, sign-in, everyday tasks, scripting and connecting AI clients. Command references describe the captured releases above; they may differ from newer releases. This repository contains the documentation, not the CLI implementations.
 
