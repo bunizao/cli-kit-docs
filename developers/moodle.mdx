@@ -155,7 +155,7 @@ Every successful `download`/`dl` prints a receipt of what was written:
 ```
 {/* Fields taken from the SubmissionReceipt interface in src/moodle-assign-core.ts. Ids, names, dates and byte counts are illustrative placeholders. */}
 
-`action` is `"planned"` under `--dry-run` instead of `"saved"`/`"submitted"` — see [Submit](/moodle/submit#drafts-vs-submit-on-save) for what those two real states mean. `files` lists what Moodle's page shows in the submission after the run (or, for a plan, the draft area's current contents); `uploads` lists the local files this run sent; `removed` lists filenames removed by `--replace`; `limits` reports whichever of the assignment's per-file, total, count and type limits are actually set (an unset limit is left out, not reported as zero or unlimited).
+`action` is `"planned"` under `--dry-run` instead of `"saved"`/`"submitted"` — see [Submit](/moodle/submit#drafts-and-assignments-without-one) for what those two real states mean. `files` lists what Moodle's page shows in the submission after the run (or, for a plan, the draft area's current contents); `uploads` lists the local files this run sent; `removed` lists filenames removed by `--replace`; `limits` reports whichever of the assignment's per-file, total, count and type limits are actually set (an unset limit is left out, not reported as zero or unlimited).
 
 ### get, find and open
 
