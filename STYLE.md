@@ -5,7 +5,7 @@ Assume the reader is competent and busy. These rules are not optional.
 
 ## Ground truth
 
-- Document the released versions only: moodle-cli 0.11.1, edstem-cli 0.8.2, ontrack 0.3.2, @bunizao/cli-kit 0.5.0.
+- Document the released versions only: moodle-cli 0.12.0, edstem-cli 0.8.2, ontrack 0.4.0, @bunizao/cli-kit 0.7.1.
 - unicorn has no release number or captured data. Its pages follow the source repository at commit ae73c78 (migrations through 0016). Check every name, flag, setting and limit against that source.
 - The captured command trees (`data/*.commands.json`), the captured `--help` text for every command
   (`data/*.help-all.txt`) and the MCP tool catalogs (`data/*.mcp-tools.json`) are authoritative.

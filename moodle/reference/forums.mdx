@@ -45,6 +45,10 @@ moodle forums post [options] <forum>
 | `--subject <subject>` | Discussion subject. |
 | `--text <text>` | Discussion text. |
 
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
 ## moodle forums subscribe
 
 ```bash
@@ -57,6 +61,10 @@ moodle forums subscribe [options] <forum>
 | --- | --- | --- |
 | `forum` | Yes | Forum module id or URL |
 
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
+
 ## moodle forums unsubscribe
 
 ```bash
@@ -68,6 +76,10 @@ moodle forums unsubscribe [options] <forum>
 | Argument | Required | Description |
 | --- | --- | --- |
 | `forum` | Yes | Forum module id or URL |
+
+<Warning>
+This command changes data on the server. It asks for confirmation unless you pass `--yes`. Add `--dry-run` to print the plan without applying it.
+</Warning>
 
 ## moodle forums list
 
