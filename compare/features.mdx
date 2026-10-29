@@ -9,17 +9,18 @@ This table lines up every command and MCP (Model Context Protocol) tool across t
 
 | Capability | Moodle | Ed Discussion | OnTrack |
 | --- | --- | --- | --- |
-| List units | `units list` (alias `courses`) | `units list` (alias `courses`, `projects`) | `units list` (alias `courses`, `projects`) |
-| Unit detail | `units show` | `units show` | `units show` |
+| List units | `courses list` (alias `units`, `projects`) | `units list` (alias `courses`, `projects`) | `courses list` (alias `units`, `projects`) |
+| Unit detail | `courses show` | `units show` | `courses show` |
 | Deadlines | `due` | — | `tasks list` (shows each task's due date) |
 | Grades | `grades` | — | — |
 | Announcements / news | `news` | — | — |
 | Forum / thread read | `threads show` | `threads show`, `threads read` | — |
 | Thread search | `forums search` | `threads search` | — |
-| Post / reply | — | `threads send`, `replies send` | — |
+| Post / reply | `forums post`, `threads reply` | `threads send`, `replies send` | — |
 | Lesson / slide content | — | `lessons show`, `slides show` | — |
-| Quiz answer | — | `slides submit` | — |
-| Files download | `download` (alias `dl`), `get` | `files get` | `units get`, `tasks get` |
+| Quiz answer | `quiz start`, `quiz answer`, `quiz finish` (beta) | `slides submit` | — |
+| Direct messages | `messages list`, `messages show`, `messages send` | — | — |
+| Files download | `download` (alias `dl`), `get` | `files get` | `courses get`, `tasks get` |
 | Assignment / task submit | `submit` | — | `tasks submit` |
 | Task state | — | — | `tasks set` |
 | Chat with tutor | — | — | `chats list`, `chats read`, `chats send` |
@@ -28,13 +29,13 @@ This table lines up every command and MCP (Model Context Protocol) tool across t
 | Dashboard | bare `moodle`, `overview` | — | — |
 | Open in browser | `open` | — | — |
 | Shell completion | `completion` | — | — |
-| Self-update | — (`npm`/`bun` reinstall only) | `update` | — (`npm`/`bun` reinstall only) |
+| Self-update | `update` | `update` | — (`npm`/`bun` reinstall only) |
 | Agent skill generation | `skills generate`, `skills add` | `skills generate` | `skills generate` |
 | `commands --json` | `commands --json` | `commands --json` | `commands --json` |
 | Local MCP | `mcp serve` | `edstem-mcp` (separate binary) | — |
 | Remote MCP | `mcp deploy` (your own Cloudflare Worker) | Hosted at a fixed URL, or self-deployed via the Cloudflare button | — |
 | OAuth for hosted clients | `mcp pair` | Built into the hosted server | — |
-| Keepalive / renewal | `auth keepalive`, `mcp renewal` | — (tokens don't need renewal) | — |
+| Keepalive / renewal | `auth keepalive`, `mcp renewal` | — (tokens don't need renewal) | Automatic; `auth renew` (alias `auth keepalive`) |
 | Uninstall | `uninstall` (a CLI command) | — (manual `npm`/`bun` removal) | — (manual `npm`/`bun` removal) |
 
 <Note>

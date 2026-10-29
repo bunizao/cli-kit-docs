@@ -19,7 +19,7 @@ This page covers what a script author, agent builder, or contributor needs from 
 | --- | --- | --- | --- |
 | `1` | `config` / `network` | No `base_url` configured, an invalid config file, or OnTrack unreachable | Set `ONTRACK_BASE_URL` or fix `config.yaml`; check connectivity |
 | `2` | `usage` | Bad flag or argument, an ambiguous `UNIT`, a mutation run without `--yes` | Fix the command; for ambiguity, rerun with the project ID it lists |
-| `3` | `auth` | No valid session; browser-cookie exchange and the session cache both failed | Run `ontrack auth login` |
+| `3` | `auth` | No valid session: the session cache is missing or expired, and renewal failed | Run `ontrack auth login` |
 | `4` | `not_found` | `UNIT` or `TASK` doesn't resolve to anything you have access to | Check `ontrack courses` / `ontrack tasks UNIT` for the exact reference |
 | `5` | `upstream` | OnTrack returned something unexpected, or rejected the request outright (no task sheet, no resources) | Usually transient; rerun. A persistent one is a real OnTrack-side rejection |
 | `130` | `cancelled` | `Ctrl-C`, or a mutation declined at the confirmation prompt | Not a failure — rerun if you want to continue |

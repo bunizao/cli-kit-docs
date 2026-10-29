@@ -22,17 +22,16 @@ This page lists what each platform's web UI offers, split into what its CLI cove
     - Forum discussion reading and search — `threads`, `forums`
     - Resource, folder and assignment file download — `download`, `get`
     - Assignment file submission, draft or final — `submit`
-    - Notification and unread message counts — `alerts`
+    - Notifications and direct or group messages, including sending — `alerts`, `messages`
+    - Taking a quiz and reviewing your attempts (beta) — `quiz`, `attempt`
     - Opening a unit or activity in the browser from a reference — `open`
   </Tab>
   <Tab title="Partially covered">
     - **Search:** `find` ranks sections, activities and discussion subjects against a query, but it's a heuristic match over what the CLI has already fetched, not Moodle's own global search index — it won't find text inside a page's body the way Moodle's site-wide search can.
-    - **Forums:** reading and searching discussions is covered; there's no way to reply, edit, or delete a post from the CLI.
+    - **Forums:** reading, searching, replying, starting a discussion and subscribing are covered; there's no way to edit or delete a post from the CLI.
     - **Folder downloads:** a folder activity exposes its individual files so you can choose which to save, but there's no single "download everything in this unit" command.
   </Tab>
   <Tab title="Not covered">
-    - Taking a quiz or reviewing quiz attempts
-    - Private messaging between users
     - Calendar export or subscription (iCal feed)
     - Wiki, glossary and database activities
     - Badges and competencies
@@ -42,7 +41,7 @@ This page lists what each platform's web UI offers, split into what its CLI cove
   </Tab>
 </Tabs>
 
-Write side: only `submit` changes anything on Moodle. Everything else in this CLI is read-only.
+Write side: the commands listed under Moodle in [Mutations](/concepts/mutations#every-mutating-command) change something on Moodle; everything else is read-only.
 
 ## Ed Discussion
 

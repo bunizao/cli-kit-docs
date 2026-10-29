@@ -13,7 +13,7 @@ ontrack doctor
 ontrack doctor --live --cookies
 ```
 
-`doctor` checks that the session file can be read, whether a renewal path exists, which browser the CLI can open and whether your site's sign-in can be found. It prints the whole report and exits with code 3 when a check fails. `--live` also calls OnTrack with your session; `--cookies` also reads your everyday browsers' cookies, which can ask for OS permission. It never prints tokens or cookie values.
+`doctor` checks that the session file can be read, whether a renewal path exists, which browser the CLI can open and whether your site's sign-in can be found. It prints the whole report and exits with code 3 when the site is unreachable, the session file can't be read, or the `--live` check fails. A missing browser or renewal path shows in the report without changing the exit code. `--live` also calls OnTrack with your session; `--cookies` also reads your everyday browsers' cookies, which can ask for OS permission. It never prints tokens or cookie values.
 
 Credentials set in the environment or the config file override the session file. If `doctor` passes but commands still fail, remove an invalid override, then run `auth login`.
 
@@ -23,7 +23,7 @@ Credentials set in the environment or the config file override the session file.
 OnTrack sign-in expires in about 9 hours. Sign in on the OnTrack website or run `ontrack auth login` to renew it.
 ```
 
-The renewal credential is in its last 24 hours, and renewing the session doesn't extend it. Sign in to OnTrack in your everyday browser or run `ontrack auth login`. Once it has lapsed, the message says the sign-in has expired; run `auth login`. If you never ticked "Remember me", there's no renewal credential, so you'll be asked to sign in whenever the session expires.
+The renewal credential is in its last 24 hours, and renewing the session doesn't extend it. Sign in to OnTrack in your everyday browser or run `ontrack auth login`. Once it has lapsed, commands fail with `No active OnTrack browser session was found.`; run `auth login`. If you never ticked "Remember me", there's no renewal credential, so you'll be asked to sign in whenever the session expires.
 
 ## CLI browser problems
 
@@ -45,29 +45,18 @@ Another `ontrack` sign-in or renewal may be using the same private profile. Wait
 
 ## Reading your everyday browser's cookies
 
-These apply to `--reuse-browser` and `doctor --cookies`.
-
-**Permission denied (`EPERM`/`EACCES`)**
+`--reuse-browser` doesn't stop when it can't read a browser's cookies. It prints one line and falls through to the one-time DevTools snippet described in [Sign in](/ontrack/sign-in#choose-a-sign-in-path):
 
 ```text
-Permission denied while reading Chrome cookies (EACCES). In System Settings > Privacy & Security >
-Files & Folders, enable Chrome for the terminal or app that launched ontrack, then retry.
+Browser cookie warning: Direct browser-cookie reuse is unavailable. Continuing with loopback sign-in.
 ```
 
-Grant the listed permission (macOS) or rerun the terminal with access to the browser's profile directory (Linux/Windows), then retry. Or skip this path: `ontrack auth login --browser` never reads your everyday browser's files.
+To see why, run `ontrack doctor --cookies`:
 
-**macOS Keychain prompt not approved**
+- `Browser data access is denied for this terminal or app.` On macOS, allow the terminal or app that launched `ontrack` under System Settings > Privacy & Security > Files & Folders. On Linux or Windows, run the terminal with access to the browser's profile directory.
+- `Keychain did not authorize browser cookie decryption.` Approve the Keychain prompt when it appears; it can hide behind the terminal window.
 
-```text
-macOS Keychain did not authorize Chrome cookie decryption. Approve the Touch ID prompt for
-ontrack, then retry.
-```
-
-Approve the Keychain prompt when it appears; it can hide behind the terminal window.
-
-**No cookies found**
-
-If no browser has a usable session, `--reuse-browser` falls through to the one-time DevTools snippet described in [Sign in](/ontrack/sign-in#choose-a-sign-in-path).
+Or skip this path: `ontrack auth login --browser` never reads your everyday browser's files.
 
 ## DevTools snippet problems
 

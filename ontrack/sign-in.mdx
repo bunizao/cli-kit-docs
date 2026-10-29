@@ -41,7 +41,7 @@ A script can pipe the same text to `ontrack auth login --paste` on stdin. Keep c
 
 When the access token expires, `ontrack` renews it with the renewal credential, then, if that fails, by signing in again in the private browser profile in the background, which prints one line on stderr. Renewal must return the same account; to switch accounts, run `auth login`.
 
-The renewal credential itself expires, and renewing does not extend it. Signing in again does: run `auth login`, or sign in to OnTrack in your everyday browser and `ontrack` picks up the newer credential from there when the stored one is close to expiring. In its last 24 hours, ordinary commands print one reminder on stderr, never in JSON output. If your institution's sign-in needs multi-factor authentication, no unattended job can do this for you, so sign in about once a week.
+The renewal credential itself expires, and renewing does not extend it. Signing in again does: run `auth login`, or sign in to OnTrack in your everyday browser and `ontrack` picks up the newer credential from there when the stored one is close to expiring. In its last 24 hours, ordinary commands print one reminder on stderr, never in JSON output. If your institution's sign-in needs multi-factor authentication, no unattended job can do this for you: sign in again before the reminder's deadline.
 
 If both the renewal credential and your institution's sign-in have expired, run `auth login` again.
 

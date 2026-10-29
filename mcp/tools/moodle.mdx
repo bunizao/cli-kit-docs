@@ -111,8 +111,32 @@ Marked items; summary counts; all adds ungraded; feedback opt-in. Use when the u
   Unit code, name, id or URL. Omit to cover every enrolled unit.
 </ParamField>
 
-<ParamField path="graded_only" type="boolean" default="false">
-  Return only items that already have a grade.
+<ParamField path="mode" type="string" default="graded">
+  `graded` lists items that have a grade, `all` adds ungraded items, and `summary` returns only per-unit counts and totals.
+</ParamField>
+
+<ParamField path="types" type="string[]">
+  Activity types to include, such as `assign`, `quiz` or `h5pactivity`. Omit to include every type.
+</ParamField>
+
+<ParamField path="include_feedback" type="boolean" default="false">
+  Include the marker's feedback with each item.
+</ParamField>
+
+<ParamField path="include_ungraded" type="boolean" default="false">
+  Include ungraded items in `graded` mode.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="20">
+  Maximum rows to return across all units. Minimum 1, maximum 200.
+</ParamField>
+
+<ParamField path="offset" type="integer" default="0">
+  Rows to skip, for paging.
+</ParamField>
+
+<ParamField path="graded_only" type="boolean">
+  Older spelling of `mode: "graded"`. When `true`, it overrides `mode`.
 </ParamField>
 
 Available on: local, bridge, remote. Read-only.
