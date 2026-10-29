@@ -1,5 +1,5 @@
 $ moodle --help
-moodle v0.11.1
+moodle v0.12.0
 Read Moodle and submit work from the command line
 
 Usage
@@ -18,7 +18,7 @@ Core commands
   submission                  Read or remove your assignment submission
   complete <ref>              Mark an activity complete manually
   quiz                        Take a quiz (beta)
-  units, courses              Inspect enrolled units
+  courses, units, projects    Inspect enrolled units
   activities                  Inspect activities
   grades                      Inspect grades
   threads                     Inspect forum discussion threads
@@ -410,12 +410,12 @@ Global options
   --days <number>
 
 
-$ moodle units --help
-moodle units
+$ moodle courses --help
+moodle courses
 Inspect enrolled units
 
 Usage
-  moodle units [options] [command]
+  moodle courses [options] [command]
 
 Commands
   list         List enrolled units
@@ -426,15 +426,15 @@ Global options
   --no-color, --yes, --dry-run, --no-cache, --pretty, --limit <number>,
   --days <number>
 
-Run 'moodle units <command> --help' for details on a command.
+Run 'moodle courses <command> --help' for details on a command.
 
 
-$ moodle units list --help
-moodle units list
+$ moodle courses list --help
+moodle courses list
 List enrolled units
 
 Usage
-  moodle units list [options]
+  moodle courses list [options]
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -442,12 +442,12 @@ Global options
   --days <number>
 
 
-$ moodle units show --help
-moodle units show
+$ moodle courses show --help
+moodle courses show
 Show unit detail with sections
 
 Usage
-  moodle units show [options] <unit>
+  moodle courses show [options] <unit>
 
 Arguments
   unit  Unit ID or unique name

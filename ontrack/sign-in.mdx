@@ -1,54 +1,69 @@
 ---
 title: Sign in
-description: How ontrack authenticates through your browser or SAML, and what it stores.
+description: How ontrack signs you in, keeps the session renewed, and what it stores.
 icon: key
 ---
 
-`auth login` tries two paths, in order: reusing a browser session you already have, then an interactive SAML (Security Assertion Markup Language) sign-in with a one-time snippet. Most people never see the second path.
+`auth login` signs you in to OnTrack and keeps the session on your machine, encrypted. In a terminal it asks which way to sign in; a script or agent gets the CLI browser.
 
 ```bash
 ontrack auth login
 ```
 
-## Reusing a browser session
+Tick "Remember me" on your institution's sign-in page. OnTrack issues the renewal credential only for remembered sign-ins, and `ontrack` needs it to renew your session without asking you again.
 
-`ontrack` looks for a session cookie set for your OnTrack site by a browser you're already signed in with. On macOS it checks Chrome, Edge, Firefox and Safari; on Linux and Windows it checks Chrome, Edge and Firefox. It reads each browser's saved cookies directly, using your OS keychain to decrypt them where needed; it does not need the browser open.
+## Choose a sign-in path
 
-If it finds a usable session, it exchanges it for an OnTrack access token, then discards the cookies — the long-lived credential it keeps is the access token, not your browser session.
+```bash
+ontrack auth login --browser
+ontrack auth login --reuse-browser
+ontrack auth login --paste
+```
 
-If no browser yields a usable session — nothing signed in, a locked cookie database, no keychain access — `auth login` falls through to the SAML flow below without asking you to grant extra file permissions first.
+| Path | What happens |
+| --- | --- |
+| `--browser` (recommended) | Opens Chrome, Edge, Brave or Chromium with a private profile that belongs to `ontrack`. Sign in there; the CLI picks up the session itself. It never reads your everyday browser's files. |
+| `--reuse-browser` | Reuses the session from a browser you're already signed in with. If that browser's cookies can't be read, it opens your sign-in page and prints a one-time snippet to paste into the OnTrack tab's DevTools console. |
+| `--paste` | Reads credentials you copied from your browser, without echoing them. |
+| `--manual` | Goes straight to the one-time DevTools snippet. |
 
-## The SAML fallback and its console snippet
+### Paste credentials
 
-When browser-cookie reuse fails, `ontrack auth login`:
+In your browser's DevTools Network tab, find the request to OnTrack named `access-token`. Copy its Cookie header, the whole request as cURL, or its response, then run `ontrack auth login --paste` and paste it. Multi-line pastes stay together. A bare renewal cookie also needs `--username USERNAME`.
 
-1. Asks OnTrack for its sign-in method and opens that URL in your system browser.
-2. Starts a short-lived server on your own machine to receive the result.
-3. Prints a JavaScript snippet and asks you to sign in, then paste the snippet into that OnTrack tab's DevTools console.
-
-The snippet does exactly one thing: it reads your already-signed-in tab's session and sends the resulting access token, its expiry, and your username to that local server — it never reads or sends your OnTrack session cookie itself, only the short-lived access token it requests on the spot. The local server accepts exactly one reply and then shuts down, or gives up after five minutes if nothing arrives.
+A script can pipe the same text to `ontrack auth login --paste` on stdin. Keep credentials out of command arguments, where your shell history would keep them.
 
 <Note>
-  This snippet is generated fresh per login attempt and is only ever valid for that attempt. Don't reuse one from an old terminal session or share it — treat it like a password-reset link.
+  The DevTools snippet is generated for one sign-in attempt and works only for that attempt. Don't reuse one from an old terminal or share it; treat it like a password-reset link.
 </Note>
+
+## How the session stays signed in
+
+When the access token expires, `ontrack` renews it with the renewal credential, then, if that fails, by signing in again in the private browser profile in the background, which prints one line on stderr. Renewal must return the same account; to switch accounts, run `auth login`.
+
+The renewal credential itself expires, and renewing does not extend it. Signing in again does: run `auth login`, or sign in to OnTrack in your everyday browser and `ontrack` picks up the newer credential from there when the stored one is close to expiring. In its last 24 hours, ordinary commands print one reminder on stderr, never in JSON output. If your institution's sign-in needs multi-factor authentication, no unattended job can do this for you: sign in again before the reminder's deadline.
+
+If both the renewal credential and your institution's sign-in have expired, run `auth login` again.
 
 ## Where the session lives
 
-A successful browser or SAML sign-in is cached at `~/.config/ontrack-cli/session.json`, readable only by you, keyed to the site's base URL. Later commands reuse it until the token expires, then repeat the browser-cookie exchange automatically before falling back to the interactive flow.
+The session is encrypted in `~/.config/ontrack-cli/session.json`, readable only by you, with its key in macOS Keychain, Windows' data protection or the Linux Secret Service. On Linux without a Secret Service, the key is a private file under `~/.config/ontrack-cli/keys/`, protected only by your file permissions. The private browser profile lives under `~/.config/ontrack-cli/browser/`, one per site.
 
-Credentials supplied through environment variables or the config file are never written to this file — they're read fresh on every run instead. See [OnTrack CLI for scripts and agents](/developers/ontrack#automating-sign-in-without-a-browser) for that route.
+Credentials supplied through environment variables or the config file are never written to the session file, and they take precedence over it. See [OnTrack CLI for scripts and agents](/developers/ontrack#automating-sign-in-without-a-browser) for that route.
 
-## Checking and clearing a session
+## Check, renew and sign out
 
 ```bash
 ontrack auth status
+ontrack auth status --local
+ontrack auth renew
 ontrack auth logout
 ```
 
-`auth status` proves the session is live by checking it against OnTrack, and reports your username, the site's auth method and how many units and teaching roles you have. `auth logout` deletes the cached session file; it does not revoke the token on OnTrack's side.
+`auth status` checks the session against OnTrack and reports your username, the site's sign-in method and how many units and teaching roles you have. `--local` reads only the cache, without a network request, and shows `renewal_expires_at`. `auth renew` (also `auth keepalive`) renews and verifies once without an interactive sign-in. `auth logout` ends the session on OnTrack when it can, then deletes the session file and the private browser profiles; it still signs you out locally if OnTrack can't be reached.
 
-For scripts and CI, skip both browser paths entirely — see [OnTrack CLI for scripts and agents](/developers/ontrack#automating-sign-in-without-a-browser) for supplying a username and access token directly.
+When sign-in or access fails, run `ontrack doctor`. See [Troubleshooting](/ontrack/troubleshooting#diagnose-with-doctor).
 
 ## First run at a terminal
 
-The first time you run any command with no site configured, `ontrack` asks for your OnTrack URL once and saves it to the config file before doing anything else. If it then finds no session, it offers to run `auth login` for you interactively. Both prompts are skipped for a non-interactive caller — see [Install](/ontrack/install#first-run) and [Humans and agents](/concepts/humans-and-agents).
+The first time you run any command with no site configured, `ontrack` asks for your OnTrack URL once and saves it to the config file. If it then finds no session, it offers to run `auth login` for you. Both prompts are skipped for a non-interactive caller. See [Install](/ontrack/install#first-run) and [Humans and agents](/concepts/humans-and-agents).

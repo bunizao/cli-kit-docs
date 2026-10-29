@@ -9,14 +9,14 @@ List your enrolled units, resolve a `UNIT` reference, and read a unit's tasks an
 ## Units
 
 ```bash
-ontrack units
-ontrack units list --include-inactive
-ontrack units show UNIT
+ontrack courses
+ontrack courses list --include-inactive
+ontrack courses show UNIT
 ```
 
 `units` (aliases `courses`, `projects`) lists what you're enrolled in. By default it shows active units only; `--include-inactive` adds past ones. `units show UNIT` returns the unit's task definitions alongside your project for it — including `target_grade` and `submitted_grade` at the project level, and per task a `target_grade` / `target_grade_label`, current `grade` / `grade_label`, `status` / `status_label`, and the dates that decide whether it's overdue.
 
-Full syntax: [`ontrack units`](/ontrack/reference/units).
+Full syntax: [`ontrack courses`](/ontrack/reference/courses).
 
 ## Resolving UNIT
 
@@ -33,7 +33,7 @@ Unit UNIT matches multiple projects: 1041, 1187. Use a project ID.
 ```
 
 <Info>
-  The CLI never assumes what a unit code looks like — it resolves purely against your own unit list. Run `ontrack units --include-inactive` to see the full vocabulary for your site.
+  The CLI never assumes what a unit code looks like — it resolves purely against your own unit list. Run `ontrack courses --include-inactive` to see the full vocabulary for your site.
 </Info>
 
 ## Tasks

@@ -16,7 +16,7 @@ Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#error
 | `auth` | No usable Moodle session could be found: an env-set token that didn't authenticate, a pasted cookie that didn't authenticate, or Moodle rejecting the session outright. | Run [`moodle auth login`](/moodle/sign-in#how-the-cli-finds-a-session), or `moodle auth login --paste` if the cookie store can't be read. Run `moodle doctor` first if you're not sure why. |
 | `config` | No Moodle site URL is configured, or the configured value fails validation (missing scheme, no hostname, includes a query string, and so on). | Run `moodle` once in an interactive shell to set it, or set `MOODLE_BASE_URL`. See [Configuration](/moodle/configuration). |
 | `usage` | A malformed invocation: a missing required argument, a flag the command doesn't have, an invalid `completion` shell choice. | Run `moodle <command> --help`. |
-| `not_found` | A reference (unit, section, activity) resolved to nothing on Moodle. | Run `moodle units` or `moodle find <query>` to confirm the reference exists and how the CLI spells it. |
+| `not_found` | A reference (unit, section, activity) resolved to nothing on Moodle. | Run `moodle courses` or `moodle find <query>` to confirm the reference exists and how the CLI spells it. |
 | `upstream` | Moodle returned an error that isn't a login or not-found problem — a site-side failure. | Run `moodle doctor`, then retry. If it persists, the site itself is likely degraded. |
 | `network` | The request never reached Moodle: connection refused or reset, DNS failure, timeout. | Check the connection or VPN, then retry. |
 | `cancelled` | You declined a confirmation prompt or pressed Ctrl-C mid-command. | Retry when ready; nothing was changed. |

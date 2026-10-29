@@ -1,7 +1,7 @@
 [
   {
     "name": "home",
-    "description": "Today's date and timezone, items due soon, unread counts and the current section of each unit. Input: days defaults to 14.",
+    "description": "Today's date and timezone, items due soon, unread counts and the current section of each unit. Use when the user says \"dashboard\". Instead: due for longer deadline lists. Input: days defaults to 14. Then: unit or item. Cost: small dashboard.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -23,7 +23,7 @@
   },
   {
     "name": "due",
-    "description": "Items due in a date window. Input: unit code, name, id or URL.",
+    "description": "Items due in a date window. Use when the user says \"deadlines\". Instead: item for submission details. Input: unit code, name, id or URL. Then: item with activity_id. Cost: up to 20 rows by default.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -64,7 +64,7 @@
   },
   {
     "name": "units",
-    "description": "Enrolled units with ids, codes and names. Input: none.",
+    "description": "Enrolled units with ids, codes and names. Use when the user says \"unit names\". Instead: unit for sections. Input: none. Then: unit with a name or id. Cost: small list.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -86,7 +86,7 @@
   },
   {
     "name": "unit",
-    "description": "Section index and current section; section argument returns activities and files. Input: unit code, name, id or URL; section number or name.",
+    "description": "Section index and current section; section argument returns activities and files. Use when the user says \"a unit or section\". Instead: find for a named item. Input: unit code, name, id or URL; section number or name. Then: item or file with activity id. Cost: index about 4 KB; section about 0.5 KB.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -131,7 +131,7 @@
   },
   {
     "name": "find",
-    "description": "Ranked sections, activities and discussion subjects. Input: query and optional unit code, name, id or URL.",
+    "description": "Ranked sections, activities and discussion subjects. Use when the user says \"find slides or a task\". Instead: search_forums for post text; due for deadlines. Input: query and optional unit code, name, id or URL. Then: item or file with id. Cost: up to 20 rows by default.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -179,7 +179,7 @@
   },
   {
     "name": "item",
-    "description": "One activity in full: due date, status, grade, marker feedback with rubric or marking-guide rows and feedback files, attached files, quiz attempts, or a forum's latest threads. Input: id, same-site URL, or UNIT TASK phrase.",
+    "description": "One activity in full: due date, status, grade, marker feedback with rubric or marking-guide rows and feedback files, attached files, quiz attempts, or a forum's latest threads. Use when the user says \"submission or item detail\". Instead: file for binary content; attempt for quiz answers. Input: id, same-site URL, or UNIT TASK phrase. Then: file with a file id, or attempt with an attempt id. Cost: one item.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -211,7 +211,7 @@
   },
   {
     "name": "attempt",
-    "description": "Each question with your response, and mark, correct answer and feedback when the site shows them. Input: attempt id or review URL.",
+    "description": "Each question with your response, and mark, correct answer and feedback when the site shows them. Use when the user says \"a quiz attempt\". Instead: item for the attempt list. Input: attempt id or review URL. Then: item with quiz_id. Cost: one attempt.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -243,7 +243,7 @@
   },
   {
     "name": "grades",
-    "description": "Marked items; summary counts; all adds ungraded; feedback opt-in. Input: unit; types: assign, quiz, h5pactivity.",
+    "description": "Marked items; summary counts; all adds ungraded; feedback opt-in. Use when the user says \"grades\". Instead: item for rubrics. Input: unit; types: assign, quiz, h5pactivity. Then: offset; item id. Cost: 20 rows total.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -310,7 +310,7 @@
   },
   {
     "name": "news",
-    "description": "Latest announcement threads with first-post text. Input: optional unit code, name, id or URL.",
+    "description": "Latest announcement threads with first-post text. Use when the user says \"announcements\". Instead: search_forums for other discussions. Input: optional unit code, name, id or URL. Then: thread with discussion id. Cost: up to 5 announcements by default.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -345,7 +345,7 @@
   },
   {
     "name": "thread",
-    "description": "A discussion and a page of compact posts, with attachment links. Input: discussion_id; offset and limit.",
+    "description": "A discussion and a page of compact posts, with attachment links. Use when the user says \"discussion posts\". Instead: news for announcements. Input: discussion_id; offset and limit. Then: increase offset while posts_total exceeds returned. Cost: up to 20 posts by default.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -379,7 +379,7 @@
   },
   {
     "name": "search_forums",
-    "description": "Matching posts with unit and forum name maps. Input: query, optional unit or courseId and forumId.",
+    "description": "Matching posts with unit and forum name maps. Use when the user says \"forum post text\". Instead: find for activity names. Input: query, optional unit or courseId and forumId. Then: thread with discussion_id. Cost: bounded forum scan; total covers scanned scope.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -461,7 +461,7 @@
   },
   {
     "name": "submit",
-    "description": "Upload local files into an assignment; returns the receipt Moodle shows afterwards. Input: assignment id, same-site URL or UNIT TASK phrase; local file paths. dry_run (default) only plans; show the plan to the person, then rerun with dry_run false; final submits for grading and cannot be undone; without a draft stage saving is the submission, so it is refused unless final is true.",
+    "description": "Upload local files into an assignment; returns the receipt Moodle shows afterwards. Use when the user says \"upload assignment files\". Instead: item for status only. Input: assignment id, same-site URL or UNIT TASK phrase; local file paths. Then: dry_run (default) only plans; show the plan to the person, then rerun with dry_run false; final submits for grading and cannot be undone; without a draft stage saving is the submission, so it is refused unless final is true. Cost: writes to Moodle.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -526,7 +526,7 @@
   },
   {
     "name": "file",
-    "description": "One authenticated file: an image as image content, anything else as embedded binary, at most 16 MiB. Input: id of a one-file activity, file or activity URL, or UNIT TASK phrase.",
+    "description": "One authenticated file: an image as image content, anything else as embedded binary, at most 16 MiB. Use when the user says \"download a file\". Instead: item for file choices. Input: id of a one-file activity, file or activity URL, or UNIT TASK phrase. Then: read the returned image or resource. Cost: binary content up to 16 MiB.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -558,7 +558,7 @@
   },
   {
     "name": "messages",
-    "description": "Direct and group conversations with unread counts and the latest message. Input: limit and offset.",
+    "description": "Direct and group conversations with unread counts and the latest message. Use when the user says \"messages\". Instead: conversation for messages. Input: limit and offset. Then: conversation with id. Cost: 20 conversations.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -585,7 +585,7 @@
   },
   {
     "name": "conversation",
-    "description": "A conversation's latest messages in chronological order; does not mark them read. Input: conversation_id, limit and offset (from newest).",
+    "description": "A conversation's latest messages in chronological order; does not mark them read. Use when the user says \"read a conversation\". Instead: messages for conversation ids. Input: conversation_id, limit and offset (from newest). Then: increase offset for older messages. Cost: 50 messages by default.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -619,7 +619,7 @@
   },
   {
     "name": "calendar",
-    "description": "All course, user and site calendar events in the date window. Input: days and optional unit.",
+    "description": "All course, user and site calendar events in the date window. Use when the user says \"calendar events\". Instead: due for actionable deadlines. Input: days and optional unit. Then: item for an activity. Cost: one page plus one view per month.",
     "inputSchema": {
       "type": "object",
       "properties": {

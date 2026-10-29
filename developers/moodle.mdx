@@ -23,9 +23,9 @@ moodle grades --json --pretty
 
 Every JSON response shares one envelope: on success, the command's own fields at the top level; on failure, `{"ok": false, "error": {...}, "exit_code": N}` — see [Error codes and exit codes](#error-codes-and-exit-codes) below. An array field is paired with a `total` count that can exceed what's returned when a limit trims the list.
 
-### units
+### courses
 
-`units list` returns every unit you're enrolled in (up to 200): id, short code, full name, start and end dates (both an ISO timestamp and the raw epoch seconds), and whether the unit is hidden. `units show UNIT` resolves `UNIT` (code, name, id or URL) to one unit and returns its section index — each section's id, name, activity count, and whether it's hidden — plus which section the site (or moodle-cli's estimate) considers current. It does not include each section's activities; for that, use `moodle UNIT SECTION` or `activities list --section`.
+`courses list` returns every unit you're enrolled in (up to 200): id, short code, full name, start and end dates (both an ISO timestamp and the raw epoch seconds), and whether the unit is hidden. `courses show UNIT` resolves `UNIT` (code, name, id or URL) to one unit and returns its section index — each section's id, name, activity count, and whether it's hidden — plus which section the site (or moodle-cli's estimate) considers current. It does not include each section's activities; for that, use `moodle UNIT SECTION` or `activities list --section`.
 
 ### due and todo
 
@@ -170,7 +170,7 @@ moodle-cli uses the shared error and exit-code vocabulary in [Errors and exit co
 | `auth` | 3 | No usable Moodle session could be found: an env-set `MOODLE_TOKEN`/`MOODLE_SESSION` that didn't authenticate, a pasted cookie that didn't authenticate, or Moodle rejecting the session outright. | Run [`moodle auth login`](/moodle/sign-in#how-the-cli-finds-a-session), or `moodle auth login --paste` if the cookie store can't be read. Run `moodle doctor` first if you're not sure why. |
 | `config` | 1 | No Moodle site URL is configured, or the configured value fails validation (missing scheme, no hostname, includes a query string, and so on). | Run `moodle` once in an interactive shell to set it, or set `MOODLE_BASE_URL`. See [Configuration](/moodle/configuration). |
 | `usage` | 2 | A malformed invocation: a missing required argument, a flag the command doesn't have, an invalid `completion` shell choice. Also covers a `submit` run without `--yes` when stdin isn't interactive. | Run `moodle <command> --help`, or `moodle commands --json` for the full tree. |
-| `not_found` | 4 | A reference (unit, section, activity) resolved to nothing on Moodle. | Run `moodle units` or `moodle find <query>` to confirm the reference exists and how the CLI spells it. |
+| `not_found` | 4 | A reference (unit, section, activity) resolved to nothing on Moodle. | Run `moodle courses` or `moodle find <query>` to confirm the reference exists and how the CLI spells it. |
 | `upstream` | 5 | Moodle returned an error that isn't a login or not-found problem — a site-side failure. | Run `moodle doctor`, then retry. If it persists, the site itself is likely degraded. |
 | `network` | 1 | The request never reached Moodle: connection refused or reset, DNS failure, timeout. | Check the connection or VPN, then retry. |
 | `cancelled` | 130 | You declined a confirmation prompt or pressed Ctrl-C mid-command. | Retry when ready; nothing was changed. |
@@ -189,7 +189,7 @@ moodle UNIT "Assignment 2" --json
 ```
 
 ```json
-{"ok":false,"error":{"code":"ambiguous","message":"Several items match 'Assignment 2'.","candidates":[{"id":91234,"name":"Assignment 2","type":"assign","code":"UNIT-A"},{"id":91580,"name":"Assignment 2","type":"assign","code":"UNIT-B"}],"hint":"Run `moodle units` to see this site's names, or refine the reference."},"exit_code":2}
+{"ok":false,"error":{"code":"ambiguous","message":"Several items match 'Assignment 2'.","candidates":[{"id":91234,"name":"Assignment 2","type":"assign","code":"UNIT-A"},{"id":91580,"name":"Assignment 2","type":"assign","code":"UNIT-B"}],"hint":"Run `moodle courses` to see this site's names, or refine the reference."},"exit_code":2}
 ```
 
 Fix: use one of the listed candidate ids directly, or narrow the phrase until only one thing matches. See [How ambiguity resolves](/moodle/daily-use#how-ambiguity-resolves) for the interactive picker a terminal shows instead, and [Errors and exit codes](/concepts/errors-and-exit-codes) for the shared error-code table `ambiguous` sits alongside.

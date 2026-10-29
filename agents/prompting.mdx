@@ -13,15 +13,15 @@ These tables are the same intent → command mapping each CLI's `SKILL.md` carri
 | --- | --- | --- | --- |
 | A dashboard / what's going on | `moodle` | — | — |
 | Deadlines | `moodle due [UNIT] --days 14` | — | `ontrack tasks UNIT` |
-| Unit names, so you can refer to one correctly | `moodle units` | `edstem units` | `ontrack units` |
-| A unit or section's detail | `moodle UNIT [SECTION]` | `edstem units show UNIT` | `ontrack units show UNIT` |
+| Unit names, so you can refer to one correctly | `moodle courses` | `edstem units` | `ontrack courses` |
+| A unit or section's detail | `moodle UNIT [SECTION]` | `edstem units show UNIT` | `ontrack courses show UNIT` |
 | Grades and feedback | `moodle grades [UNIT]` | — | — |
 | Announcements | `moodle news [UNIT]` | — | — |
 | Find slides, a task, or an activity by keyword | `moodle find "QUERY" [UNIT]` | — | — |
 | Forum or thread text search | `moodle forums search "QUERY" --unit UNIT` | `edstem threads search UNIT QUERY...` | — |
 | Read a thread or lesson as text | `moodle threads show ID` | `edstem threads read REF`, `edstem lessons read LESSON` | — |
 | A task sheet or a task's status | `moodle UNIT "TASK"` | — | `ontrack tasks read UNIT TASK`, `ontrack tasks show UNIT TASK` |
-| Download a file | `moodle get "UNIT TASK" --to DIR`, `moodle download ID --dest FILE` | `edstem files get TARGET --dest DIR` | `ontrack tasks get UNIT TASK --dest PATH`, `ontrack units get UNIT --dest PATH` |
+| Download a file | `moodle get "UNIT TASK" --to DIR`, `moodle download ID --dest FILE` | `edstem files get TARGET --dest DIR` | `ontrack tasks get UNIT TASK --dest PATH`, `ontrack courses get UNIT --dest PATH` |
 | Tutor feedback / unread task chat | — | — | `ontrack chats UNIT` |
 | Teaching roles | — | — | `ontrack roles` |
 | Am I signed in / is it working | `moodle auth status`, `moodle doctor` | `edstem auth status` | `ontrack auth status` |

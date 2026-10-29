@@ -29,11 +29,11 @@ Typing the verb is usually optional. The CLI looks at how many arguments follow 
 
 ## Noun aliases
 
-`units` is the canonical enrolment noun in all three CLIs; `courses` and `projects` are equivalent aliases everywhere. `moodle courses` and `moodle units` are the same command.
+`courses` is the enrolment noun in `moodle` and `ontrack`, with `units` and `projects` as aliases. `edstem` still calls it `units`, with `courses` and `projects` as aliases. Every spelling works in every tool: `moodle courses` and `moodle units` are the same command.
 
 ## References: UNIT, TASK, SECTION
 
-A `UNIT` argument accepts whatever the site itself uses to identify it — a numeric id, the exact code, or the exact name — and, in `moodle`, a URL. None of the three tools assumes a code follows a particular format (letters plus digits, a fixed length, and so on): they resolve what you typed against the site's own unit list, because that list is the only thing that's actually true across institutions. Run `<tool> units` to see the vocabulary a given site uses.
+A `UNIT` argument accepts whatever the site itself uses to identify it — a numeric id, the exact code, or the exact name — and, in `moodle`, a URL. None of the three tools assumes a code follows a particular format (letters plus digits, a fixed length, and so on): they resolve what you typed against the site's own unit list, because that list is the only thing that's actually true across institutions. Run `<tool> courses` to see the vocabulary a given site uses.
 
 `TASK` (OnTrack) and thread/lesson references (Ed) work the same way: a short form you'd recognize from the site, or a numeric id.
 

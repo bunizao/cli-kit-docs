@@ -3,15 +3,15 @@ title: "Moodle MCP tool catalog"
 description: "Every tool the Moodle MCP servers expose, with its parameters, server availability, and whether it writes to Moodle."
 ---
 
-This catalog lists the 12 tools the Moodle Model Context Protocol (MCP) server provides, in the order it lists them. Descriptions are the exact text the server ships for each tool.
+This catalog lists the 16 tools the Moodle Model Context Protocol (MCP) server provides, in the order it lists them. Descriptions are the exact text the server ships for each tool.
 
-Eleven tools are read-only and available on every Moodle MCP surface: the local stdio server (`moodle mcp serve`), the bridge (`moodle mcp bridge`), and the remote Worker (Bearer or OAuth). `submit` is the exception — it needs the files it uploads to sit on the same machine as the server, so it is local-only.
+Fifteen tools are read-only and available on every Moodle MCP surface: the local stdio server (`moodle mcp serve`), the bridge (`moodle mcp bridge`), and the remote Worker (Bearer or OAuth). `submit` is the exception — it needs the files it uploads to sit on the same machine as the server, so it is local-only.
 
 For how these surfaces differ, see [How MCP works](/mcp/how-it-works). For argument syntax on the CLI equivalents, see [`/moodle/reference`](/moodle/reference/index).
 
 ### home
 
-Today, timezone, due items and unread counts. Use when: dashboard. Not for: due for longer deadline lists. Refs: days defaults to 14. Then: unit or item. Cost: small dashboard.
+Today's date and timezone, items due soon, unread counts and the current section of each unit. Use when the user says "dashboard". Instead: due for longer deadline lists. Input: days defaults to 14. Then: unit or item. Cost: small dashboard.
 
 <ParamField path="days" type="integer" default="14">
   Window size in days. Minimum 1, maximum 365.
@@ -21,7 +21,7 @@ Available on: local, bridge, remote. Read-only.
 
 ### due
 
-Items due in a date window. Use when: deadlines. Not for: item for submission details. Refs: unit code, name, id or URL. Then: item with activity_id. Cost: up to 20 rows by default.
+Items due in a date window. Use when the user says "deadlines". Instead: item for submission details. Input: unit code, name, id or URL. Then: item with activity_id. Cost: up to 20 rows by default.
 
 <ParamField path="unit" type="string | integer">
   Unit code, name, id or URL. Omit to cover every enrolled unit.
@@ -39,7 +39,7 @@ Available on: local, bridge, remote. Read-only.
 
 ### units
 
-Enrolled units with ids, codes and names. Use when: unit names. Not for: unit for sections. Refs: none. Then: unit with a name or id. Cost: small list.
+Enrolled units with ids, codes and names. Use when the user says "unit names". Instead: unit for sections. Input: none. Then: unit with a name or id. Cost: small list.
 
 <ParamField path="limit" type="integer" default="200">
   Maximum units to return. Minimum 1, maximum 200.
@@ -49,7 +49,7 @@ Available on: local, bridge, remote. Read-only.
 
 ### unit
 
-Section index and current section; section argument returns activities and files. Use when: a unit or section. Not for: find for a named item. Refs: unit code, name, id or URL; section number or name. Then: item or file with activity id. Cost: index about 4 KB; section about 0.5 KB.
+Section index and current section; section argument returns activities and files. Use when the user says "a unit or section". Instead: find for a named item. Input: unit code, name, id or URL; section number or name. Then: item or file with activity id. Cost: index about 4 KB; section about 0.5 KB.
 
 <ParamField path="unit" type="string | integer" required>
   Unit code, name, id or URL.
@@ -63,7 +63,7 @@ Available on: local, bridge, remote. Read-only.
 
 ### find
 
-Ranked sections, activities and discussion subjects. Use when: find slides or a task. Not for: search_forums for post text; due for deadlines. Refs: query and optional unit code, name, id or URL. Then: item or file with id. Cost: up to 20 rows by default.
+Ranked sections, activities and discussion subjects. Use when the user says "find slides or a task". Instead: search_forums for post text; due for deadlines. Input: query and optional unit code, name, id or URL. Then: item or file with id. Cost: up to 20 rows by default.
 
 <ParamField path="query" type="string" required>
   Search text. At least 1 character.
@@ -85,7 +85,7 @@ Available on: local, bridge, remote. Read-only.
 
 ### item
 
-Activity due dates, status, grades, files, or latest forum threads. Use when: submission or item detail. Not for: file for binary content. Refs: id, same-site URL, or UNIT TASK phrase. Then: file with id or files URL. Cost: one item.
+One activity in full: due date, status, grade, marker feedback with rubric or marking-guide rows and feedback files, attached files, quiz attempts, or a forum's latest threads. Use when the user says "submission or item detail". Instead: file for binary content; attempt for quiz answers. Input: id, same-site URL, or UNIT TASK phrase. Then: file with a file id, or attempt with an attempt id. Cost: one item.
 
 <ParamField path="ref" type="string | integer" required>
   Activity id, a same-site URL, or a `UNIT TASK` phrase.
@@ -93,23 +93,57 @@ Activity due dates, status, grades, files, or latest forum threads. Use when: su
 
 Available on: local, bridge, remote. Read-only.
 
+### attempt
+
+Each question with your response, and mark, correct answer and feedback when the site shows them. Use when the user says "a quiz attempt". Instead: item for the attempt list. Input: attempt id or review URL. Then: item with quiz_id. Cost: one attempt.
+
+<ParamField path="attempt" type="string | integer" required>
+  Attempt id or the attempt's review URL.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
 ### grades
 
-Grades across units or in one unit. Use when: my grades. Not for: item for submission status. Refs: optional unit code, name, id or URL. Then: item for an ungraded task. Cost: graded_only narrows output.
+Marked items; summary counts; all adds ungraded; feedback opt-in. Use when the user says "grades". Instead: item for rubrics. Input: unit; types: assign, quiz, h5pactivity. Then: offset; item id. Cost: 20 rows total.
 
 <ParamField path="unit" type="string | integer">
   Unit code, name, id or URL. Omit to cover every enrolled unit.
 </ParamField>
 
-<ParamField path="graded_only" type="boolean" default="false">
-  Return only items that already have a grade.
+<ParamField path="mode" type="string" default="graded">
+  `graded` lists items that have a grade, `all` adds ungraded items, and `summary` returns only per-unit counts and totals.
+</ParamField>
+
+<ParamField path="types" type="string[]">
+  Activity types to include, such as `assign`, `quiz` or `h5pactivity`. Omit to include every type.
+</ParamField>
+
+<ParamField path="include_feedback" type="boolean" default="false">
+  Include the marker's feedback with each item.
+</ParamField>
+
+<ParamField path="include_ungraded" type="boolean" default="false">
+  Include ungraded items in `graded` mode.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="20">
+  Maximum rows to return across all units. Minimum 1, maximum 200.
+</ParamField>
+
+<ParamField path="offset" type="integer" default="0">
+  Rows to skip, for paging.
+</ParamField>
+
+<ParamField path="graded_only" type="boolean">
+  Older spelling of `mode: "graded"`. When `true`, it overrides `mode`.
 </ParamField>
 
 Available on: local, bridge, remote. Read-only.
 
 ### news
 
-Latest announcement threads with first-post text. Use when: announcements. Not for: search_forums for other discussions. Refs: optional unit code, name, id or URL. Then: thread with discussion id. Cost: up to 5 announcements by default.
+Latest announcement threads with first-post text. Use when the user says "announcements". Instead: search_forums for other discussions. Input: optional unit code, name, id or URL. Then: thread with discussion id. Cost: up to 5 announcements by default.
 
 <ParamField path="unit" type="string | integer">
   Unit code, name, id or URL. Omit to cover every enrolled unit.
@@ -123,7 +157,7 @@ Available on: local, bridge, remote. Read-only.
 
 ### thread
 
-A discussion and a page of compact posts, with attachment links. Use when: discussion posts. Not for: news for announcements. Refs: discussion_id; offset and limit. Then: increase offset while posts_total exceeds returned. Cost: up to 20 posts by default.
+A discussion and a page of compact posts, with attachment links. Use when the user says "discussion posts". Instead: news for announcements. Input: discussion_id; offset and limit. Then: increase offset while posts_total exceeds returned. Cost: up to 20 posts by default.
 
 <ParamField path="discussion_id" type="integer" required>
   Discussion id. Must be greater than 0.
@@ -141,7 +175,7 @@ Available on: local, bridge, remote. Read-only.
 
 ### search_forums
 
-Matching posts with unit and forum name maps. Use when: forum post text. Not for: find for activity names. Refs: query, optional unit or courseId and forumId. Then: thread with discussion_id. Cost: bounded forum scan; total covers scanned scope.
+Matching posts with unit and forum name maps. Use when the user says "forum post text". Instead: find for activity names. Input: query, optional unit or courseId and forumId. Then: thread with discussion_id. Cost: bounded forum scan; total covers scanned scope.
 
 <ParamField path="query" type="string" required>
   Search text. At least 1 character.
@@ -191,7 +225,7 @@ Available on: local, bridge, remote. Read-only.
 
 ### submit
 
-Upload local files into an assignment; returns the receipt Moodle shows afterwards. Use when: upload assignment files. Not for: item for status only. Refs: assignment id, same-site URL or UNIT TASK phrase; local file paths. Then: dry_run (default) only plans; show the plan to the person, then rerun with dry_run false; final submits for grading and cannot be undone. Cost: writes to Moodle.
+Upload local files into an assignment; returns the receipt Moodle shows afterwards. Use when the user says "upload assignment files". Instead: item for status only. Input: assignment id, same-site URL or UNIT TASK phrase; local file paths. Then: dry_run (default) only plans; show the plan to the person, then rerun with dry_run false; final submits for grading and cannot be undone; without a draft stage saving is the submission, so it is refused unless final is true. Cost: writes to Moodle.
 
 <ParamField path="ref" type="string | integer" required>
   Assignment id, a same-site URL, or a `UNIT TASK` phrase.
@@ -199,6 +233,14 @@ Upload local files into an assignment; returns the receipt Moodle shows afterwar
 
 <ParamField path="files" type="string[]" default="[]">
   Local file paths to upload. At most 20.
+</ParamField>
+
+<ParamField path="text" type="string">
+  Online text to save. Blank lines preserve paragraphs.
+</ParamField>
+
+<ParamField path="text_file" type="string">
+  Local Markdown, text or HTML file to read the online text from.
 </ParamField>
 
 <ParamField path="final" type="boolean" default="false">
@@ -221,10 +263,56 @@ Available on: **local only** (`moodle mcp serve`). Writes to Moodle when `dry_ru
 
 ### file
 
-One authenticated file as embedded content, at most 16 MiB. Use when: download a file. Not for: item for file choices. Refs: resource id, same-site URL, or UNIT TASK phrase. Then: read the returned resource. Cost: binary content up to 16 MiB.
+One authenticated file: an image as image content, anything else as embedded binary, at most 16 MiB. Use when the user says "download a file". Instead: item for file choices. Input: id of a one-file activity, file or activity URL, or UNIT TASK phrase. Then: read the returned image or resource. Cost: binary content up to 16 MiB.
 
 <ParamField path="ref" type="string | integer" required>
   Resource id, a same-site URL, or a `UNIT TASK` phrase.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
+### messages
+
+Direct and group conversations with unread counts and the latest message. Use when the user says "messages". Instead: conversation for messages. Input: limit and offset. Then: conversation with id. Cost: 20 conversations.
+
+<ParamField path="limit" type="integer" default="20">
+  Maximum conversations to return. Minimum 1, maximum 200.
+</ParamField>
+
+<ParamField path="offset" type="integer" default="0">
+  Conversations to skip, for paging.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
+### conversation
+
+A conversation's latest messages in chronological order; does not mark them read. Use when the user says "read a conversation". Instead: messages for conversation ids. Input: conversation_id, limit and offset (from newest). Then: increase offset for older messages. Cost: 50 messages by default.
+
+<ParamField path="conversation_id" type="integer" required>
+  Conversation id, from `messages`.
+</ParamField>
+
+<ParamField path="limit" type="integer" default="50">
+  Maximum messages to return. Minimum 1, maximum 200.
+</ParamField>
+
+<ParamField path="offset" type="integer" default="0">
+  Messages to skip, counted from the newest.
+</ParamField>
+
+Available on: local, bridge, remote. Read-only.
+
+### calendar
+
+All course, user and site calendar events in the date window. Use when the user says "calendar events". Instead: due for actionable deadlines. Input: days and optional unit. Then: item for an activity. Cost: one page plus one view per month.
+
+<ParamField path="days" type="integer" default="14">
+  Window size in days. Minimum 1, maximum 365.
+</ParamField>
+
+<ParamField path="unit" type="string | integer">
+  Unit code, name, id or URL. Omit to cover every enrolled unit.
 </ParamField>
 
 Available on: local, bridge, remote. Read-only.

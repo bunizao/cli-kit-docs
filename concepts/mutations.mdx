@@ -11,9 +11,15 @@ Most commands across the three CLIs only read. The ones that write are marked `m
 
 <Tabs>
   <Tab title="Moodle">
-    - `submit` — upload local files into an assignment
+    - `submit`, `submission remove` — upload files into an assignment, or remove your submission
+    - `quiz start`, `quiz answer`, `quiz finish` — take a quiz (beta)
+    - `complete` — mark an activity complete, or incomplete with `--undo`
+    - `threads reply`, `forums post` — post to a forum
+    - `forums subscribe` / `forums unsubscribe` — change a forum subscription
+    - `messages send` — send a direct or group message
+    - `alerts read`, `messages read` — mark notifications or conversations read
+    - `update` — update the package and redeploy the managed Worker
     - `uninstall` — remove local background jobs, optionally the deployed Worker and configuration
-    - `auth login` — sign in through a CLI-controlled browser and capture the session
     - `auth keepalive install` / `auth keepalive uninstall` — install or remove the macOS keepalive launch agent
     - `mcp deploy`, `mcp login`, `mcp connect`, `mcp revoke`, `mcp pair`, `mcp remove`, `mcp session push` — managed MCP (Model Context Protocol) server lifecycle
   </Tab>
@@ -34,10 +40,10 @@ Most commands across the three CLIs only read. The ones that write are marked `m
   </Tab>
 </Tabs>
 
-Most of these are the write actions you'd expect (posting, submitting, sending). A few aren't obviously "writes" — `auth login`, `uninstall`, and the `mcp` lifecycle commands change local or deployed state rather than unit content, but they're still marked `mutating: true` the same way.
+Most of these are the write actions you'd expect (posting, submitting, sending). A few aren't obviously "writes": `update`, `uninstall` and the `mcp` lifecycle commands change local or deployed state rather than unit content, and `alerts read` and `messages read` change only what Moodle shows as unread. They're still marked `mutating: true` the same way. `moodle auth login` is not: it only writes your local session.
 
 <Note>
-  `mutating: true` labels a command as a write; it doesn't by itself add a prompt. In moodle-cli 0.9.2, only `submit`, `uninstall`, `auth keepalive install`, `auth keepalive uninstall`, `mcp deploy`, and `mcp connect --show-token` (only when revealing the token) show the plan-then-confirm flow below. `mcp remove` asks you to type the deployment's name instead of a `y/N` prompt, and `--yes` skips that too. `auth login`, `mcp login`, `mcp revoke`, `mcp pair` and `mcp session push` run immediately with no prompt at all — `mcp session push` requires `--stdin` instead, and the others take no `--yes` or `--dry-run` because there's nothing to confirm.
+  `mutating: true` labels a command as a write; it doesn't by itself add a prompt. In moodle-cli 0.12.0, every Moodle command in the list above shows the plan-then-confirm flow below except these: `mcp remove` asks you to type the deployment's name instead of a `y/N` prompt, and `--yes` skips that too; `mcp connect` confirms only with `--show-token`, when it reveals the token; `update`, `mcp login` and `mcp pair` run immediately with no prompt; `mcp session push` requires `--stdin` instead.
 </Note>
 
 ## The plan → confirm → apply flow

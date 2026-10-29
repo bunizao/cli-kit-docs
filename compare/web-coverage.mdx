@@ -8,31 +8,30 @@ icon: globe
 This page lists what each platform's web UI offers, split into what its CLI covers, partially covers, and doesn't cover at all — use it to decide whether a task still needs a browser.
 
 <Note>
-  Coverage below was last checked against `moodle-cli` 0.9.2, `edstem-cli` 0.7.0 and `ontrack` 0.3.2, so newer releases may close some gaps. A platform's web UI moves independently of these CLIs; recheck this page against a new release before relying on a gap being closed.
+  Coverage below was last checked against `moodle-cli` 0.9.2, `edstem-cli` 0.7.0 and `ontrack` 0.4.0, so newer releases may close some gaps. A platform's web UI moves independently of these CLIs; recheck this page against a new release before relying on a gap being closed.
 </Note>
 
 ## Moodle
 
 <Tabs>
   <Tab title="Covered">
-    - Enrolled units, with section browsing — `units`, `activities`
+    - Enrolled units, with section browsing — `courses`, `activities`
     - Deadlines and the calendar's actionable timeline — `due`, `todo`
     - Grades and feedback — `grades`
     - Announcements (forum-type posts) — `news`
     - Forum discussion reading and search — `threads`, `forums`
     - Resource, folder and assignment file download — `download`, `get`
     - Assignment file submission, draft or final — `submit`
-    - Notification and unread message counts — `alerts`
+    - Notifications and direct or group messages, including sending — `alerts`, `messages`
+    - Taking a quiz and reviewing your attempts (beta) — `quiz`, `attempt`
     - Opening a unit or activity in the browser from a reference — `open`
   </Tab>
   <Tab title="Partially covered">
     - **Search:** `find` ranks sections, activities and discussion subjects against a query, but it's a heuristic match over what the CLI has already fetched, not Moodle's own global search index — it won't find text inside a page's body the way Moodle's site-wide search can.
-    - **Forums:** reading and searching discussions is covered; there's no way to reply, edit, or delete a post from the CLI.
+    - **Forums:** reading, searching, replying, starting a discussion and subscribing are covered; there's no way to edit or delete a post from the CLI.
     - **Folder downloads:** a folder activity exposes its individual files so you can choose which to save, but there's no single "download everything in this unit" command.
   </Tab>
   <Tab title="Not covered">
-    - Taking a quiz or reviewing quiz attempts
-    - Private messaging between users
     - Calendar export or subscription (iCal feed)
     - Wiki, glossary and database activities
     - Badges and competencies
@@ -42,7 +41,7 @@ This page lists what each platform's web UI offers, split into what its CLI cove
   </Tab>
 </Tabs>
 
-Write side: only `submit` changes anything on Moodle. Everything else in this CLI is read-only.
+Write side: the commands listed under Moodle in [Mutations](/concepts/mutations#every-mutating-command) change something on Moodle; everything else is read-only.
 
 ## Ed Discussion
 
@@ -77,10 +76,10 @@ Write side: `threads send`, `replies send`, `lessons mark-read`, `slides submit`
 
 <Tabs>
   <Tab title="Covered">
-    - Enrolled units — `units`
+    - Enrolled units — `courses`
     - Tasks, their status and due dates — `tasks list`
     - A task sheet, converted to Markdown from its source PDF — `tasks read`
-    - Task and whole-unit resource downloads — `tasks get`, `units get`
+    - Task and whole-unit resource downloads — `tasks get`, `courses get`
     - Task workflow state (self-reported: not started, working on it, need help) — `tasks set`
     - Task file submission — `tasks submit`
     - Task chat history and sending a message — `chats read`, `chats send`

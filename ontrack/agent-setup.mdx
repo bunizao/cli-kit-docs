@@ -40,23 +40,23 @@ Setting `ONTRACK_BASE_URL` also works, but only for the current shell. Prefer th
 
 ## Get the user signed in
 
-Ask the user to sign in to OnTrack in Chrome, Edge, Firefox or Safari if they have not already, then run `ontrack auth login`.
+Sign-in needs the user's hands. Run `ontrack auth login --browser`: it opens a private browser window. Ask the user to sign in there and tick "Remember me", so later sessions renew without them. Wait for them to say it finished.
 
-- If it reuses the browser session, sign-in is done.
-- If it opens the SAML sign-in instead, it prints a one-time snippet. This step needs the user's hands: ask them to run `ontrack auth login` in their own terminal (in Claude Code, `! ontrack auth login`), sign in in the browser tab it opens, then paste the snippet into that tab's DevTools console. The snippet only works for that attempt and expires after five minutes. Wait for them to say it finished.
+- If no Chrome, Edge, Brave or Chromium is installed, ask the user to run `ontrack auth login --paste` in their own terminal (in Claude Code, `! ontrack auth login --paste`) and paste the credentials it asks for. Never ask them to paste credentials into the chat.
+- If `ontrack auth status --local` later shows `renewal_expires_at` under 24 hours away, ask the user to sign in to OnTrack in their browser or run `ontrack auth login` again.
 
 See [Sign in](/ontrack/sign-in) for what each path does and stores.
 
 ## Verify
 
 1. Run `ontrack auth status --json`. It should report an active session for the site you configured.
-2. Run `ontrack units list --json`. Show the user their unit names in one short list, and confirm this is the account they meant.
+2. Run `ontrack courses list --json`. Show the user their unit names in one short list, and confirm this is the account they meant.
 
 Do not report success until both commands work. See [Troubleshooting](/ontrack/troubleshooting) for specific errors.
 
 ## Install the agent skill
 
-Run `npx skills add https://github.com/bunizao/ontrack-cli`. The skill teaches agents which `ontrack` command answers which request. See [Agent skills](/agents/skills).
+In Claude Code, run `claude plugin marketplace add bunizao/ontrack-cli`, then `claude plugin install ontrack-cli@ontrack-cli`. Elsewhere, run `npx skills add https://github.com/bunizao/ontrack-cli`. The skill teaches agents which `ontrack` command answers which request. See [Agent skills](/agents/skills).
 
 ## Finish
 

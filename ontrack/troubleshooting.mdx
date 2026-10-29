@@ -6,35 +6,71 @@ icon: wrench
 
 Every error goes to stderr; `--json` prints it in the same shape described in [Errors and exit codes](/concepts/errors-and-exit-codes). This page covers what you'll actually see and how to fix it. For the exact exit code and `error.code` behind each one, see [OnTrack CLI for scripts and agents](/developers/ontrack#error-codes-and-exit-codes).
 
-## Browser-cookie extraction failing
+## Diagnose with doctor
 
-**Permission denied (`EPERM`/`EACCES`) reading a browser's cookies**
-
-```text
-Permission denied while reading Chrome cookies (EACCES). In System Settings > Privacy & Security >
-Files & Folders, enable Chrome for the terminal or app that launched ontrack, then retry.
+```bash
+ontrack doctor
+ontrack doctor --live --cookies
 ```
 
-Grant the listed permission (macOS) or rerun the terminal with access to the browser's profile directory (Linux/Windows), then retry.
+`doctor` checks that the session file can be read, whether a renewal path exists, which browser the CLI can open and whether your site's sign-in can be found. It prints the whole report and exits with code 3 when the site is unreachable, the session file can't be read, or the `--live` check fails. A missing browser or renewal path shows in the report without changing the exit code. `--live` also calls OnTrack with your session; `--cookies` also reads your everyday browsers' cookies, which can ask for OS permission. It never prints tokens or cookie values.
 
-**macOS Keychain prompt not approved**
+Credentials set in the environment or the config file override the session file. If `doctor` passes but commands still fail, remove an invalid override, then run `auth login`.
+
+## Sign-in expiring soon
 
 ```text
-macOS Keychain did not authorize Chrome cookie decryption. Approve the Touch ID prompt for
-ontrack, then retry.
+OnTrack sign-in expires in about 9 hours. Sign in on the OnTrack website or run `ontrack auth login` to renew it.
 ```
 
-Approve the Keychain prompt when it appears — it can be easy to miss behind the terminal window — then retry.
+The renewal credential is in its last 24 hours, and renewing the session doesn't extend it. Sign in to OnTrack in your everyday browser or run `ontrack auth login`. Once it has lapsed, commands fail with `No active OnTrack browser session was found.`; run `auth login`. If you never ticked "Remember me", there's no renewal credential, so you'll be asked to sign in whenever the session expires.
 
-**No cookies found at all**
+## CLI browser problems
 
-If every browser comes back empty (none installed, none signed in, or a cookie database that doesn't exist), `ontrack` doesn't error — it falls straight through to the SAML sign-in flow described in [Sign in](/ontrack/sign-in#the-saml-fallback-and-its-console-snippet).
+**No browser to open**
 
-## SAML snippet flow problems
+```text
+No Chromium-family browser is installed.
+```
 
-- **Waited too long.** The local callback server times out after 5 minutes. Rerun `ontrack auth login` and paste the snippet promptly after signing in.
-- **Pasted the snippet, nothing happened.** Confirm you pasted it into the OnTrack tab that finished signing in, not a different tab — the snippet reads that tab's own session.
-- **"Sign-in could not be completed."** The snippet's request didn't return a valid token, or the token was already expired by the time it arrived. Rerun `ontrack auth login`.
+`--browser` needs Chrome, Edge, Brave or Chromium. Install one, or sign in with `ontrack auth login --paste`.
+
+**The browser closed before sign-in completed**
+
+Another `ontrack` sign-in or renewal may be using the same private profile. Wait for it to finish, then retry.
+
+**Timed out**
+
+`Timed out waiting for sign-in.` means the window stayed open without a finished sign-in. Complete the sign-in, then retry. `Timed out renewing the session in the background browser.` means automatic renewal needs you: run `ontrack auth login`.
+
+## Reading your everyday browser's cookies
+
+`--reuse-browser` doesn't stop when it can't read a browser's cookies. It prints one line and falls through to the one-time DevTools snippet described in [Sign in](/ontrack/sign-in#choose-a-sign-in-path):
+
+```text
+Browser cookie warning: Direct browser-cookie reuse is unavailable. Continuing with loopback sign-in.
+```
+
+To see why, run `ontrack doctor --cookies`:
+
+- `Browser data access is denied for this terminal or app.` On macOS, allow the terminal or app that launched `ontrack` under System Settings > Privacy & Security > Files & Folders. On Linux or Windows, run the terminal with access to the browser's profile directory.
+- `Keychain did not authorize browser cookie decryption.` Approve the Keychain prompt when it appears; it can hide behind the terminal window.
+
+Or skip this path: `ontrack auth login --browser` never reads your everyday browser's files.
+
+## DevTools snippet problems
+
+- **Waited too long.** The CLI waits 5 minutes for the snippet. Rerun `ontrack auth login --manual` and paste it promptly after signing in.
+- **Pasted the snippet, nothing happened.** Paste it into the OnTrack tab that finished signing in, not another tab.
+- **"Sign-in could not be completed."** The snippet didn't return a valid session. Rerun `ontrack auth login`.
+
+## Session file errors
+
+```text
+Could not decrypt the authenticated session cache.
+```
+
+This, or `The session encryption key is unavailable.`, means `ontrack` can't read its encrypted session, usually because the OS key store refused access or the key was removed. The old file is kept. Run `ontrack auth login` to sign in again, and approve the key store prompt if one appears.
 
 ## Wrong base URL
 
@@ -48,10 +84,6 @@ Base URL must be the site root.
 ```
 
 The first means nothing is configured yet — see [Install](/ontrack/install#point-it-at-your-site). The second means `base_url` has a path, query string or credentials in it; it must be exactly the site's origin, for example `https://ontrack.example.edu` with nothing after it.
-
-## Expired session
-
-A cached session past its expiry is treated as absent, not as an error on its own — `ontrack` retries the browser-cookie exchange automatically before falling back to `auth login`. If sign-in still fails right after a session should have been valid, the automatic retry also failed; run `ontrack auth login` directly.
 
 ## Ambiguous UNIT
 
