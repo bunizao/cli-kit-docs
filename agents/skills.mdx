@@ -1,13 +1,31 @@
 ---
 title: Agent skills
-description: Install the generated skill bundle so a coding agent knows which command answers which request.
+description: Install the generated skill so a coding agent knows which command answers which request.
 sidebarTitle: Skills
 icon: sparkles
 ---
 
-Each CLI ships a `SKILL.md` file that teaches an agent its command surface without the agent having to read the whole `--help` tree first. Installing it is the same three-step shape everywhere: fetch the bundle, let the agent read it, run commands from it.
+Each CLI ships a skill: a `SKILL.md` file that tells an agent when to use the tool and which command answers which request, without reading the whole `--help` tree first.
 
-## Install
+## Install in Claude Code
+
+`moodle` and `ontrack` are Claude Code plugins. Each repository is also its own plugin marketplace:
+
+```bash
+claude plugin marketplace add bunizao/moodle-cli
+claude plugin install moodle-cli@moodle-cli
+```
+
+```bash
+claude plugin marketplace add bunizao/ontrack-cli
+claude plugin install ontrack-cli@ontrack-cli
+```
+
+The `moodle-cli` plugin also starts a local MCP server, so Claude Code can use the Moodle tools without the CLI on `PATH`. The `ontrack-cli` plugin carries the skill alone, because `ontrack` has no MCP server.
+
+## Install with the skills CLI
+
+For Codex and other agents, install the skill alone:
 
 ```bash
 npx skills add https://github.com/bunizao/moodle-cli
@@ -15,37 +33,30 @@ npx skills add https://github.com/bunizao/edstem-cli
 npx skills add https://github.com/bunizao/ontrack-cli
 ```
 
-Each CLI also wraps this in its own command, so you don't have to remember the `skills` package's own invocation:
+`moodle skills add` runs the first command for you. `npx skills add` writes the skill under `.agents/skills/<name>/` in the current project and records what it installed in a `skills-lock.json` next to it, so a later run can tell whether the installed copy still matches its source.
 
-```bash
-moodle skills add       # shells out to `npx skills add` for you
-edstem skills generate  # regenerates SKILL.md locally; install it with npx skills add
-ontrack skills generate # regenerates SKILL.md locally; install it with npx skills add
-```
+`edstem skills generate` and `ontrack skills generate` rebuild the skill from the CLI's own commands. You need them only when you change a CLI's commands, not to install the skill.
 
-Only moodle has a `skills add` subcommand. `edstem` and `ontrack` have `skills generate` alone — it rebuilds the tracked `SKILL.md` from the CLI's own commands, which is what you'd run if you were contributing to one of these repos, not what a person installing the skill runs day to day.
+## What a skill contains
 
-## What `SKILL.md` contains
+Each skill is generated from its CLI's `commands --json` output, so it cannot drift from what the binary does. `moodle-cli` and `ontrack` live in `skills/<name>/` in their repositories and contain:
 
-Every `SKILL.md` in the family is generated from that CLI's own `commands --json` output, not hand-written, so it can't drift from what the binary actually does without someone noticing. It typically has:
+- A description that says when to use the skill, with requests phrased the way students ask them, and which requests belong to one of the other two tools.
+- A table of what a person asks for, the command that answers it, and, for `moodle`, the matching MCP tool. `UNIT`, `TASK` and `SECTION` are placeholders, never real identifiers.
+- Checklists for changes: dry-run, confirm, apply with `--yes`, read the result back. Submitting a Moodle assignment has its own checklist.
+- A short list of rules, each with its reason: prefer the narrowest command, keep tokens out of replies, follow an error's hint.
+- `references/commands.md`: every command with its arguments, options and whether it changes anything upstream, plus the exit codes.
 
-- An intent table — what a person or agent might ask for, mapped to the exact command, with `UNIT`/`TASK`/`SECTION` placeholders instead of real identifiers.
-- A short list of agent rules: prefer the narrowest command, use `read` for Markdown output, treat mutating commands as needing explicit intent plus confirmation or `--yes`, never print a token or session cookie.
-- A full command reference table (arguments, options, mutating flag) or a pointer to `commands --json` for the exact machine-readable version.
-- The exit-code table.
+`edstem-cli` still ships a single `SKILL.md` at the repository root with the command table inline.
 
 <Info>
-  `moodle-cli` and `edstem-cli` verify automatically that `SKILL.md` still matches the CLI's actual commands, so the bundle can't ship stale. `ontrack` doesn't run that check yet — if you edit `ontrack`'s commands, regenerating the skill locally before committing is on you.
+  All three repositories check in their tests that the committed skill matches the CLI's commands, so a release cannot ship a stale skill.
 </Info>
-
-## Where skills install
-
-`npx skills add <url>` is the shared installer across all three. It writes the skill's files under `.agents/skills/<name>/` in the current project and records what it installed in a `skills-lock.json` alongside it, so a later run can tell whether the installed copy still matches its source.
 
 ## Codex
 
-`moodle-cli` additionally ships `agents/openai.yaml`, a Codex-specific agent manifest (display name, short description, and a default prompt: *"Use $moodle-cli to inspect my Moodle data, retrieve a file through MCP, or download selected files locally with the narrowest relevant operation."*). It's generated alongside `SKILL.md` and kept in sync the same way. Neither `edstem-cli` nor `ontrack` ships a Codex-specific manifest at this version.
+`moodle-cli` and `ontrack` each ship `agents/openai.yaml` next to their skill: a display name, a short description and a default prompt for Codex. `edstem-cli` does not ship one at this version.
 
 <Card title="Prompting an agent" icon="messages-square" href="/agents/prompting">
-  The intent → command mapping these skill bundles are built from, merged across all three tools.
+  The request-to-command mapping these skills are built from, merged across all three tools.
 </Card>

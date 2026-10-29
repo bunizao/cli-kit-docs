@@ -246,7 +246,8 @@
               "ontrack/reference/index",
               "ontrack/reference/user",
               "ontrack/reference/auth",
-              "ontrack/reference/units",
+              "ontrack/reference/doctor",
+              "ontrack/reference/courses",
               "ontrack/reference/tasks",
               "ontrack/reference/chats",
               "ontrack/reference/roles",
@@ -337,5 +338,11 @@
       "light": "#F5F4EF",
       "dark": "#08080A"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/ontrack/reference/units",
+      "destination": "/ontrack/reference/courses"
+    }
+  ]
 }

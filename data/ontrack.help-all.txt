@@ -1,12 +1,12 @@
 $ ontrack --help
-ontrack v0.3.2
+ontrack v0.4.0
 Work with OnTrack tasks and chats from the command line
 
 Usage
   ontrack [options] [command]
 
 Core commands
-  units, courses, projects  Enrolled units
+  courses, units, projects  Enrolled units
   tasks                     Tasks in a unit: list, read, submit, set state
   chats                     Read and send task chat messages
 
@@ -14,6 +14,8 @@ Additional commands
   user                      Show the signed-in user
   roles                     Teaching roles you hold
   auth                      Manage authentication
+  doctor                    Diagnose authentication, cache, browser, and site
+                            discovery
 
 Agent commands
   commands                  Describe the complete command tree
@@ -60,9 +62,11 @@ Usage
   ontrack auth [options] [command]
 
 Commands
-  login   Sign in through OnTrack
-  status  Validate current credentials
-  logout  Remove the cached session
+  login             Sign in through OnTrack
+  status            Validate current credentials
+  keepalive, renew  Renew and verify the session once without an interactive
+                    sign-in
+  logout            Remove the cached session
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -78,6 +82,16 @@ Sign in through OnTrack
 Usage
   ontrack auth login [options]
 
+Options
+  --browser              Sign in in a browser owned by the CLI
+  --reuse-browser        Reuse cookies from your existing browser, or sign in
+                         manually
+  --paste                Read renewal cookies, a cURL command, or a sign-in
+                         response securely
+  --manual               Sign in using the manual DevTools snippet
+  --username <username>  Username for a bare refresh cookie with --paste
+  -h, --help             Show help
+
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
   --no-color, --yes, --dry-run
@@ -89,6 +103,22 @@ Validate current credentials
 
 Usage
   ontrack auth status [options]
+
+Options
+  --local     Inspect cache and renewal state without network requests
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack auth keepalive --help
+ontrack auth keepalive
+Renew and verify the session once without an interactive sign-in
+
+Usage
+  ontrack auth keepalive [options]
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -107,12 +137,29 @@ Global options
   --no-color, --yes, --dry-run
 
 
-$ ontrack units --help
-ontrack units
+$ ontrack doctor --help
+ontrack doctor
+Diagnose authentication, cache, browser, and site discovery
+
+Usage
+  ontrack doctor [options]
+
+Options
+  --live      Also verify a protected OnTrack endpoint
+  --cookies   Also probe existing browser cookies and report access problems
+  -h, --help  Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ ontrack courses --help
+ontrack courses
 Enrolled units
 
 Usage
-  ontrack units [options] [command]
+  ontrack courses [options] [command]
 
 Commands
   list         List units
@@ -123,15 +170,15 @@ Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
   --no-color, --yes, --dry-run
 
-Run 'ontrack units <command> --help' for details on a command.
+Run 'ontrack courses <command> --help' for details on a command.
 
 
-$ ontrack units list --help
-ontrack units list
+$ ontrack courses list --help
+ontrack courses list
 List units
 
 Usage
-  ontrack units list [options]
+  ontrack courses list [options]
 
 Options
   --include-inactive  Include past units
@@ -142,12 +189,12 @@ Global options
   --no-color, --yes, --dry-run
 
 
-$ ontrack units show --help
-ontrack units show
+$ ontrack courses show --help
+ontrack courses show
 Show one unit
 
 Usage
-  ontrack units show [options] <unit>
+  ontrack courses show [options] <unit>
 
 Arguments
   unit  Unit code, name or project id
@@ -157,12 +204,12 @@ Global options
   --no-color, --yes, --dry-run
 
 
-$ ontrack units get --help
-ontrack units get
+$ ontrack courses get --help
+ontrack courses get
 Download unit resources
 
 Usage
-  ontrack units get [options] <unit>
+  ontrack courses get [options] <unit>
 
 Arguments
   unit  Unit code, name or project id
@@ -454,7 +501,7 @@ Usage
   ontrack skills [options] [command]
 
 Commands
-  generate  Generate SKILL.md from the command tree
+  generate  Write the skill folder and plugin files into the current directory
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
@@ -465,7 +512,7 @@ Run 'ontrack skills <command> --help' for details on a command.
 
 $ ontrack skills generate --help
 ontrack skills generate
-Generate SKILL.md from the command tree
+Write the skill folder and plugin files into the current directory
 
 Usage
   ontrack skills generate [options]

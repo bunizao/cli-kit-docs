@@ -20,7 +20,7 @@ This page covers what a script author, agent builder, or contributor needs from 
 | `1` | `config` / `network` | No `base_url` configured, an invalid config file, or OnTrack unreachable | Set `ONTRACK_BASE_URL` or fix `config.yaml`; check connectivity |
 | `2` | `usage` | Bad flag or argument, an ambiguous `UNIT`, a mutation run without `--yes` | Fix the command; for ambiguity, rerun with the project ID it lists |
 | `3` | `auth` | No valid session; browser-cookie exchange and the session cache both failed | Run `ontrack auth login` |
-| `4` | `not_found` | `UNIT` or `TASK` doesn't resolve to anything you have access to | Check `ontrack units` / `ontrack tasks UNIT` for the exact reference |
+| `4` | `not_found` | `UNIT` or `TASK` doesn't resolve to anything you have access to | Check `ontrack courses` / `ontrack tasks UNIT` for the exact reference |
 | `5` | `upstream` | OnTrack returned something unexpected, or rejected the request outright (no task sheet, no resources) | Usually transient; rerun. A persistent one is a real OnTrack-side rejection |
 | `130` | `cancelled` | `Ctrl-C`, or a mutation declined at the confirmation prompt | Not a failure — rerun if you want to continue |
 
@@ -52,8 +52,8 @@ auth_token: <your-token>
 `ontrack` resolves a session in this order, stopping at the first that succeeds:
 
 1. **Explicit credentials.** `ONTRACK_USERNAME` + `ONTRACK_TOKEN` (or `ONTRACK_AUTH_TOKEN`) from the environment; failing that, `username` + `auth_token` from the config file. Either wins over everything below and is used directly on every run — no session file is read or written.
-2. **Cached session.** `session.json`, if it matches the current `base_url` and hasn't expired.
-3. **Browser-cookie exchange.** Tried automatically, using whichever supported browser has a usable session for the site.
+2. **Cached session.** `session.json`, if it matches the current `base_url` and its access token hasn't expired.
+3. **Renewal.** The renewal credential saved at sign-in, then a background sign-in with the private browser profile, then a session from your everyday browser. Each must return the same account.
 4. Nothing found: `ontrack` errors and tells you to run `ontrack auth login`.
 
 See [Configuration](/concepts/configuration) for how this fits the model every tool here shares.

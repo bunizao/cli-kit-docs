@@ -13,7 +13,7 @@ Each CLI reads its own YAML config file and its own set of environment variables
 | --- | --- | --- |
 | `moodle-cli` | `~/.config/moodle-cli/config.yaml` | `~/.cache/moodle-cli/session.json` — your session and profile fields, **encrypted at rest**, file and directory restricted to your user (`0600`/`0700`), expires after 24 hours |
 | `edstem-cli` | `~/.config/edstem-cli/config.yaml` | `~/.config/edstem-cli/token` — the API token, plaintext, file permissions restricted to your user (`0600`) |
-| `ontrack` | `~/.config/ontrack-cli/config.yaml` (or the platform default under `%APPDATA%` on Windows) | `session.json` next to the config file — plaintext, file permissions restricted to your user (`0600`) |
+| `ontrack` | `~/.config/ontrack-cli/config.yaml` (or the platform default under `%APPDATA%` on Windows) | `session.json` next to the config file — **encrypted at rest**, key in the OS key store, file restricted to your user (`0600`) |
 
 Only moodle's local session cache is encrypted, using your OS's own protected storage — the keychain on macOS and Linux, and the equivalent built-in protection on Windows. Ed's token file and OnTrack's session file rely on file permissions (owner-only read/write) rather than encryption — treat both as sensitive files the same way you'd treat an SSH key, and never put their contents in a script, a fixture, or a committed `.env` file.
 

@@ -5,18 +5,18 @@ sidebarTitle: Units and activities
 icon: layers
 ---
 
-This page covers the commands that inspect structure rather than a single item: `units`, `activities`, `todo`, `alerts`, `overview` and `user`. For the bare-target shortcuts (`moodle UNIT`, `moodle UNIT SECTION`), see [Daily use](/moodle/daily-use). For deadlines and grades in depth, see [Grades and deadlines](/moodle/grades-and-deadlines).
+This page covers the commands that inspect structure rather than a single item: `courses`, `activities`, `todo`, `alerts`, `overview` and `user`. For the bare-target shortcuts (`moodle UNIT`, `moodle UNIT SECTION`), see [Daily use](/moodle/daily-use). For deadlines and grades in depth, see [Grades and deadlines](/moodle/grades-and-deadlines).
 
 ## Units
 
 ```bash
-moodle units list
-moodle units show UNIT
+moodle courses list
+moodle courses show UNIT
 ```
 
-`units` also answers to `courses` — both are registered names for the same command, so `moodle courses list` and `moodle units list` behave identically.
+`courses` also answers to `units` and `projects`, so `moodle units list` behaves identically.
 
-`units list` shows every unit you're enrolled in — its code, name, dates and whether it's hidden. `units show UNIT` resolves `UNIT` (code, name, id or URL) to one unit and shows its section index: each section's name, how many activities it has, and which one is current. It does not include each section's activities; for that, use `moodle UNIT SECTION` or `activities list --section`.
+`courses list` shows every unit you're enrolled in — its code, name, dates and whether it's hidden. `courses show UNIT` resolves `UNIT` (code, name, id or URL) to one unit and shows its section index: each section's name, how many activities it has, and which one is current. It does not include each section's activities; for that, use `moodle UNIT SECTION` or `activities list --section`.
 
 See [`moodle units`](/moodle/reference/units) for the full flag list. Scripting this? See [Moodle CLI for scripts and agents](/developers/moodle#units) for the exact field names.
 

@@ -14,11 +14,35 @@ ontrack auth [options] [command]
 ontrack auth login [options]
 ```
 
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--browser` | Sign in in a browser owned by the CLI |
+| `--reuse-browser` | Reuse cookies from your existing browser, or sign in manually |
+| `--paste` | Read renewal cookies, a cURL command, or a sign-in response securely |
+| `--manual` | Sign in using the manual DevTools snippet |
+| `--username <username>` | Username for a bare refresh cookie with --paste |
+
 ## ontrack auth status
 
 ```bash
 ontrack auth status [options]
 ```
+
+**Options**
+
+| Flags | Description |
+| --- | --- |
+| `--local` | Inspect cache and renewal state without network requests |
+
+## ontrack auth keepalive
+
+```bash
+ontrack auth keepalive [options]
+```
+
+**Aliases:** `renew`
 
 ## ontrack auth logout
 

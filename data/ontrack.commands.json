@@ -1,6 +1,6 @@
 {
   "name": "ontrack",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Work with OnTrack tasks and chats from the command line.",
   "commands": [
     {
@@ -28,7 +28,38 @@
           "aliases": [],
           "description": "Sign in through OnTrack",
           "positionals": [],
-          "options": [],
+          "options": [
+            {
+              "flags": "--browser",
+              "description": "Sign in in a browser owned by the CLI",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--reuse-browser",
+              "description": "Reuse cookies from your existing browser, or sign in manually",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--paste",
+              "description": "Read renewal cookies, a cURL command, or a sign-in response securely",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--manual",
+              "description": "Sign in using the manual DevTools snippet",
+              "required": false,
+              "variadic": false
+            },
+            {
+              "flags": "--username <username>",
+              "description": "Username for a bare refresh cookie with --paste",
+              "required": true,
+              "variadic": false
+            }
+          ],
           "mutating": false,
           "commands": []
         },
@@ -37,6 +68,25 @@
           "noun": "auth",
           "aliases": [],
           "description": "Validate current credentials",
+          "positionals": [],
+          "options": [
+            {
+              "flags": "--local",
+              "description": "Inspect cache and renewal state without network requests",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "mutating": false,
+          "commands": []
+        },
+        {
+          "name": "keepalive",
+          "noun": "auth",
+          "aliases": [
+            "renew"
+          ],
+          "description": "Renew and verify the session once without an interactive sign-in",
           "positionals": [],
           "options": [],
           "mutating": false,
@@ -55,10 +105,33 @@
       ]
     },
     {
-      "name": "units",
-      "noun": "units",
+      "name": "doctor",
+      "noun": "doctor",
+      "aliases": [],
+      "description": "Diagnose authentication, cache, browser, and site discovery",
+      "positionals": [],
+      "options": [
+        {
+          "flags": "--live",
+          "description": "Also verify a protected OnTrack endpoint",
+          "required": false,
+          "variadic": false
+        },
+        {
+          "flags": "--cookies",
+          "description": "Also probe existing browser cookies and report access problems",
+          "required": false,
+          "variadic": false
+        }
+      ],
+      "mutating": false,
+      "commands": []
+    },
+    {
+      "name": "courses",
+      "noun": "courses",
       "aliases": [
-        "courses",
+        "units",
         "projects"
       ],
       "description": "Enrolled units",
@@ -68,7 +141,7 @@
       "commands": [
         {
           "name": "list",
-          "noun": "units",
+          "noun": "courses",
           "verb": "list",
           "aliases": [],
           "description": "List units",
@@ -86,7 +159,7 @@
         },
         {
           "name": "show",
-          "noun": "units",
+          "noun": "courses",
           "verb": "show",
           "aliases": [],
           "description": "Show one unit",
@@ -104,7 +177,7 @@
         },
         {
           "name": "get",
-          "noun": "units",
+          "noun": "courses",
           "verb": "get",
           "aliases": [],
           "description": "Download unit resources",
@@ -511,7 +584,7 @@
           "name": "generate",
           "noun": "skills",
           "aliases": [],
-          "description": "Generate SKILL.md from the command tree",
+          "description": "Write the skill folder and plugin files into the current directory",
           "positionals": [],
           "options": [],
           "mutating": false,
