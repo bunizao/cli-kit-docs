@@ -91,6 +91,50 @@
     }
   },
   {
+    "name": "list_grades",
+    "title": "List grades",
+    "description": "The user's own grades on the lessons of one course that take submissions, judged on the final submission: status (graded, ungraded, unreleased, not_submitted or unavailable), grade, max and submittedAt. Use when the user asks what they got, whether work is marked yet, or which assessed lessons they have not submitted. Not for lesson progress (list_lessons). queries are words that must all appear in the lesson or module name; omit them for every such lesson. max is the sum of Ed's slide totals; unreleased means staff have not released results. courseId accepts a numeric ID, a unit code, or part of the unit name. Cost: two Ed requests, plus two per submitted lesson.",
+    "inputSchema": {
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "courseId": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ],
+          "description": "Ed course ID, the unit code as Ed shows it, or part of the unit name (see list_courses). Do not assume a code format."
+        },
+        "queries": {
+          "default": [],
+          "description": "Case-insensitive words that must all appear in the lesson title or module name; at most 10. Omit for every lesson that takes submissions.",
+          "maxItems": 10,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "courseId"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
     "name": "get_lesson",
     "title": "Get lesson",
     "description": "One lesson with its slides and slide content. Use when the user asks what a lesson says or you need a slide id. Not for downloadable files (list_lesson_files) or quiz questions (list_slide_questions). lessonId comes from list_lessons. Cost: large for long lessons.",

@@ -1,5 +1,5 @@
 $ edstem --help
-edstem v0.8.3
+edstem v0.8.4
 Read and post on Ed Discussion from the command line
 
 Usage

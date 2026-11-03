@@ -8,7 +8,7 @@ Guides, command references and MCP setup instructions for three command-line too
 | Tool | Source repository | Documented version |
 | --- | --- | --- |
 | Moodle CLI | [moodle-cli](https://github.com/bunizao/moodle-cli) | 0.12.0 |
-| Ed Discussion CLI | [edstem-cli](https://github.com/bunizao/edstem-cli) | 0.8.3 |
+| Ed Discussion CLI | [edstem-cli](https://github.com/bunizao/edstem-cli) | 0.8.4 |
 | OnTrack CLI | [ontrack-cli](https://github.com/bunizao/ontrack-cli) | 0.4.0 |
 | unicorn | [unicorn](https://github.com/TuuHub/unicorn) | commit ae73c78 (database migrations through 0016) |
 

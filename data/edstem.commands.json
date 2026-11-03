@@ -1,6 +1,6 @@
 {
   "name": "edstem",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Read and post on Ed Discussion from the command line.",
   "commands": [
     {
