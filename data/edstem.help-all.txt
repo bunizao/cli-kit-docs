@@ -1,5 +1,5 @@
 $ edstem --help
-edstem v0.8.2
+edstem v0.8.4
 Read and post on Ed Discussion from the command line
 
 Usage
@@ -9,6 +9,7 @@ Core commands
   threads                   List, search, show, or read Ed threads
   replies                   Post replies to Ed threads
   lessons                   List, show, read, or mark lessons as read
+  grades                    List your own grades
   slides                    Show, read, or submit lesson slides
   files                     List or download Ed-hosted lesson and thread files
   units, courses, projects  List or show enrolled units
@@ -622,6 +623,41 @@ Options
                      given
   --delay <seconds>  Delay between slide updates (default: 0)
   -h, --help         Show help
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+
+$ edstem grades --help
+edstem grades
+List your own grades
+
+Usage
+  edstem grades [options] [command]
+
+Commands
+  list <unit> [queries...]  List your own final-submission grades in a unit; max
+                            is the sum of Ed's slide totals. Read-only.
+
+Global options
+  --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,
+  --no-color, --yes, --dry-run
+
+Run 'edstem grades <command> --help' for details on a command.
+
+
+$ edstem grades list --help
+edstem grades list
+List your own final-submission grades in a unit; max is the sum of Ed's slide
+totals. Read-only.
+
+Usage
+  edstem grades list [options] <unit> [queries...]
+
+Arguments
+  unit     Unit ID or code
+  queries  Words required in lesson or module names
 
 Global options
   --json, --yaml, --table, --fields <fields>, --output <file>, --verbose,

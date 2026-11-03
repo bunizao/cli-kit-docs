@@ -1,6 +1,6 @@
 {
   "name": "edstem",
-  "version": "0.8.2",
+  "version": "0.8.4",
   "description": "Read and post on Ed Discussion from the command line.",
   "commands": [
     {
@@ -884,6 +884,41 @@
             }
           ],
           "mutating": true,
+          "commands": []
+        }
+      ]
+    },
+    {
+      "name": "grades",
+      "noun": "grades",
+      "aliases": [],
+      "description": "List your own grades.",
+      "positionals": [],
+      "options": [],
+      "mutating": false,
+      "commands": [
+        {
+          "name": "list",
+          "noun": "grades",
+          "verb": "list",
+          "aliases": [],
+          "description": "List your own final-submission grades in a unit; max is the sum of Ed's slide totals. Read-only.",
+          "positionals": [
+            {
+              "name": "unit",
+              "description": "Unit ID or code",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "queries",
+              "description": "Words required in lesson or module names",
+              "required": false,
+              "variadic": true
+            }
+          ],
+          "options": [],
+          "mutating": false,
           "commands": []
         }
       ]
