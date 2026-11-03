@@ -1,0 +1,31 @@
+---
+title: "Grades"
+description: "List your own grades for the lessons in a unit that take submissions."
+---
+
+`edstem grades` lists your own grades in one unit. It only covers lessons that take submissions, and only your final submission counts.
+
+```bash
+edstem grades UNIT
+edstem grades UNIT assignment 1
+```
+
+`edstem grades UNIT` defaults to `list`. Every word after `UNIT` must appear in the lesson's title or its module name (case-insensitive, all words required), the same matching as `lessons mark-read`. With no words, every submission lesson in the unit is listed.
+
+## What each row means
+
+| `status` | Meaning |
+| --- | --- |
+| `graded` | Your final submission has a grade. `grade` and `max` are set. |
+| `ungraded` | You submitted, but it hasn't been marked yet. |
+| `unreleased` | Staff have marked it but not released results to students. |
+| `not_submitted` | You have no final submission for this lesson. |
+| `unavailable` | Ed refused or failed for this one lesson. `error` says why, and the rest of the unit is still listed. |
+
+`grade` uses a staff override when there is one. `max` is the sum of Ed's slide totals for the lesson, so it can differ from the mark scale shown in a lesson's own instructions. `submittedAt` is when your final submission was made.
+
+## Cost
+
+Besides finding the unit, one request for its lessons and one for your user, then two per lesson you submitted. Lessons you never submitted cost nothing extra, and up to three lessons are checked at once. An expired token or a lost connection stops the whole listing rather than marking every lesson `unavailable`.
+
+`grades` is read-only. It is not available as an MCP tool yet.
