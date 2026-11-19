@@ -237,6 +237,7 @@
               "ontrack/task-workflow",
               "ontrack/chats",
               "ontrack/roles",
+              "ontrack/mcp-server",
               "ontrack/configuration",
               "ontrack/troubleshooting"
             ]
