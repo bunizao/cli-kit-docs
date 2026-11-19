@@ -16,9 +16,9 @@ The rest of the page speaks to the agent.
 
 You are connecting the user's OnTrack account to the `ontrack` CLI. Take ownership of the setup. Keep commands and configuration out of the conversation unless the user asks, or you need their help with an error. Use the user's language.
 
-`ontrack` has no MCP server. Agents use it through the terminal and the agent skill. If the user asks to use OnTrack from a web AI app, tell them plainly that this is not available.
+If the user only asked to set up remote MCP and `ontrack auth status` already works, skip to [Offer remote access](#offer-remote-access).
 
-Never ask the user for their university password, a session cookie or an access token, and never print one.
+Never ask the user for their university password, their authenticator secret, a session cookie or an access token, and never print one.
 
 ## Install
 
@@ -57,6 +57,25 @@ Do not report success until both commands work. See [Troubleshooting](/ontrack/t
 ## Install the agent skill
 
 In Claude Code, run `claude plugin marketplace add bunizao/ontrack-cli`, then `claude plugin install ontrack-cli@ontrack-cli`. Elsewhere, run `npx skills add https://github.com/bunizao/ontrack-cli`. The skill teaches agents which `ontrack` command answers which request. See [Agent skills](/agents/skills).
+
+## Offer remote access
+
+After local verification succeeds, ask:
+
+> Do you want to use OnTrack from Claude on the web, ChatGPT or your phone too? It needs a free Cloudflare account and takes about five minutes.
+
+If they decline, finish with local access and mention that remote access can be added later.
+
+If they want it, the user does three steps in a browser. Run everything else yourself, and wait for them at each of those steps.
+
+1. Run `okta-auth --help`. If it is missing, install it with `npm install -g okta-auth-cli`.
+2. Run `okta-auth setup`. It opens a page in the user's browser. Ask them to save their Okta username, password and authenticator secret there, and to tell you when the test sign-in passes. If they don't know their authenticator secret, the page explains how to get one. Never ask for any of it in chat, and never run `okta-auth export`.
+3. Run `npx wrangler whoami`. If it is not signed in, run `npx wrangler login` and ask the user to approve Cloudflare in the browser it opens.
+4. Run `ontrack mcp deploy --json`. It deploys the server, signs it in to OnTrack through Okta, and prints `url` and `pairing_code`.
+5. Ask which AI app they use. Give them the `url` to add as a custom connector there, and the `pairing_code` to type on the approval page that opens. The code lasts ten minutes and approves one app. If it expires, or they want another app, run `ontrack mcp pair`.
+6. Run `ontrack mcp status --json` and check that `session.username` is their account.
+
+See [Remote MCP](/ontrack/mcp-server) for what the server can do and how it stays signed in.
 
 ## Finish
 

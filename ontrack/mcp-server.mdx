@@ -1,0 +1,88 @@
+---
+title: Remote MCP
+description: Use OnTrack from Claude on the web, ChatGPT or your phone through a private MCP server on your own Cloudflare account.
+sidebarTitle: Remote MCP
+icon: server
+---
+
+`ontrack mcp deploy` puts a private MCP server on your own Cloudflare account, so AI apps that can't run a program on your computer, like Claude on the web, ChatGPT or the Claude mobile app, can read your OnTrack. The server signs in to OnTrack through Okta by itself and renews the session before it lapses, so you set it up once. Cloudflare's free plan covers it.
+
+The quickest way is to ask your agent:
+
+```text
+Read https://unicorn.tuuhub.com/docs/ontrack/agent-setup.md and set up remote MCP for ontrack.
+```
+
+It runs the commands and stops for the three steps that need you in a browser.
+
+## Set up
+
+You need `ontrack` signed in first; see [Install](/ontrack/install) and [Sign in](/ontrack/sign-in).
+
+1. **Save your Okta credentials.** Install [okta-auth-cli](https://www.npmjs.com/package/okta-auth-cli) and run its setup:
+
+   ```bash
+   npm install -g okta-auth-cli
+   okta-auth setup
+   ```
+
+   It opens a page in your browser. Save your Okta username, password and authenticator secret there, in 1Password or the macOS Keychain, and wait for the test sign-in to pass. The page explains how to add an authenticator Okta accepts if you only have push notifications.
+
+2. **Sign in to Cloudflare.**
+
+   ```bash
+   npx wrangler login
+   ```
+
+3. **Deploy.**
+
+   ```bash
+   ontrack mcp deploy
+   ```
+
+   It deploys the server, stores your Okta credentials as encrypted Worker secrets, signs in to OnTrack from Cloudflare, and prints the server's URL and an eight-character pairing code.
+
+4. **Connect your AI app.** Add the URL as a custom connector. The app opens an approval page that shows which app is asking and where its access goes; type the pairing code there and approve.
+
+Running `deploy` again updates the server in place and prints a new code.
+
+<Warning>
+The server holds your Okta password and authenticator secret so it can sign in without you. Your Okta account is then as safe as your Cloudflare account: put a passkey or two-factor sign-in on Cloudflare before you deploy.
+</Warning>
+
+## Pairing codes
+
+```bash
+ontrack mcp pair
+```
+
+Prints a new pairing code. A code lasts ten minutes, approves one app, and stops working after five wrong tries. Only a hash of it is stored on the server. Run `pair` again for each app you connect, or when a code expires. While no code is open, the approval page refuses every request.
+
+The approval page never asks for your OnTrack, Okta or Cloudflare password. If it does, close it.
+
+## What the server can do
+
+| Tool | What it returns |
+| --- | --- |
+| `whoami` | The signed-in OnTrack user |
+| `units` | Your enrolled units |
+| `unit` | One unit with your target grade and progress |
+| `tasks` | Every task in a unit with its status and due date |
+| `task` | One task, with its task sheet as text |
+| `chats` | Tasks with unread tutor comments |
+| `chat` | One task's comment history |
+| `session` | When the server's OnTrack session renews |
+
+It submits nothing and changes no task status. `chat` marks the comments it returns as read, the same as opening them on the website.
+
+## Staying signed in
+
+```bash
+ontrack mcp status
+```
+
+Shows the signed-in user, when the session expires and when the server renews it. The server renews two days before the session lapses, signing in through Okta again.
+
+OnTrack keeps one renewal token per user, so the server and the CLI on your computer share it. When one renews, the other signs in through Okta once on its next run. That is expected and needs nothing from you.
+
+If Okta refuses a sign-in, for example after you change your password, run `okta-auth setup` to save the new one and `ontrack mcp deploy` to send it to the server. `status` reports `okta_blocked` until then.
